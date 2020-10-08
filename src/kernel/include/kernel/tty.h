@@ -1,0 +1,15 @@
+#ifndef _KERNEL_TTY_H
+#define _KERNEL_TTY_H
+
+#include <stddef.h>
+
+void terminal_initialize(void);
+uint16_t terminal_cursor_position(void);
+void terminal_set_cursor_position(uint16_t position);
+void terminal_set_cursor_cords(uint8_t x, uint8_t y);
+void terminal_clear(void);
+void terminal_putchar(char c);
+void terminal_write(const char* data, size_t size);
+void terminal_writestring(const char* data);
+
+#endif

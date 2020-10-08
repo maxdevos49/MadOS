@@ -1,0 +1,12 @@
+*.o
+*.a
+*.kernel
+*.bin
+*.d
+*.img
+*.iso
+*.flp
+*.tmp
+bin
+build
+

@@ -1,0 +1,8 @@
+Architecture
+=============
+
+Each supported architecture requires its own folder. Inside the folder the following must be implemented:
+- Boot sequence to launch kernel calling kernel_main
+- Native tty support using the header in ../include/kernel
+- A architecture defined `linker.ld` script
+- A `make.config` 
