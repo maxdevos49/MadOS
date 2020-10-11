@@ -13,9 +13,9 @@ X86_64_OBS=\
 # Do not edit below
 ###################################################################################
 
-X86_64_SRC_DIR:=src/kernel/arch/x86_64
-LINKER_LIST+=$(addprefix $(X86_64_SRC_DIR)/, $(X86_64_OBS))
-BOOTLOADER:=$(X86_64_SRC_DIR)/$(X86_64_BOOTLOADER)
+X86_64_SRC_DIR=kernel/arch/x86_64
+KERNEL_LINKER_LIST+=$(addprefix $(X86_64_SRC_DIR)/, $(X86_64_OBS))
+BOOTLOADER=$(X86_64_SRC_DIR)/$(X86_64_BOOTLOADER)
 
 # Assembles a asm file to a elf64 binary file
 %.o: %.asm
