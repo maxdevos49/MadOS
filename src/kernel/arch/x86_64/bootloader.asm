@@ -35,9 +35,11 @@ main:
 EXTENDED_STRING: db "Jumping to extended program",0xA, 0xD,0
 
 ; Bootsector padding
+
 times 446-($-$$) db 0
 ; Byte Indicates to older computers that this is a bootable partision
 db 0x80
+
 times 510-($-$$) db 0
 ; Magic number indicating this is a boot sector
 dw 0xaa55

@@ -45,9 +45,6 @@ LOADING_GDT_MSG: db "Loading GDT",0xA, 0xD, 0
 
 [bits 32]
 
-%include "./cpu_id.asm"
-%include "./paging.asm"
-
 init_32_bit:
 
     mov ax, DATA_SEG                 ; Now in PM our old segments are meaningless,
@@ -65,8 +62,11 @@ init_32_bit:
     call setup_identity_paging
     call edit_gdt
 
-    jmp $
     jmp CODE_SEG:init_64_bit
+
+
+%include "./cpu_id.asm"
+%include "./paging.asm"
 
 [bits 64]
 [extern kernel_main]

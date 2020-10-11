@@ -7,6 +7,4 @@
 *.iso
 *.flp
 *.tmp
-bin_*
-build_*
-
+sysroot
