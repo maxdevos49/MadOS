@@ -1,5 +1,5 @@
 ###########################################################
-################# MadOS Make file system ##################
+#---------------- MadOS Make file system -----------------#
 ###########################################################
 
 # Chnage this to target another platform
@@ -14,8 +14,10 @@ QEMU=qemu-system-$(ARCH_NAME)
 TARGET=MadOS_$(ARCH_NAME).img
 KERNEL=MadOS.kernel
 
-CFLAGS=-MD -Wall -Wextra -mno-red-zone -m64 --sysroot=$(SYS_ROOT) -isystem=$(USR_INCLUDE_DIR)
+CFLAGS=-MD -Wall -Wextra -ffreestanding -m64 --sysroot=$(SYS_ROOT) -isystem=$(USR_INCLUDE_DIR)
 CPPFLAGS=
+
+BINARIES=libk.a
 
 # Do not edit below
 ###################################################################################
@@ -31,11 +33,11 @@ SYS_ROOT_PATHS=\
 
 all: $(TARGET)
 
-include kernel/kernel.Makefile
 include libc/libc.Makefile
+include kernel/kernel.Makefile
 
 # Builds MadOS_<arch>.img
-$(TARGET): $(BOOTLOADER) $(KERNEL)
+$(TARGET): install-headers install-libraries $(BOOTLOADER) $(KERNEL)
 	dd if=/dev/zero of=$(TARGET) bs=512 count=200 &> /dev/null
 	cat $(BOOTLOADER) kernel/$(KERNEL) | dd of=$(TARGET) conv=notrunc &> /dev/null
 
@@ -48,8 +50,8 @@ $(SYS_ROOT_PATHS):
 install-headers: $(SYS_ROOT_PATHS)
 	rsync -r -u kernel/include/* libc/include/* $(SYS_ROOT)$(USR_INCLUDE_DIR)
 
-install-libraries: $(SYS_ROOT_PATHS) # libk.a libc.a
-	@echo todo
+install-libraries: $(BINARIES) $(SYS_ROOT_PATHS) libc.a
+	rsync -r -u libc/libk.a $(SYS_ROOT)$(USR_LIB_DIR)
 
 run: $(TARGET)
 	VBoxmanage startvm "My OS"

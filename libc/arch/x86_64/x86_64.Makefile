@@ -1,8 +1,12 @@
-ARCH_CFLAGS=
-ARCH_CPPFLAGS=
-KERNEL_ARCH_CFLAGS=
-KERNEL_ARCH_CPPFLAGS=
+###########################################################
+#---------------- X86_64 LIBC Makefile -------------------#
+###########################################################
 
-ARCH_FREEOBJS=\
+ARCH_LIBC_CFLAGS=
+ARCH_LIBC_CPPFLAGS=
+ARCH_LIBK_CFLAGS=
+ARCH_LIBK_CPPFLAGS=
 
-ARCH_HOSTEDOBJS=\
+ARCH_FREESTANDING_OBJS=
+
+ARCH_HOSTED_OBJS=

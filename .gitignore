@@ -7,4 +7,5 @@
 *.iso
 *.flp
 *.tmp
+*.out
 sysroot
