@@ -21,7 +21,7 @@ FREESTANDING_OBJS=\
 	stdio/putchar.o \
 	stdio/puts.o \
 	string/strlen.o\
-	stringmemcmp.o\
+	string/memcmp.o\
 	string/memcpy.o\
 	string/memmove.o\
 	string/memset.o\

@@ -5,10 +5,8 @@
 
 void kernel_main(void)
 {
- 
     terminal_initialize();
-    putchar('M');
+    printf("printf('%c', \"%s\", %f, %d, %x);", 'A', "String", 45.45f, 1234, 0xface);
 
 
-    // printf("Hello, kernel World!\n");
 }

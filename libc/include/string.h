@@ -15,6 +15,10 @@ void* memmove(void*, const void*, size_t);
 void* memset(void*, int, size_t);
 size_t strlen(const char*);
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 #ifdef __cplusplus
 }
 #endif

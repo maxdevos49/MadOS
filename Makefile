@@ -45,12 +45,12 @@ $(SYS_ROOT_PATHS):
 	mkdir -p $@
 
 
-.PHONY: all clean run install-headers install-libraries sysroot
+.PHONY: all clean run install-headers install-libraries
 
 install-headers: $(SYS_ROOT_PATHS)
 	rsync -r -u kernel/include/* libc/include/* $(SYS_ROOT)$(USR_INCLUDE_DIR)
 
-install-libraries: $(BINARIES) $(SYS_ROOT_PATHS) libc.a
+install-libraries: $(BINARIES) $(SYS_ROOT_PATHS)
 	rsync -r -u libc/libk.a $(SYS_ROOT)$(USR_LIB_DIR)
 
 run: $(TARGET)

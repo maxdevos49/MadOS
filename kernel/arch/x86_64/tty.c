@@ -1,5 +1,4 @@
 #include <kernel/tty.h>
-#include <stdint.h>
 #include "vga.h"
 #include "io.h"
 
@@ -43,7 +42,18 @@ void terminal_set_cursor_position(uint16_t position)
 
     cursor_position = position;
 }
-
+/*
+ * Special Characters:
+ *      %%--> print a percent sign
+ *      \a  --> audible alert
+ *      \b  --> backspace
+ *      \f  --> form feed
+ *      \n  --> new line
+ *      \r  --> carriage return
+ *      \t  --> tab
+ *      \v  --> vertical tab
+ *      \\  --> backslash
+ * */
 void terminal_putchar(char c)
 {
     uint16_t index = terminal_get_cursor_position();

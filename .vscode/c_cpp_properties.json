@@ -3,14 +3,16 @@
         {
             "name": "x86_64 Mac",
             "includePath": [
-                "${workspaceFolder}/sysroot/usr/include"
+                "${workspaceFolder}/sysroot/usr/include",
+                "${workspaceFolder}**"
             ],
             "defines": [],
             "macFrameworkPath": [
+                
             ],
             "compilerPath": "/usr/local/bin/x86_64-elf-gcc",
             "cStandard": "c11",
-            "cppStandard": "c++17",
+            "cppStandard": "c++11",
             "intelliSenseMode": "gcc-x64"
         }
     ],
