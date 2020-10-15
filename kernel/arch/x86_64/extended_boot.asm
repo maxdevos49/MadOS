@@ -71,10 +71,11 @@ init_32_bit:
 [bits 64]
 [extern kernel_main]
 
-; %include "./idt.asm"
+%include "./idt.asm"
 
 init_64_bit:
     call activate_SSE
+    xor ebp, ebp ; Mark it as null
     call kernel_main
     jmp $
 

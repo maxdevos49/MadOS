@@ -1,9 +1,12 @@
 #include <kernel/tty.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "vga.h"
 #include "io.h"
 
 static uint16_t cursor_position = 0;
-static uint8_t current_theme = 0x10 | 0x0f;
+static uint8_t current_theme = VGA_COLOR_BLUE | VGA_COLOR_WHITE;
 
 void terminal_initialize(void)
 {
@@ -60,12 +63,21 @@ void terminal_putchar(char c)
 
     switch (c)
     {
-
-    case 10: //\n
+    case '\n':
         index += VGA_WIDTH;
+
+        if (index > (VGA_WIDTH * VGA_HEIGHT))
+        {
+            terminal_scroll();
+            index = (VGA_WIDTH * VGA_HEIGHT);
+        }
+
         break;
-    case 13: //\r
+    case '\r':
         index -= index % VGA_WIDTH;
+        break;
+    case '\t':
+        index += 4 - ((index & VGA_WIDTH) % 4);
         break;
     default:
         *(VGA_MEMORY + index * 2) = c;
@@ -86,19 +98,19 @@ void terminal_write(const char *data, size_t size)
 
 void terminal_write_string(const char *str)
 {
-    uint8_t *char_ptr = (uint8_t *)str;
-    while (*char_ptr != 0)
-    {
-        terminal_putchar(*char_ptr);
-        char_ptr++;
-    }
-    //TODO change to
-    //terminal_write(str, strlen(str));
+    terminal_write(str, strlen(str));
 }
 
 void terminal_scroll()
 {
-    //TODO requires memcopy or something else
+    uint16_t length = 3840;
+
+    memmove(VGA_MEMORY, VGA_MEMORY + (VGA_WIDTH * 2), length);
+
+    for (uint16_t i = 0; i < VGA_WIDTH; i++)
+    {
+        *(VGA_MEMORY + length + i * 2) = (char)' ';
+    }
 }
 
 void terminal_set_theme(enum vga_color background, enum vga_color foreground)

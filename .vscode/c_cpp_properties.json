@@ -6,7 +6,7 @@
                 "${workspaceFolder}/sysroot/usr/include",
                 "${workspaceFolder}**"
             ],
-            "defines": [],
+            "defines": [""],
             "macFrameworkPath": [
                 
             ],

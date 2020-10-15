@@ -8,7 +8,7 @@ void *memmove(void *dst_ptr, const void *src_ptr, size_t size)
     const unsigned char *src = (const unsigned char *)src_ptr;
 
     //depending which pointer has a higher memory address we do not want to overwrite any data because its possible the two regions can overlap
-    if (dst > src)
+    if (dst < src)
     {
         for (size_t i = 0; i < size; i++)
         {

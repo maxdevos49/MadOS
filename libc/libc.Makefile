@@ -12,7 +12,7 @@ LIBC_CFLAGS:= $(CFLAGS) $(ARCH_LIBC_CFLAGS)
 LIBC_CPPFLAGS:= $(CPPFLAGS) $(ARCH_LIBC_CPPFLAGS) -D__is_libc -Iinclude
 
 LIBK_CFLAGS:= $(LIBC_CFLAGS) $(ARCH_LIBK_CPPFLAGS)
-LIBK_CPPFLAGS:= $(LIBC_CPPFLAGS) $(ARCH_LIBK_CPPFLAGS)-D__is_libk
+LIBK_CPPFLAGS:= $(LIBC_CPPFLAGS) $(ARCH_LIBK_CPPFLAGS) -D__is_libk
 
 
 FREESTANDING_OBJS=\
@@ -25,6 +25,7 @@ FREESTANDING_OBJS=\
 	string/memcpy.o\
 	string/memmove.o\
 	string/memset.o\
+	stdlib/abort.o
 
 
 HOSTED_OBJS=\
@@ -38,11 +39,11 @@ OBJS=\
 ###################################################################################
 LIB_SRC_DIR=libc
 
-LIBC_OBJS:=$(OBJS: .o=.libc.o)
-LIBK_OBJS:=$(FREESTANDING_OBJS:.o=.libk.o)
+# LIBC_OBJS=$(OBJS: .o=.libc.o)
+# LIBK_OBJS=$(FREESTANDING_OBJS:.o=.libk.o)
 
-LIBC_OBJS:=$(addprefix $(LIB_SRC_DIR)/, $(LIBC_OBJS)) 
-LIBK_OBJS:=$(addprefix $(LIB_SRC_DIR)/, $(LIBK_OBJS)) 
+LIBC_OBJS:=$(addprefix $(LIB_SRC_DIR)/, $(OBJS:.o=.libc.o)) 
+LIBK_OBJS:=$(addprefix $(LIB_SRC_DIR)/, $(FREESTANDING_OBJS:.o=.libk.o)) 
 
 
 libc.a: $(LIBC_OBJS)

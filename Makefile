@@ -14,10 +14,10 @@ QEMU=qemu-system-$(ARCH_NAME)
 TARGET=MadOS_$(ARCH_NAME).img
 KERNEL=MadOS.kernel
 
-CFLAGS=-MD -Wall -Wextra -ffreestanding -m64 --sysroot=$(SYS_ROOT) -isystem=$(USR_INCLUDE_DIR)
+CFLAGS= -MD -Wall -Wextra -ffreestanding -m64 --sysroot=$(SYS_ROOT) -isystem=$(USR_INCLUDE_DIR)
 CPPFLAGS=
 
-BINARIES=libk.a
+BINARIES=libk.a # libc.a
 
 # Do not edit below
 ###################################################################################
@@ -45,7 +45,7 @@ $(SYS_ROOT_PATHS):
 	mkdir -p $@
 
 
-.PHONY: all clean run install-headers install-libraries
+.PHONY: clean run install-headers install-libraries
 
 install-headers: $(SYS_ROOT_PATHS)
 	rsync -r -u kernel/include/* libc/include/* $(SYS_ROOT)$(USR_INCLUDE_DIR)
@@ -61,6 +61,7 @@ clean:
 	@rm -rf sysroot
 	@find . -type f -name "*.o" -delete -print
 	@find . -type f -name "*.d" -delete -print
+	@find . -type f -name "*.a" -delete -print
 	@find . -type f -name "*.kernel" -delete -print
 	@find . -type f -name "*.bin" -delete -print
 	@find . -type f -name "*.img" -delete -print
