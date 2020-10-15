@@ -9,3 +9,5 @@
 *.tmp
 *.out
 sysroot
+.DS_Store
+.vscode
