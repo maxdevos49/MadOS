@@ -19,5 +19,5 @@ void kernel_main(void)
     init_keyboard();
 #endif
 
-    // abort();
+    abort();
 }
