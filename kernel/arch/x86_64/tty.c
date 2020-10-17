@@ -6,12 +6,11 @@
 #include "io.h"
 
 static uint16_t cursor_position = 0;
-static uint8_t current_theme = VGA_COLOR_BLUE | VGA_COLOR_WHITE;
+static uint8_t current_theme = VGA_COLOR_BLUE | VGA_COLOR_WHITE << 4;
 
 void terminal_initialize(void)
 {
     terminal_set_cursor_position(0);
-    terminal_set_theme(VGA_COLOR_BLUE, VGA_COLOR_WHITE);
     terminal_clear();
 }
 

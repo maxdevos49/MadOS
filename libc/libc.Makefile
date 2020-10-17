@@ -21,11 +21,13 @@ FREESTANDING_OBJS=\
 	stdio/putchar.o \
 	stdio/puts.o \
 	string/strlen.o\
+	string/strcmp.o\
 	string/memcmp.o\
 	string/memcpy.o\
 	string/memmove.o\
 	string/memset.o\
-	stdlib/abort.o
+	stdlib/abort.o\
+	minunit/minunit.o
 
 
 HOSTED_OBJS=\
@@ -63,6 +65,6 @@ libk.a: $(LIBK_OBJS)
 # 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 # Not needed yet
-# .S.libk.o:
+# .s.libk.o:
 # 	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 

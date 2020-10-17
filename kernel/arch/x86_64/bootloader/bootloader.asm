@@ -28,8 +28,8 @@ main:
 
     jmp PROGRAM_SPACE ; Go to the extended program
 
-%include "read_disk.asm"
-%include "print.asm"
+%include "./read_disk.asm"
+%include "./print.asm"
 
 
 EXTENDED_STRING: db "Jumping to extended program",0xA, 0xD,0

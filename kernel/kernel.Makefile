@@ -14,7 +14,7 @@ KERNEL_OBJS= \
 	kernel/kernel.o 
 
 KERNEL_CFLAGS:= -Ttext 0x8000 -mno-red-zone $(CFLAGS)  
-KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__$(ARCH_NAME) -D__is_kernel -Iinclude
+KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__$(ARCH_NAME) -D__is_kernel -Iinclude  
 KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 # Do not edit below
@@ -31,4 +31,4 @@ $(KERNEL): $(KERNEL_LINKER_LIST)
 
 # Build a c file into a object file
 %.k.o: %.c
-	$(CC) $(KERNEL_CFLAGS) $(KERNEL_LIBS) -c $< -o $@ 
+	$(CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) $(KERNEL_LIBS) -c $< -o $@ 

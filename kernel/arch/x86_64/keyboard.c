@@ -13,9 +13,11 @@ uint8_t last_scan_code;
 
 void standard_keyboard_handler(uint8_t scan_code, char chr)
 {
+
     if (chr != 0)
     {
-        switch (left_shift_pressed | right_shift_pressed)
+
+        switch (left_shift_pressed || right_shift_pressed)
         {
         case true:
             putchar(chr - 32);
@@ -47,7 +49,7 @@ void standard_keyboard_handler(uint8_t scan_code, char chr)
             right_shift_pressed = false;
             break;
         case 0x9c: //enter
-            printf("\n\r");
+            putchar('\n');
             break;
         }
     }
@@ -60,7 +62,13 @@ void keyboard_handler_0xE0(uint8_t scan_code)
     case 0x50: //down arrow
         terminal_set_cursor_position(terminal_get_cursor_position() + VGA_WIDTH);
         break;
-    case 0x48:
+    case 0x4B: //left arrow
+        terminal_set_cursor_position(terminal_get_cursor_position() - 1);
+        break;
+    case 0x4D: //right arrow
+        terminal_set_cursor_position(terminal_get_cursor_position() + 1);
+        break;
+    case 0x48: //up arrow
         terminal_set_cursor_position(terminal_get_cursor_position() - VGA_WIDTH);
         break;
     }
@@ -68,7 +76,6 @@ void keyboard_handler_0xE0(uint8_t scan_code)
 
 void keyboard_handler(uint8_t scan_code, char chr)
 {
-
     switch (last_scan_code)
     {
     case 0xe0:
@@ -76,6 +83,7 @@ void keyboard_handler(uint8_t scan_code, char chr)
         break;
     default:
         standard_keyboard_handler(scan_code, chr);
+        break;
     }
 
     last_scan_code = scan_code;

@@ -33,7 +33,7 @@ enable_A20:
     out 0x92, al
     ret
 
-%include "./print.asm"
+%include "../bootloader/print.asm"
 %include "./gdt.asm"
 %include "./detect_memory.asm"
 

@@ -3,9 +3,9 @@
 ###################################################################################
 
 
-X86_64_BOOTLOADER=bootloader.k.bin
+X86_64_BOOTLOADER=bootloader/bootloader.k.bin
 X86_64_OBS=\
-	extended_boot.o \
+	extended_boot/extended_boot.o \
 	tty.o \
 	io.o \
 	debug.o\
@@ -24,8 +24,8 @@ BOOTLOADER=$(X86_64_SRC_DIR)/$(X86_64_BOOTLOADER)
 
 # Assembles a asm file to a elf64 binary file
 %.k.o: %.asm
-	nasm -i$(X86_64_SRC_DIR) -f elf64 $< -o $@
+	nasm -i$(X86_64_SRC_DIR)/extended_boot -f elf64 $< -o $@
 
 # Assembles a asm file into a raw binary file
 %.k.bin: %.asm
-	nasm -i$(X86_64_SRC_DIR) -f bin $< -o $@
+	nasm -i$(X86_64_SRC_DIR)/bootloader -f bin $< -o $@
