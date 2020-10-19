@@ -27,7 +27,13 @@ FREESTANDING_OBJS=\
 	string/memmove.o\
 	string/memset.o\
 	stdlib/abort.o\
-	minunit/minunit.o
+	stdlib/rand.o\
+	stdlib/abs.o\
+	stdlib/malloc.o\
+	stdlib/realloc.o\
+	stdlib/calloc.o\
+	stdlib/free.o\
+	ctest/ctest.o
 
 
 HOSTED_OBJS=\
@@ -47,6 +53,11 @@ LIB_SRC_DIR=libc
 LIBC_OBJS:=$(addprefix $(LIB_SRC_DIR)/, $(OBJS:.o=.libc.o)) 
 LIBK_OBJS:=$(addprefix $(LIB_SRC_DIR)/, $(FREESTANDING_OBJS:.o=.libk.o)) 
 
+LIBC_DEP:=$(LIBC_OBJS:.o=.d);
+LIBK_DEP:=$(LIBK_OBJS:.o=.d);
+
+-include $(LIBC_DEP)
+-include $(LIBK_DEP)
 
 libc.a: $(LIBC_OBJS)
 	$(AR) rcs $(LIB_SRC_DIR)/$@ $(LIBC_OBJS)

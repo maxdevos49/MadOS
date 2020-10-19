@@ -24,6 +24,8 @@ extern "C"
 #ifdef __test
     void test_strcmp(void);
     void test_strlen(void);
+    void test_memset(void);
+    void test_memmove(void);
 #endif
 
 #ifdef __cplusplus

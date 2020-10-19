@@ -21,3 +21,32 @@ void *memset(void *buff_ptr, int value, size_t size)
     //     *ptr=value;
     // }
 }
+
+#ifdef __test
+
+#include <ctest.h>
+
+void test_memset(void)
+{
+
+    int i;
+    int buffer_size = 20;
+    char buffer[buffer_size];
+
+    memset(buffer, 0, sizeof(char) * buffer_size);
+    for (i = 0; i < buffer_size && buffer[i] == 0; i++)
+        ;
+    ctest_assert("Error: buffer was not set to all zeros", i == 20);
+
+    memset(buffer, 'g', sizeof(char) * buffer_size);
+    for (i = 0; i < buffer_size && buffer[i] == 'g'; i++)
+        ;
+    ctest_assert("Error: buffer was not set to all 'g'", i == 20);
+
+    memset(buffer, 'G', sizeof(char) * buffer_size);
+    for (i = 0; i < buffer_size && buffer[i] == 'G'; i++)
+        ;
+    ctest_assert("Error: buffer was not set to all 'G", i == 20);
+}
+
+#endif

@@ -23,7 +23,7 @@ enum vga_color {
 	VGA_COLOR_WHITE = 15,
 };
 
-void terminal_initialize(void);
+void init_terminal(void);
 
 uint16_t terminal_get_cursor_position(void);
 void terminal_set_cursor_position(uint16_t position);

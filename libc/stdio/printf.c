@@ -3,9 +3,9 @@
 #include <string.h>
 #include <stdint.h>
 
-static char *hex_to_str(uint64_t, size_t);
+static char *hex_to_str(uint64_t);
 static char *int_to_str(int64_t);
-static char *float_to_str(float, uint8_t);
+static char *float_to_str(double, uint8_t);
 
 /**
  * printf("format string", formatter_values...) 
@@ -52,13 +52,13 @@ int printf(const char *restrict format, ...)
             case 'd': //%d --> decimal integer
             case 'i': //%i --> decimal integer
 
-                written += puts(int_to_str((int)va_arg(args, int)));
+                written += puts(int_to_str((int64_t)va_arg(args, int64_t)));
 
                 format += 2;
                 break;
             case 'u': //%u --> unsigned integer
 
-                written += puts(int_to_str((unsigned int)va_arg(args, unsigned int)));
+                written += puts(int_to_str((uint64_t)va_arg(args, uint64_t)));
 
                 format += 2;
                 break;
@@ -70,7 +70,7 @@ int printf(const char *restrict format, ...)
                 break;
             case 'x': //%x --> unsigned hex
 
-                written += puts(hex_to_str((int)va_arg(args, uint64_t), sizeof(int)));
+                written += puts(hex_to_str((uint64_t)va_arg(args, uint64_t)));
 
                 format += 2;
                 break;
@@ -100,27 +100,40 @@ int printf(const char *restrict format, ...)
     return written;
 }
 
-static char hex_string_output[120];
-static char *hex_to_str(uint64_t value, size_t size)
+static char hex_string_output[17]; // 8bytes == 16 characters  + null byte = 17
+const char *HEX_TABLE = "0123456789abcdef";
+static char *hex_to_str(uint64_t value)
 {
-    size = size * 2;
-    uint8_t *ptr;
-    uint8_t temp;
-    uint8_t i;
 
-    for (i = 0; i < size; i++)
+    if (value == 0)
     {
-        ptr = ((uint8_t *)&value + i); //select a byte of the number
-
-        temp = ((*ptr & 0xf0) >> 4);                                           //grab left first 4 bits
-        hex_string_output[(size - (i * 2 + 1))] = temp + (temp > 9 ? 55 : 48); //select letter
-
-        temp = ((*ptr & 0x0f));
-        hex_string_output[(size - (i * 2 + 0))] = temp + (temp > 9 ? 55 : 48);
+        hex_string_output[0] = '0';
+        hex_string_output[1] = '\0';
+        return hex_string_output;
     }
 
-    //null terminate string
-    hex_string_output[size + 1] = 0;
+    uint8_t hex_index = 0;
+    uint8_t *ptr;
+
+    for (int8_t i = 7; i > -1; i--)
+    {
+        ptr = ((uint8_t *)&value + i);
+
+        if (*ptr == 0 && hex_index == 0)
+        {
+            continue;
+        }
+        else
+        {
+            hex_string_output[hex_index] = HEX_TABLE[((*ptr & 0xf0) >> 4)];
+            hex_index++;
+
+            hex_string_output[hex_index] = HEX_TABLE[(*ptr & 0x0f)];
+            hex_index++;
+        }
+    }
+
+    hex_string_output[hex_index + 1] = 0;
 
     return hex_string_output;
 }
@@ -164,7 +177,7 @@ static char *int_to_str(int64_t value)
 }
 
 static char float_string_output[60];
-static char *float_to_str(float value, uint8_t decimal_places)
+static char *float_to_str(double value, uint8_t decimal_places)
 {
     char *int_ptr = (char *)int_to_str((int)value);
     char *float_ptr = float_string_output;
@@ -201,26 +214,31 @@ static char *float_to_str(float value, uint8_t decimal_places)
 
 #ifdef __test
 
-#include <minunit.h>
+#include <ctest.h>
 
 void test_printf(void)
 {
 
-    printf("\tstatic char* int_to_str(int64_t value)\n");
+    printf("\t\tstatic char* int_to_str(int64_t)\n");
 
-    int length = strlen(int_to_str(0));
-    mu_assert("Error: length is not 1", length == 1);
-    length = strlen(int_to_str(100));
-    mu_assert("Error: length is not 3", length == 3);
-    length = strlen(int_to_str(-100));
-    mu_assert("Error: length is not 4", length == 4);
+    ctest_assert("Error: string not \"0\"", strcmp(int_to_str(0), "0") == 0);
+    ctest_assert("Error: string not \"100\"", strcmp(int_to_str(100), "100") == 0);
+    ctest_assert("Error: string not \"-100\"", strcmp(int_to_str(-100), "-100") == 0);
+    ctest_assert("Error: string not \"2000000000\"", strcmp(int_to_str(2000000000), "2000000000") == 0);
 
-    // // mu_assert("Error test: Error test: Error test: Error test: Error test: Error test: Error test: Error test: Error test: Error test: Error test: Error test: Error test: Error test: ", 10 == 3);
-    // int test = strcmp("face", hex_to_str(0xface, sizeof(char)));
-    // printf("%d\n", test);
-    // // mu_assert("Error: hex_to_str() provides incorrect output.",  test == 0);
+    printf("\t\tstatic char* hex_to_str(uint64_t)\n");
 
-    return;
+    ctest_assert("Error: \"0\" was not outputted", strcmp("0", hex_to_str(0x000)) == 0);
+    ctest_assert("Error: \"face\" was not outputted", strcmp("face", hex_to_str(0xface)) == 0);
+    ctest_assert("Error: \"1234\" was not outputted", strcmp("1234", hex_to_str(0x1234)) == 0);
+    ctest_assert("Error: \"1234abcdface\" was not outputted", strcmp("1234abcdface", hex_to_str(0x1234abcdface)) == 0);
+
+    printf("\t\tstatic char* hex_to_str(uint64_t)\n");
+
+    ctest_assert("Error: \"0.00\" was not outputted", strcmp("0.000", float_to_str(0, 3)) == 0);
+    ctest_assert("Error: \"1.000\" was not outputted", strcmp("1.000", float_to_str(1, 3)) == 0);
+    ctest_assert("Error: -456.12 should output \"-456.119\"", strcmp("-456.119", float_to_str(-456.12, 3)) == 0);
+    
 }
 
 #endif

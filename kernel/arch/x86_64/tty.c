@@ -8,7 +8,7 @@
 static uint16_t cursor_position = 0;
 static uint8_t current_theme = VGA_COLOR_BLUE | VGA_COLOR_WHITE << 4;
 
-void terminal_initialize(void)
+void init_terminal(void)
 {
     terminal_set_cursor_position(0);
     terminal_clear();
@@ -37,6 +37,13 @@ uint16_t terminal_get_cursor_position(void)
 
 void terminal_set_cursor_position(uint16_t position)
 {
+
+    if (position > VGA_WIDTH * VGA_HEIGHT + VGA_WIDTH - 1)
+    {
+        terminal_scroll();
+        position = VGA_WIDTH * VGA_HEIGHT;
+    }
+
     outb(0x3d4, 0x0f); //TODO comeback and understand
     outb(0x3d5, (uint8_t)(position & 0xff));
     outb(0x3d4, 0x0e);
@@ -54,7 +61,6 @@ void terminal_set_cursor_position(uint16_t position)
  *      \r  --> carriage return
  *      \t  --> tab
  *      \v  --> vertical tab
- *      \\  --> backslash
  * */
 void terminal_putchar(char c)
 {
@@ -64,13 +70,6 @@ void terminal_putchar(char c)
     {
     case '\n':
         index += VGA_WIDTH;
-
-        if (index > (VGA_WIDTH * VGA_HEIGHT))
-        {
-            terminal_scroll();
-            index = (VGA_WIDTH * VGA_HEIGHT);
-        }
-
         break;
     case '\r':
         index -= index % VGA_WIDTH;
@@ -109,6 +108,7 @@ void terminal_scroll()
     for (uint16_t i = 0; i < VGA_WIDTH; i++)
     {
         *(VGA_MEMORY + length + i * 2) = (char)' ';
+        *(VGA_MEMORY + length + i * 2 + 1) = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
     }
 }
 

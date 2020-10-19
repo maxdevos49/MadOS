@@ -15,7 +15,7 @@ TARGET=MadOS_$(ARCH_NAME).img
 KERNEL=MadOS.kernel
 
 CFLAGS= -O0 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=$(SYS_ROOT) -isystem=$(USR_INCLUDE_DIR)
-CPPFLAGS= -D__test
+CPPFLAGS=  #-D__test
 
 BINARIES=libk.a # libc.a
 
@@ -54,7 +54,7 @@ install-libraries: $(BINARIES) $(SYS_ROOT_PATHS)
 	rsync -r -u libc/libk.a $(SYS_ROOT)$(USR_LIB_DIR)
 
 run: $(TARGET)
-	VBoxmanage startvm "My OS"
+	$(QEMU) -drive format=raw,media=disk,file=$(TARGET)
 
 clean: 
 	@echo Cleaning Project
