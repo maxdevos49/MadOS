@@ -1,9 +1,15 @@
 #include <kernel/heap.h>
+#include <stdlib.h>
 
 static void combine_free_segments(struct mem_seg_header *a, struct mem_seg_header *b);
 
 void k_free(void *address)
 {
+    if (address == NULL)
+    {
+        abort();
+    }
+
     struct mem_seg_header *current_memory_segment = ((struct mem_seg_header *)address) - 1;
     current_memory_segment->free = true;
 

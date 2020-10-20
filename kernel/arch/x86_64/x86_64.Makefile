@@ -13,11 +13,7 @@ X86_64_OBS=\
 	IDT.o\
 	keyboard.o\
 	memory.o\
-	heap/init_heap.o\
-	heap/k_malloc.o\
-	heap/k_calloc.o\
-	heap/k_realloc.o\
-	heap/k_free.o\
+
 	
 
 

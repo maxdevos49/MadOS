@@ -38,10 +38,10 @@ uint16_t terminal_get_cursor_position(void)
 void terminal_set_cursor_position(uint16_t position)
 {
 
-    if (position > VGA_WIDTH * VGA_HEIGHT + VGA_WIDTH - 1)
+    if (position > VGA_WIDTH * VGA_HEIGHT - 1)
     {
         terminal_scroll();
-        position = VGA_WIDTH * VGA_HEIGHT;
+        position = VGA_WIDTH * VGA_HEIGHT - VGA_WIDTH;
     }
 
     outb(0x3d4, 0x0f); //TODO comeback and understand
@@ -101,7 +101,7 @@ void terminal_write_string(const char *str)
 
 void terminal_scroll()
 {
-    uint16_t length = 3840;
+    uint16_t length = VGA_WIDTH * VGA_HEIGHT * 2;
 
     memmove(VGA_MEMORY, VGA_MEMORY + (VGA_WIDTH * 2), length);
 

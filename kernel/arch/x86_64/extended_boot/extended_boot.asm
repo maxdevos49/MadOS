@@ -2,11 +2,12 @@
 
 mov bx, EXTENDED_SPACE_SUCCESS_MSG
 call print_string
+
 jmp enter_protected_mode
 
 enter_protected_mode:
     call detect_memory               ; Detects memory used
-    call enable_A20                  ; Allows use of extendedd memory
+    call enable_A20                  ; Allows use of extended memory
     
     cli                              ; We must switch off interrupts until we have set-up the protected mode
                                         ; otherwise interrupts will run riot.

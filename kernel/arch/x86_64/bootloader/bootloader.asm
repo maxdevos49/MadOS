@@ -19,9 +19,9 @@ main:
     ; init stack
     mov bp, 0x7c00    ; If kernel gets too big then this gets clobbered and it wont likely make it to the extended program
     mov sp, bp
-
+    
     call read_disk
-
+    
     ; Print a test string
     mov bx, EXTENDED_STRING
     call print_string

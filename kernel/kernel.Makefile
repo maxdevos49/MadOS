@@ -11,7 +11,12 @@ include kernel/arch/$(ARCH_DIR)/$(ARCH_NAME).Makefile
 
 
 KERNEL_OBJS= \
-	kernel/kernel.o 
+	kernel/kernel.o \
+	kernel/heap/init_heap.o\
+	kernel/heap/k_malloc.o\
+	kernel/heap/k_calloc.o\
+	kernel/heap/k_realloc.o\
+	kernel/heap/k_free.o\
 
 KERNEL_CFLAGS:= -Ttext 0x8000 -mno-red-zone $(CFLAGS)  
 KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__$(ARCH_NAME) -D__is_kernel -Iinclude  

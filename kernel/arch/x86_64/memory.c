@@ -14,6 +14,14 @@ void print_memory_map(struct mem_map_entry *mem_map)
     printf("Region Attributes: %x\n\n", mem_map->extended_attributes);
 }
 
+void print_all_memory_map(struct mem_map_entry *mem_map)
+{
+    for (uint8_t i = 0; i < MEMORY_REGION_COUNT; i++)
+    {
+        print_memory_map(mem_map + i);
+    }
+}
+
 void init_memory(struct mem_map_entry *mem_map)
 {
     printf("Initializing Memory Map\n");

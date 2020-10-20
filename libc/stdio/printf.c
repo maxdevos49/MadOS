@@ -100,8 +100,8 @@ int printf(const char *restrict format, ...)
     return written;
 }
 
-static char hex_string_output[17]; // 8bytes == 16 characters  + null byte = 17
-const char *HEX_TABLE = "0123456789abcdef";
+static char hex_string_output[17]; // 8bytes == 16 characters  + null byte = 17 total characters
+static const char *HEX_TABLE = "0123456789abcdef"; //This is for simplicity but not really required
 static char *hex_to_str(uint64_t value)
 {
 
@@ -133,7 +133,7 @@ static char *hex_to_str(uint64_t value)
         }
     }
 
-    hex_string_output[hex_index + 1] = 0;
+    hex_string_output[hex_index] = 0;
 
     return hex_string_output;
 }
@@ -228,7 +228,7 @@ void test_printf(void)
 
     printf("\t\tstatic char* hex_to_str(uint64_t)\n");
 
-    ctest_assert("Error: \"0\" was not outputted", strcmp("0", hex_to_str(0x000)) == 0);
+    ctest_assert("Error: \"0\" was not outputted", strcmp("0", hex_to_str(0x00)) == 0);
     ctest_assert("Error: \"face\" was not outputted", strcmp("face", hex_to_str(0xface)) == 0);
     ctest_assert("Error: \"1234\" was not outputted", strcmp("1234", hex_to_str(0x1234)) == 0);
     ctest_assert("Error: \"1234abcdface\" was not outputted", strcmp("1234abcdface", hex_to_str(0x1234abcdface)) == 0);

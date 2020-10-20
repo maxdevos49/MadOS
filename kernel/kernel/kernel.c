@@ -28,13 +28,16 @@ void test_suites(void)
     ctest_run_suite("void *memset(void*, int, size_t)", test_memset);
     ctest_run_suite("void *memmove(void*, const void*, size_t))", test_memmove);
 
-    printf("\n Testing <stdlib.h>\n");
+    printf("\nTesting <stdlib.h>\n");
     ctest_run_suite("int rand(void)", test_rand);
     ctest_run_suite("int abs(int n)", test_abs);
     ctest_run_suite("void* malloc(size_t)", test_malloc);
     ctest_run_suite("void* calloc(size_t, size_t)", test_calloc);
     ctest_run_suite("void* realloc(void*, size_t)", test_realloc);
     ctest_run_suite("void free(void*)", test_free);
+
+    printf("\nTesting: <time.h>\n");
+    printf("\tTODO\n");
 }
 #endif
 
@@ -54,9 +57,11 @@ void kernel_main(void)
 {
     terminal_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
     init_terminal();
-    init_memory((memory_map_entry_t *)0x5000);
+    init_memory((struct mem_map_entry*)0x5000);
 
-    memory_map_entry_t **usable_memory = get_usable_memory_regions();
+    // print_all_memory_map((struct mem_map_entry*)0x5000);
+
+    struct mem_map_entry **usable_memory = get_usable_memory_regions();
     uint64_t heap_base = usable_memory[1]->base_address;
     uint64_t heap_size = usable_memory[1]->region_length;
 
@@ -72,20 +77,4 @@ void kernel_main(void)
 #ifdef __test
     run_ctest(test_suites);
 #endif
-
-    int *test = NULL;
-    printf("Address Init: %x\n", test);
-    test = malloc(sizeof(int));
-    printf("Address Malloc 1: %x\n", test);
-
-    free(test);
-    test = NULL;
-    printf("Address free: %x\n", test);
-
-    test = malloc(sizeof(int));
-    printf("Address Malloc 2: %x\n", test);
-
-
-
-
 }

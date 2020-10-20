@@ -5,7 +5,7 @@
 #define VGA_MEMORY (uint8_t *)0xb8000
 // #define VGA_MEMORY (uint8_t *)0xa0000
 #define VGA_WIDTH 80
-#define VGA_HEIGHT 24
+#define VGA_HEIGHT 25
 
 
 
