@@ -12,16 +12,6 @@ extern void load_IDT();
 void init_IDT()
 {
 
-    printf("Defining IDT\n");
-
-    _idt[1].zero = 0;
-    _idt[1].offset_low = (uint16_t)(((uint64_t)&isr1 & 0x000000000000ffff));
-    _idt[1].offset_mid = (uint16_t)(((uint64_t)&isr1 & 0x00000000ffff0000) >> 16);
-    _idt[1].offset_high = (uint32_t)(((uint64_t)&isr1 & 0xffffffff00000000) >> 32);
-    _idt[1].ist = 0;
-    _idt[1].selector = 0x08;   //Code segment selector defined in gdt
-    _idt[1].types_attr = 0x8e; //Indicates it as a 32 bit interupt gate
-
     printf("Remapping PIC\n");
 
     remap_pic();
@@ -36,6 +26,17 @@ void init_IDT()
 
     // Load IDT and reenable interrupts
     load_IDT();
+
+    printf("Defining IDT\n");
+
+    //This can be done in either
+    _idt[1].zero = 0;
+    _idt[1].offset_low = (uint16_t)(((uint64_t)&isr1 & 0x000000000000ffff));
+    _idt[1].offset_mid = (uint16_t)(((uint64_t)&isr1 & 0x00000000ffff0000) >> 16);
+    _idt[1].offset_high = (uint32_t)(((uint64_t)&isr1 & 0xffffffff00000000) >> 32);
+    _idt[1].ist = 0;
+    _idt[1].selector = 0x08;   //Code segment selector defined in gdt
+    _idt[1].types_attr = 0x8e; //Indicates it as a 32 bit interupt gate
 }
 
 void (*main_keyboard_handler)(uint8_t, char); // This was a pain in the ass. Turns out function pointers are a definition + declartion so extern is required in header file

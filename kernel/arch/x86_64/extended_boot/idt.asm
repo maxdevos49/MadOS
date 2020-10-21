@@ -37,7 +37,7 @@ isr1:                    ; Interupt service routine 1
     GLOBAL isr1
 
 load_IDT:
-    lidt[idt_descriptor] ; Load the idt using the descriptor
+    lidt [idt_descriptor] ; Load the idt using the descriptor
     sti                  ; Enable interupts
     ret
     GLOBAL load_IDT

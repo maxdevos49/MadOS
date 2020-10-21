@@ -32,6 +32,7 @@ KERNEL_LINKER_LIST:=$(KERNEL_LINKER_LIST:.o=.k.o)
 KERNEL_DEPS:=$(KERNEL_LINKER_LIST:.o=.d)
 
 -include $(KERNEL_DEPS)
+-include echo $(KERNEL_DEPS)
 
 # Links MadOS.kernel
 $(KERNEL): $(KERNEL_LINKER_LIST)
