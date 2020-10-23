@@ -25,7 +25,7 @@ void print_all_memory_map(struct mem_map_entry *mem_map)
 void init_memory(struct mem_map_entry *mem_map)
 {
     printf("Initializing Memory Map\n");
-    printf("Memory Region Count: %d\n", MEMORY_REGION_COUNT);
+    printf("\tMemory Region Count... %d\n", MEMORY_REGION_COUNT);
 
     //get the usable memory regions
     for (uint8_t i = 0; i < MEMORY_REGION_COUNT; i++)
@@ -37,7 +37,7 @@ void init_memory(struct mem_map_entry *mem_map)
         }
     }
 
-    printf("Usable Memory Region Count: %d\n", usable_memory_regions_count);
+    printf("\tUsable Memory Region Count... %d\n", usable_memory_regions_count);
 }
 
 struct mem_map_entry **get_usable_memory_regions()

@@ -1,5 +1,7 @@
 #include "keyboard.h"
-// #include "IDT.h"
+#include "kb_1.h"
+#include "idt/idt.h"
+#include "io.h"
 
 #include <kernel/tty.h>
 #include "vga.h"
@@ -74,8 +76,15 @@ void keyboard_handler_0xE0(uint8_t scan_code)
     }
 }
 
-void keyboard_handler(uint8_t scan_code, char chr)
+void keyboard_handler()
 {
+
+    uint8_t scan_code = inb(0x60);
+    uint8_t chr = 0;
+
+    if (scan_code < 0x3a)
+        chr = kb1_table[scan_code];
+
     switch (last_scan_code)
     {
     case 0xe0:
@@ -89,8 +98,8 @@ void keyboard_handler(uint8_t scan_code, char chr)
     last_scan_code = scan_code;
 }
 
-void init_keyboard()
+void install_keyboard()
 {
-    printf("Initializing Keyboard\n");
-    // main_keyboard_handler = keyboard_handler;
+    printf("Installing Keyboard\n");
+    irq_install_handler(1, keyboard_handler);
 }

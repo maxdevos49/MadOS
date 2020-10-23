@@ -15,6 +15,8 @@
 void outb(uint16_t port, uint8_t val);
 uint8_t inb(uint16_t port);
 
+void timer_phase(int hz);
+
 void remap_pic();
 
 #endif

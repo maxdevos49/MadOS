@@ -36,45 +36,45 @@ extern void isr30();
 extern void isr31();
 
 const char *exception_messages[] = {
-    "Division by Zero",
-    "Debug",
-    "Non Maskable Interrupt",
-    "Breakpoint",
-    "Into Detected Overflow",
-    "Out of Bounds",
-    "Invalid Opcode",
-    "No Coprocessor",
+    "Division by Zero Exception",
+    "Debug Exception",
+    "Non Maskable Interrupt Exception",
+    "Breakpoint Exception",
+    "Into Detected Overflow Exception",
+    "Out of Bounds Exception",
+    "Invalid Opcode Exception",
+    "No Coprocessor Exception",
 
-    "Double Fault",
-    "Coprocessor Segment Overrun",
-    "Bad TSS",
-    "Segment Not Present",
-    "Stack Fault",
-    "General Protection Fault",
-    "Page Fault",
-    "Unknown Interrupt",
+    "Double Fault Exception",
+    "Coprocessor Segment Overrun Exception",
+    "Bad TSS Exception",
+    "Segment Not Present Exception",
+    "Stack Fault Exception",
+    "General Protection Fault Exception",
+    "Page Fault Exception",
+    "Unknown Interrupt Exception",
 
-    "Coprocessor Check",
-    "Machine Check",
-    "Reservered",
-    "Reservered",
-    "Reservered",
-    "Reservered",
-    "Reservered",
-    "Reservered",
+    "Coprocessor Check Exception",
+    "Machine Check Exception",
+    "Reservered Exception",
+    "Reservered Exception",
+    "Reservered Exception",
+    "Reservered Exception",
+    "Reservered Exception",
+    "Reservered Exception",
 
-    "Reservered",
-    "Reservered",
-    "Reservered",
-    "Reservered",
-    "Reservered",
-    "Reservered",
-    "Reservered",
+    "Reservered Exception",
+    "Reservered Exception",
+    "Reservered Exception",
+    "Reservered Exception",
+    "Reservered Exception",
+    "Reservered Exception",
+    "Reservered Exception",
 };
 
 void isrs_install()
 {
-    printf("Installing ISRs\n");
+    printf("Installing ISR Gates\n");
     idt_set_gate(0, (uint64_t)isr0, 0x08, 0x8E);
     idt_set_gate(1, (uint64_t)isr1, 0x08, 0x8E);
     idt_set_gate(2, (uint64_t)isr2, 0x08, 0x8E);
@@ -111,13 +111,8 @@ void isrs_install()
 
 void fault_handler(struct registers *regs)
 {
-
     if (regs->int_num < 32)
     {
-
-        printf("ISR Int %d, Error: %d\n", regs->int_num, regs->err_code);
-        printf("%s Exception. System Halted\n", exception_messages[regs->int_num]);
-        for (;;)
-            ;
+        abort(exception_messages[regs->int_num]);
     };
 }

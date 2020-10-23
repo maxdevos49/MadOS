@@ -19,7 +19,7 @@ extern "C"
     void *calloc(size_t num, size_t size);
     void free(void *ptr);
 
-    __attribute__((__noreturn__)) void abort(void);
+    __attribute__((__noreturn__)) void abort(const char*);
 
 #define RAND_MAX 2147483647
 #ifndef NULL

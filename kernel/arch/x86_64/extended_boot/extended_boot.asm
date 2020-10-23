@@ -40,7 +40,7 @@ enable_A20:
 
 ; ; 16 BIT Global Variables
 EXTENDED_SPACE_SUCCESS_MSG: db "We are successfully in extended space",0xA, 0xD, 0
-ENABLE_A20_MSG: db "Enabling A20",0xA, 0xD, 0
+ENABLE_A20_MSG: db "Enabling", 132, " A20",0xA, 0xD, 0
 LOADING_GDT_MSG: db "Loading GDT",0xA, 0xD, 0
 
 

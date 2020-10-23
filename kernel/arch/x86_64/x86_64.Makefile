@@ -15,7 +15,7 @@ X86_64_OBS=\
 	idt/idt.o\
 	idt/isr.o\
 	idt/irq.o\
-
+	timer.o\
 	
 
 

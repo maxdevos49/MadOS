@@ -3,6 +3,6 @@
 #ifndef __KEYBOARD__
 #define __KEYBOARD__
 
-void init_keyboard(void);
+void install_keyboard(void);
 
 #endif

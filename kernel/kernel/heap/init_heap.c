@@ -8,8 +8,8 @@ void init_heap(uint64_t base_address, uint64_t length)
 {
     printf("Initializing heap\n");
 
-    printf("Heap Base Address: %x\n", base_address);
-    printf("Heap size: %d\n", length);
+    printf("\tHeap Base Address... 0x%x\n", base_address);
+    printf("\tHeap size... %d\n", length);
 
     first_free_mem_seg = (struct mem_seg_header *)base_address;
     first_free_mem_seg->length = length - sizeof(struct mem_seg_header);

@@ -18,6 +18,8 @@ Notes, examples, and links of any useful resources I find interesting or useful.
     - [Programming the 8259 PIC](#programming-the-8259-pic)
   - [PIT](#pit)
       - [Channel 0](#channel-0)
+  - [C and ASM Interop](#c-and-asm-interop)
+    - [Passing Arguments to C Functions from ASM](#passing-arguments-to-c-functions-from-asm)
 
 <!-- /code_chunk_output -->
 
@@ -174,4 +176,17 @@ TODO
 Sources:
 http://www.osdever.net/bkerndev/Docs/pit.htm
 
+C and ASM Interop
+---
 
+### Passing Arguments to C Functions from ASM
+```
+arg1 - rdi
+arg2 - rsi
+arg3 - rdx
+arg4 - rcx
+arg5 - r8
+arg6 - r9
+Then anything after that gets pushed onto the stack in reverse
+thats for x86_64
+```

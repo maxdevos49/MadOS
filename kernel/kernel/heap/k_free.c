@@ -7,7 +7,7 @@ void k_free(void *address)
 {
     if (address == NULL)
     {
-        abort();
+        abort("");
     }
 
     struct mem_seg_header *current_memory_segment = ((struct mem_seg_header *)address) - 1;

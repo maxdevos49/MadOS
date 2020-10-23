@@ -37,7 +37,7 @@ void irq_uninstall_handler(int irq)
 
 void irq_install()
 {
-    printf("Installing IRQs\n");
+    printf("Installing IRQ Gates\n");
 
     idt_set_gate(32, (uint64_t)irq0, 0x08, 0x8e);
     idt_set_gate(33, (uint64_t)irq1, 0x08, 0x8e); //keyboard
@@ -64,8 +64,6 @@ void irq_handler(struct registers *regs)
 
     //Check for a custom handler
     handler = irq_routines[regs->int_num - 32]; //-32 because routines are 0-15
-
-    printf("IRQ int: %d\n", regs->int_num);
 
     if (handler)
     {

@@ -22,10 +22,11 @@ extern void load_IDT(void);
 
 void idt_install(void)
 {
-    printf("Installing IDT\n");
+    printf("Initializing IDT\n");
+
     //Clear out entire IDT with zeros
     memset(&_idt, 0, sizeof(struct IDT64) * 256);
 
+    remap_pic();
     load_IDT();
-    remap_pic(); 
 }
