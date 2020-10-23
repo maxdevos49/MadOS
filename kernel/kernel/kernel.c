@@ -8,8 +8,8 @@
 #include <kernel/heap.h>
 
 #if defined(__x86_64)
-#include "../arch/x86_64/IDT.h"
-#include "../arch/x86_64/keyboard.h"
+#include "../arch/x86_64/idt/idt.h"
+// #include "../arch/x86_64/keyboard.h"
 #endif
 
 #ifdef __test
@@ -57,24 +57,31 @@ void kernel_main(void)
 {
     terminal_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
     init_terminal();
-    init_memory((struct mem_map_entry*)0x5000);
+    // init_memory((struct mem_map_entry*)0x5000);
 
     // print_all_memory_map((struct mem_map_entry*)0x5000);
 
-    struct mem_map_entry **usable_memory = get_usable_memory_regions();
-    uint64_t heap_base = usable_memory[1]->base_address;
-    uint64_t heap_size = usable_memory[1]->region_length;
+    // struct mem_map_entry **usable_memory = get_usable_memory_regions();
+    // uint64_t heap_base = usable_memory[1]->base_address;
+    // uint64_t heap_size = usable_memory[1]->region_length;
 
-    init_heap(heap_base, heap_size);
+    // init_heap(heap_base, heap_size);
 
 #if defined(__x86_64)
-    init_IDT();
-    init_keyboard();
+    idt_install();
+    isrs_install();
+    irq_install();
+    asm volatile("sti");
+    printf("Test\n");
+
+    // init_keyboard();
 #endif
 
-    printf("%s\n", splash);
+    printf("%d", 1 / 0);
+
+    // printf("%s\n", splash);
 
 #ifdef __test
-    run_ctest(test_suites);
+    // run_ctest(test_suites);
 #endif
 }

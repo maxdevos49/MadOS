@@ -1,6 +1,6 @@
 # OS DEV Research
 
-Notes, examples, and links of any useful resources I find interesting or useful. Most notes /examples will be transformed from original source into how I think I understand it with links provided. 
+Notes, examples, and links of any useful resources I find interesting or useful. Most notes /examples will be me copying what I am reading to help remember and comprehend.
 
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
@@ -13,7 +13,9 @@ Notes, examples, and links of any useful resources I find interesting or useful.
   - [ISR](#isr)
       - [Exceptions](#exceptions)
   - [IRQ](#irq)
-  - [PIC](#pic)
+  - [8259 PIC](#8259-pic)
+    - [How the 8259 PIC works](#how-the-8259-pic-works)
+    - [Programming the 8259 PIC](#programming-the-8259-pic)
   - [PIT](#pit)
       - [Channel 0](#channel-0)
 
@@ -105,13 +107,43 @@ TODO
 Sources:
 http://www.osdever.net/bkerndev/Docs/irqs.htm
 
-PIC
+8259 PIC
 ---
-__Programmable Interrupt Controller__
+__8259 Programmable Interrupt Controller__
 
-TODO
+The PIC is one of the most important chips making up the x86 architecture. Without it, the x86 architecture would not be an interrupt driven architecture. The function of the pic is to manage hardware interrupts and send them to the appropriate system interrupt. This allows the system to respond to devices needs without loss of time from things like polling.
+
+It is important to note that the APIC has replaced the 8259 PIC in modern systems to allow for multiprocessing.
+
+### How the 8259 PIC works
+The PIC controls the CPU's interrupt mechanism, by accepting several interrupt request and feeding them to the processor in order. For instance, when the keyboard registers a keyhit, it sends a puls along its interrupt line (IRQ 1) to the PIC chip, which translates the IRQ into a system interrupt and sends a message to interrupt the CPU from whatever it is doing. 
+
+In the beginning there was only 1 PIC chip but later on a second PIC chip was added to bring the amount of IRQs from 8 to 15. IRQ2 is reserved on the first PIC chip to cascade interrupts into the second PIC chip resulting in 15 IRQs instead of 16. All IRQs first flow into the Master PIC(IRQs 0-7) and if they need too are cascaded into the Slave PIC(IRQs 8-15)
+
+### Programming the 8259 PIC
+Each chip(master and slave) has a command port and a data port. 
+
+| Chip | Purpose | I/O Port |
+|------|---------|----------|
+| Master | Command | 0x20 |
+| Master | Data | 0x21 |
+| Slave | Command | 0xa0 |
+| Slave | Data | 0xa1 |
+
+When no command is issued, the data port allows us to access the interrupt mask of the PIC.
+```c
+uint8_t master_bit_mask = inb(0x21);
+uint8_t slave_bit_mask = inb(0xa1);
+```
+
+For example if the master PIC returned 0xfd it would mean that only IRQ1 is enabled. Looking at the binary representation of 0xfd helps to understand this: `0xfd == 11111101b`. Bits with a value of 1 represent a disabled IRQ
+
+
+
+
 
 Sources:
+https://wiki.osdev.org/8259_PIC
 http://www.osdever.net/bkerndev/Docs/irqs.htm
 
 PIT

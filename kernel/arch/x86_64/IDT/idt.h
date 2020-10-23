@@ -5,13 +5,12 @@
 
 struct registers
 {
-    uint64_t gs, fs, es, ds; //Might not need these in long mode
-    uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rdi, rsi, rbp, rdx, rcx, rbx, rax;
-    uint64_t int_no, err_code;
-    uint64_t rip, cs, eflags, useresp, ss; // Unknown if this is correct
+    uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rsp, rdi, rsi, rdx, rcx, rbx, rax;
+    uint8_t int_num, err_code;
+    uint64_t rip, cs, eflags, useresp, ss;
 };
 
-typedef struct IDT64
+struct IDT64
 {
     uint16_t offset_low;
     uint16_t selector;

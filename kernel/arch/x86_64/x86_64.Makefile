@@ -10,9 +10,11 @@ X86_64_OBS=\
 	io.o \
 	debug.o\
 	binaries.o\
-	IDT.o\
 	keyboard.o\
 	memory.o\
+	idt/idt.o\
+	idt/isr.o\
+	idt/irq.o\
 
 	
 

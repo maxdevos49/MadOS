@@ -1,5 +1,5 @@
 #include "keyboard.h"
-#include "IDT.h"
+// #include "IDT.h"
 
 #include <kernel/tty.h>
 #include "vga.h"
@@ -92,5 +92,5 @@ void keyboard_handler(uint8_t scan_code, char chr)
 void init_keyboard()
 {
     printf("Initializing Keyboard\n");
-    main_keyboard_handler = keyboard_handler;
+    // main_keyboard_handler = keyboard_handler;
 }
