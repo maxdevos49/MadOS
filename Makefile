@@ -14,7 +14,7 @@ QEMU=qemu-system-$(ARCH_NAME)
 TARGET=MadOS_$(ARCH_NAME).img
 KERNEL=MadOS.kernel
 
-CFLAGS= -fstack-protector-strong -O0 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=$(SYS_ROOT) -isystem=$(USR_INCLUDE_DIR)
+CFLAGS= -O0 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=$(SYS_ROOT) -isystem=$(USR_INCLUDE_DIR)
 CPPFLAGS=  -D__test
 
 BINARIES=libk.a # libc.a
