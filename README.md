@@ -21,18 +21,5 @@ I sourced everything from `Homebrew` and edited the formulas that did not have t
     - Configured with option(s): --with-sysroot
   
 ### Supported Architectures:
-  - x86_64
-  - More to Come!
-
-### Compile
-Outputs a `.img` file with the name "MadOS_\<arch\>.img"
-```sh
-$ make
-```
-
-### Run
-Copy `.img` file onto a usb drive or use a variety of emulators/VM's such as Bochs, Qemu, or Virtual Box
-```sh
-dd if=MadOS_<arch>.img of=/your/desired/drive
-```
+  - x86_64 only for now. Maybe more when I learn a thing or 2.
 
