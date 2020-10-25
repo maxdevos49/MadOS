@@ -34,9 +34,9 @@ enable_A20:
     out 0x92, al
     ret
 
-%include "../bootloader/print.asm"
-%include "./gdt.asm"
-%include "./detect_memory.asm"
+%include "print.asm"
+%include "gdt.asm"
+%include "detect_memory.asm"
 
 ; ; 16 BIT Global Variables
 EXTENDED_SPACE_SUCCESS_MSG: db "We are successfully in extended space",0xA, 0xD, 0
@@ -66,13 +66,13 @@ init_32_bit:
     jmp CODE_SEG:init_64_bit
 
 
-%include "./cpu_id.asm"
-%include "./paging.asm"
+%include "cpu_id.asm"
+%include "paging.asm"
 
 [bits 64]
 [extern kernel_main]
 
-%include "../idt/idt_init.asm"
+; %include "idt_init.asm"
 
 init_64_bit:
     call activate_SSE
