@@ -1,10 +1,10 @@
 #include "keyboard.h"
 #include "kb_1.h"
-#include "idt/idt.h"
-#include "io.h"
+#include <kernel/io.h>
+#include "../Interrupts/idt.h"
 
 #include <kernel/tty.h>
-#include "vga.h"
+#include "../TTY/vga.h"
 
 #include <stdio.h>
 #include <stdbool.h>

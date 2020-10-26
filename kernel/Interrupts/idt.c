@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "idt.h"
-#include "../io.h"
+#include <kernel/io.h>
 
 extern struct IDT64 _idt[256]; // 4096 byte IDT
 

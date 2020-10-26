@@ -13,18 +13,18 @@ void srand(unsigned int seed)
     next = seed;
 }
 
-#if __test
+// #if __test
 
-#include <ctest.h>
+// #include <ctest.h>
 
-void test_rand()
-{
-    srand(0);
+// void test_rand()
+// {
+//     srand(0);
 
-    int i, r;
-    for (i = 0; i < 1000 && r > -1 && r < RAND_MAX; i++, r = rand())
-        ;
-    ctest_assert("Error: rand outputs invalid number.", i == 1000);
-}
+//     int i, r;
+//     for (i = 0; i < 1000 && r > -1 && r < RAND_MAX; i++, r = rand())
+//         ;
+//     ctest_assert("Error: rand outputs invalid number.", i == 1000);
+// }
 
-#endif
+// #endif

@@ -5,5 +5,7 @@ set -e
 
 # Compile Projects
 for PROJECT in $SYSTEM_PROJECTS; do
-    (cd $PROJECT && echo "Project: $PROJECT" && $MAKE clean)
+    (cd $PROJECT && $MAKE clean)
 done
+
+rm -rf $SYSROOT

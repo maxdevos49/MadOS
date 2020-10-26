@@ -212,33 +212,33 @@ static char *float_to_str(double value, uint8_t decimal_places)
     return float_string_output;
 }
 
-#ifdef __test
+// #ifdef __test
 
-#include <ctest.h>
+// #include <ctest.h>
 
-void test_printf(void)
-{
+// void test_printf(void)
+// {
 
-    printf("\t\tstatic char* int_to_str(int64_t)\n");
+//     printf("\t\tstatic char* int_to_str(int64_t)\n");
 
-    ctest_assert("Error: string not \"0\"", strcmp(int_to_str(0), "0") == 0);
-    ctest_assert("Error: string not \"100\"", strcmp(int_to_str(100), "100") == 0);
-    ctest_assert("Error: string not \"-100\"", strcmp(int_to_str(-100), "-100") == 0);
-    ctest_assert("Error: string not \"2000000000\"", strcmp(int_to_str(2000000000), "2000000000") == 0);
+//     ctest_assert("Error: string not \"0\"", strcmp(int_to_str(0), "0") == 0);
+//     ctest_assert("Error: string not \"100\"", strcmp(int_to_str(100), "100") == 0);
+//     ctest_assert("Error: string not \"-100\"", strcmp(int_to_str(-100), "-100") == 0);
+//     ctest_assert("Error: string not \"2000000000\"", strcmp(int_to_str(2000000000), "2000000000") == 0);
 
-    printf("\t\tstatic char* hex_to_str(uint64_t)\n");
+//     printf("\t\tstatic char* hex_to_str(uint64_t)\n");
 
-    ctest_assert("Error: \"0\" was not outputted", strcmp("0", hex_to_str(0x00)) == 0);
-    ctest_assert("Error: \"face\" was not outputted", strcmp("face", hex_to_str(0xface)) == 0);
-    ctest_assert("Error: \"1234\" was not outputted", strcmp("1234", hex_to_str(0x1234)) == 0);
-    ctest_assert("Error: \"1234abcdface\" was not outputted", strcmp("1234abcdface", hex_to_str(0x1234abcdface)) == 0);
+//     ctest_assert("Error: \"0\" was not outputted", strcmp("0", hex_to_str(0x00)) == 0);
+//     ctest_assert("Error: \"face\" was not outputted", strcmp("face", hex_to_str(0xface)) == 0);
+//     ctest_assert("Error: \"1234\" was not outputted", strcmp("1234", hex_to_str(0x1234)) == 0);
+//     ctest_assert("Error: \"1234abcdface\" was not outputted", strcmp("1234abcdface", hex_to_str(0x1234abcdface)) == 0);
 
-    printf("\t\tstatic char* hex_to_str(uint64_t)\n");
+//     printf("\t\tstatic char* hex_to_str(uint64_t)\n");
 
-    ctest_assert("Error: \"0.00\" was not outputted", strcmp("0.000", float_to_str(0, 3)) == 0);
-    ctest_assert("Error: \"1.000\" was not outputted", strcmp("1.000", float_to_str(1, 3)) == 0);
-    ctest_assert("Error: -456.12 should output \"-456.119\"", strcmp("-456.119", float_to_str(-456.12, 3)) == 0);
+//     ctest_assert("Error: \"0.00\" was not outputted", strcmp("0.000", float_to_str(0, 3)) == 0);
+//     ctest_assert("Error: \"1.000\" was not outputted", strcmp("1.000", float_to_str(1, 3)) == 0);
+//     ctest_assert("Error: -456.12 should output \"-456.119\"", strcmp("-456.119", float_to_str(-456.12, 3)) == 0);
     
-}
+// }
 
-#endif
+// #endif

@@ -10,6 +10,5 @@ load_IDT:
     lidt [idt_descriptor] ; Load the idt using the descriptor
     ret
 
-; "../IDT/" Because assembling paths are a pain in the ass
-%include "../idt/isr_init.asm"
-%include "../idt/irq_init.asm"
+%include "Interrupts/isr_init.asm"
+%include "Interrupts/irq_init.asm"

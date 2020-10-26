@@ -1,6 +1,6 @@
 #include "timer.h"
-#include "idt/idt.h"
-#include "io.h"
+#include "Interrupts/idt.h"
+#include <kernel/io.h>
 
 #include <stdint.h>
 #include <stdio.h>
