@@ -1,5 +1,5 @@
-#ifndef __KERNEL_PIT_H
-#define __KERNEL_PIT_H
+#ifndef __KERNEL_TIME_PIT_H
+#define __KERNEL_TIME_PIT_H 1
 
 #include <stdint.h>
 

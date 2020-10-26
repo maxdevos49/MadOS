@@ -1,11 +1,9 @@
-#include "keyboard.h"
-#include "kb_1.h"
+#include <kernel/devices/keyboard.h>
+#include <kernel/devices/KB1.h>
 #include <kernel/io.h>
-#include "../Interrupts/idt.h"
-
+#include <kernel/interrupts/idt.h>
 #include <kernel/tty.h>
-#include "../TTY/vga.h"
-
+#include <kernel/vga.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -83,7 +81,7 @@ void keyboard_handler()
     uint8_t chr = 0;
 
     if (scan_code < 0x3a)
-        chr = kb1_table[scan_code];
+        chr = KB1_table[scan_code];
 
     switch (last_scan_code)
     {

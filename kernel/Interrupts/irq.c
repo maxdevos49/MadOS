@@ -1,5 +1,6 @@
 #include <kernel/io.h>
-#include "idt.h"
+#include <kernel/interrupts/idt.h>
+
 #include <stdio.h>
 
 extern void irq0();

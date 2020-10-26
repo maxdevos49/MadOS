@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-. ./Config.sh
+. ./scripts/config.sh
 
 # Compile Projects
 for PROJECT in $SYSTEM_PROJECTS; do
@@ -9,3 +9,4 @@ for PROJECT in $SYSTEM_PROJECTS; do
 done
 
 rm -rf $SYSROOT
+rm -f MadOS.bin MadOS.img

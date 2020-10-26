@@ -1,5 +1,5 @@
-#ifndef __MEMORY_H
-#define __MEMORY_H
+#ifndef __KERNEL_MEMORY_H
+#define __KERNEL_MEMORY_H 1
 
 #include <stdint.h>
 

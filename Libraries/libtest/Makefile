@@ -15,7 +15,7 @@ libtest.a: $(OBJS)
 install: install-headers install-bin
 
 install-headers:
-	cp -RL include/. $(SYSROOT)$(USR_INCLUDE_DIR)
+	rsync -avm --include='*.h' -f 'hide,! */' .  $(SYSROOT)$(USR_INCLUDE_DIR)
 
 install-bin: $(BINARIES)
 	cp -RL $(BINARIES) $(SYSROOT)$(USR_LIB_DIR)

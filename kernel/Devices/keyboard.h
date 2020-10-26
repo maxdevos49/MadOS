@@ -1,7 +1,7 @@
-#include <stdint.h>
+#ifndef __KERNEL_DEVICES_KEYBOARD_H
+#define __KERNEL_DEVICES_KEYBOARD_H 1
 
-#ifndef __KEYBOARD__
-#define __KEYBOARD__
+#include <stdint.h>
 
 void install_keyboard(void);
 
