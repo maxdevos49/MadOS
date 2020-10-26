@@ -1,4 +1,4 @@
-#include "pit.h"
+#include <kernel/time/pit.h>
 #include <stdbool.h>
 
 void init_pit()

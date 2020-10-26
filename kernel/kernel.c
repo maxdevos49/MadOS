@@ -1,15 +1,14 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <kernel/tty.h>
 #include <kernel/debug.h>
 #include <kernel/memory.h>
 #include <kernel/heap.h>
+#include <kernel/interrupts/idt.h>
+#include <kernel/devices/keyboard.h>
+#include <kernel/timer.h>
 
-#include "Interrupts/idt.h"
-#include "Devices/keyboard.h"
-#include "timer.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 // #ifdef __test
 // //TODO relocate somewhere else

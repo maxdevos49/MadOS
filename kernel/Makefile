@@ -2,12 +2,20 @@
 #-----------------------------Kernel Makefile options-----------------------------#
 ###################################################################################
 
+#Defaults
 NASM?=nasm
+CC?=x86_64-elf-gcc
+CFLAGS?=-O0 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=../sysroot -isystem=../sysroot/usr/include
+CPPFLAGS?=
+LIBS?=
 
+
+#Target
 KERNEL=MadOS.kernel
 
-KERNEL_OBJS= \
-	Early_Kernel/extended_boot.o\
+# Objects
+KERNEL_OBJS=\
+	boot/extended_boot.o\
 	kernel.o \
 	tty.o\
 	io.o\
@@ -25,39 +33,37 @@ KERNEL_OBJS= \
 	timer.o\
 
 KERNEL_CFLAGS:= -Ttext 0x8000 -mno-red-zone $(CFLAGS)  
-KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__$(ARCH_NAME) -D__is_kernel -Iinclude  
-KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc
+KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude  
+KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc -ltest
 
 # Do not edit below
 ###################################################################################
 
 KERNEL_LINKER_LIST+=$(KERNEL_OBJS)
-
-KERNEL_LINKER_LIST:=$(KERNEL_LINKER_LIST:.o=.k.o)
 KERNEL_DEPS:=$(KERNEL_LINKER_LIST:.o=.d)
-
--include $(KERNEL_DEPS)
--include echo $(KERNEL_DEPS)
 
 # Links MadOS.kernel
 $(KERNEL): $(KERNEL_LINKER_LIST)
 	$(CC) $(KERNEL_CFLAGS)  $(KERNEL_CPPFLAGS) -T"linker.ld" $(KERNEL_LINKER_LIST) $(KERNEL_LIBS) -o $(KERNEL)
 
 # Build a c file into a object file
-%.k.o: %.c
+%.o: %.c
 	$(CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) $(KERNEL_LIBS) -c $< -o $@ 
 
-%.k.o: %.asm	
+%.o: %.asm	
 	$(NASM) -f elf64 $^ -o $@
+
+-include $(KERNEL_DEPS)
 
 .PHONY: install install-bin install-headers clean
 install: install-headers install-bin
 
 install-headers:
-	cp -RL include/. $(SYSROOT)$(USR_INCLUDE_DIR)
+	rsync -avm --include='*.h' -f 'hide,! */' . $(SYSROOT)$(USR_INCLUDE_DIR)/kernel
+	# cp -RL include/. $(SYSROOT)$(USR_INCLUDE_DIR)
 
 install-bin: $(KERNEL)
-	cp -RL $(KERNEL) $(SYSROOT)$(USR_INCLUDE_DIR)
+	cp -RL $(KERNEL) $(SYSROOT)$(KERNEL_DIR)
 
 clean:
 	@find . -type f -name "*.o" -delete -print

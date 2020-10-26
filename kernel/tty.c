@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "TTY/vga.h"
+#include <kernel/vga.h>
 #include <kernel/io.h>
 
 static uint16_t cursor_position = 0;

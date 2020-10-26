@@ -10,5 +10,5 @@ load_IDT:
     lidt [idt_descriptor] ; Load the idt using the descriptor
     ret
 
-%include "Interrupts/isr_init.asm"
-%include "Interrupts/irq_init.asm"
+%include "interrupts/isr_init.asm"
+%include "interrupts/irq_init.asm"

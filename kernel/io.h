@@ -1,7 +1,7 @@
-#include <stdint.h>
+#ifndef __KERNEL_IO_H
+#define __KERNEL_IO_H 1
 
-#ifndef __IO__
-#define __IO__
+#include <stdint.h>
 
 #define PIC1_COMMAND 0x20 //Master PIC
 #define PIC1_DATA 0x21

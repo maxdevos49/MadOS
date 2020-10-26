@@ -1,7 +1,7 @@
-#ifndef __KB_SCAN_CODE_1__
-#define __KB_SCAN_CODE_1__
+#ifndef __KERNEL_DEVICES_KB1_H
+#define __KERNEL_DEVICES_KB1_H 1
 
-const char kb1_table[] = {
+const char KB1_table[] = {
     0, 0, '1', '2',
     '3', '4', '5', '6',
     '7', '8', '9', '0',
