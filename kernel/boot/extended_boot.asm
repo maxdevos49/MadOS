@@ -72,7 +72,7 @@ init_32_bit:
 [bits 64]
 [extern kernel_main]
 
-%include "Interrupts/idt_init.asm"
+%include "boot/idt_init.asm"
 
 init_64_bit:
     call activate_SSE
