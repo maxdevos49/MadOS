@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "vga.h"
-#include "io.h"
+#include "TTY/vga.h"
+#include <kernel/io.h>
 
 static uint16_t cursor_position = 0;
 static uint8_t current_theme = VGA_COLOR_BLUE | VGA_COLOR_WHITE << 4;

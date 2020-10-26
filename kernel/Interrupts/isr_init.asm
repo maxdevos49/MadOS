@@ -1,6 +1,6 @@
 [bits 64]
 
-%include "../idt/PUSHPOP.asm"
+%include "Interrupts/PUSHPOP.asm"
 
 ; 0: Divide By Zero Exception
 GLOBAL isr0

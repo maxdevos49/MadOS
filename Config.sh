@@ -4,6 +4,7 @@ set -e
 export CC=x86_64-elf-gcc
 export AR=x86_64-elf-ar
 export LD=x86_64-elf-ld
+export NASM=nasm
 export MAKE="make -j4"
 
 export SYSROOT="$(pwd)/sysroot"

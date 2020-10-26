@@ -15,26 +15,26 @@ void *malloc(size_t size)
 #endif
 }
 
-#ifdef __test
+// #ifdef __test
 
-#include <ctest.h>
+// #include <ctest.h>
 
-void test_malloc(void)
-{
+// void test_malloc(void)
+// {
 
-    int buffer_size = 30;
-    int *buffer = malloc(sizeof(int) * buffer_size);
+//     int buffer_size = 30;
+//     int *buffer = malloc(sizeof(int) * buffer_size);
 
-    ctest_assert("Error: malloc returned null", buffer != NULL);
+//     ctest_assert("Error: malloc returned null", buffer != NULL);
 
-    int *buffer2 = malloc(sizeof(int) * buffer_size);
+//     int *buffer2 = malloc(sizeof(int) * buffer_size);
 
-    ctest_assert("Error: malloc returned null", buffer2 != NULL);
-    ctest_assert("Error: malloc returned duplicate address without free", buffer != buffer2);
-    ctest_assert("Error: malloc returned overlapping memory", buffer + buffer_size < buffer2);
+//     ctest_assert("Error: malloc returned null", buffer2 != NULL);
+//     ctest_assert("Error: malloc returned duplicate address without free", buffer != buffer2);
+//     ctest_assert("Error: malloc returned overlapping memory", buffer + buffer_size < buffer2);
 
-    free(buffer);
-    free(buffer2);
-}
+//     free(buffer);
+//     free(buffer2);
+// }
 
-#endif
+// #endif

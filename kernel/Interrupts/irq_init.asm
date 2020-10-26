@@ -1,6 +1,6 @@
 [bits 64]
 
-%include "../idt/PUSHPOP.asm"
+%include "Interrupts/PUSHPOP.asm"
 
 ; 32: IRQ0
 GLOBAL irq0

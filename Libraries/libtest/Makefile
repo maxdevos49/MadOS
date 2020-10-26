@@ -22,4 +22,6 @@ install-bin: $(BINARIES)
 
 
 clean: 
-	@echo TODO clean libtest
+	@find . -type f -name "*.o" -delete -print
+	@find . -type f -name "*.d" -delete -print
+	@find . -type f -name "*.a" -delete -print

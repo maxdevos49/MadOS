@@ -19,3 +19,7 @@ done
 for PROJECT in $SYSTEM_PROJECTS; do
     (cd $PROJECT && echo "Project: $PROJECT" && $MAKE install-bin)
 done
+
+#temp for now final image
+dd if=/dev/zero of=MadOS.img bs=512 count=200
+cat Boot/boot.bin Kernel/MadOS.kernel | dd of=MadOS.img conv=notrunc
