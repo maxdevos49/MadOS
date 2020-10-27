@@ -1,6 +1,6 @@
 # MadOS | CassandraOS | CassiopeiaOS
 
-Name undecided.
+Name undecided. Let me know what you think.
 
 An operating system I am building mostly to get experience for low level development and to try something new other then web development. If I don't continue active development I atleast want to port Doom or similar game. 
 
