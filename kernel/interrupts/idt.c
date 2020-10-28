@@ -6,7 +6,7 @@
 
 extern struct IDT64 _idt[256]; // 4096 byte IDT
 
-void idt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags)
+void interrupt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags)
 {
     _idt[num].zero = 0;
     _idt[num].offset_low = (uint16_t)(base & 0x000000000000ffff);
@@ -15,7 +15,6 @@ void idt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags)
     _idt[num].ist = 0;
     _idt[num].selector = sel;     //Code segment selector defined in gdt
     _idt[num].types_attr = flags; //Indicates it as a 32 bit interupt gate
-
 }
 
 extern void load_IDT(void);
@@ -29,4 +28,14 @@ void idt_install(void)
 
     remap_pic();
     load_IDT();
+}
+
+void interrupts_disable()
+{
+    asm volatile("cli");
+}
+
+void interrupts_enable()
+{
+    asm volatile("sti");
 }

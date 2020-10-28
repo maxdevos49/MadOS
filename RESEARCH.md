@@ -16,10 +16,16 @@ Notes, examples, and links of any useful resources I find interesting or useful.
   - [8259 PIC](#8259-pic)
     - [How the 8259 PIC works](#how-the-8259-pic-works)
     - [Programming the 8259 PIC](#programming-the-8259-pic)
+  - [CMOS](#cmos)
+    - [Accessing CMOS Registers](#accessing-cmos-registers)
+    - [RTC](#rtc)
+    - [Getting Current Data And time from RTC](#getting-current-data-and-time-from-rtc)
   - [PIT](#pit)
       - [Channel 0](#channel-0)
   - [C and ASM Interop](#c-and-asm-interop)
     - [Passing Arguments to C Functions from ASM](#passing-arguments-to-c-functions-from-asm)
+  - [C and Hardware Interop](#c-and-hardware-interop)
+    - [Memory Mapped Devices](#memory-mapped-devices)
 
 <!-- /code_chunk_output -->
 
@@ -104,6 +110,12 @@ IRQ
 ---
 __Interrupt Request__
 
+| IRQ | Invoker | Default Enabled |
+|-----|---------|-----------------|
+| 0 | PIT | Yes |
+| 1 | Keyboard | Yes |
+| 8 | RTC | No |
+
 TODO
 
 Sources:
@@ -141,12 +153,76 @@ uint8_t slave_bit_mask = inb(0xa1);
 For example if the master PIC returned 0xfd it would mean that only IRQ1 is enabled. Looking at the binary representation of 0xfd helps to understand this: `0xfd == 11111101b`. Bits with a value of 1 represent a disabled IRQ
 
 
+Sources:
+https://wiki.osdev.org/8259_PIC
+http://www.osdever.net/bkerndev/Docs/irqs.htm
+
+CMOS
+---
+
+CMOS is a tiny bit if very low power static memory that lives on the same chip as the Real-Time Clock (RTC). The CMOS (and RTC) can only be accessed through IO ports 0x70 and 0x71. 
+
+| Port | Use |
+|------|-----|
+| 0x70 | Command Port |
+| 0x71 | Data Port |
+
+The function of the CMOS memory is to store 50 (or 114) bytes of "Setup" information for the BIOS while the computer is turned off. A dedicated battery keeps this information present. 
+
+CMOS values are accessed a byte at a time, and each byte is individually addressable. Each CMOS address is traditionally called a register. The first 14 CMOS registers access and control the Real-Time Clock. In fact the only truly useful registers remaining on the CMOS are the Real-Time Clock registers, and register 0x10. All other registers are obsolete or are not standardized and are therefore useless.
+
+### Accessing CMOS Registers
+
+To access a CMOS register it is extremely simple but you must take into account how you want to handle NMI. To select a register for reading or writing by sending the register number to port 0x70(CMOS_COMMAND). Since the 0x80 bit or Port 0x70 controls NMI, you always end up setting that, too. So your CMOS controller always needs to know whether your OS wants NMI enabled or not. Selecting a register can be done as the following:
+
+```c
+uint8_t NMI_disable_bit = 0x80;
+uint8_t register_number = 0x10;
+outb(CMOS_COMMAND, (NMI_disable_bit<<7>>) | register_number);
+```
+
+Once the register is selected, you either read the value of that register on Port 0x71(CMOS_DATA) or you write to it.
+
+```c
+//reading value from register 10 on CMOS
+uint8_t value = inb(CMOS_DATA);
+//or
+//Write new value(0x45) to register 10 on CMOS
+outb(CMOS_DATA, 0x45);
+```
+
+Note: Reading or writing to Port 0x71(CMOS_DATA) seems to default the "selected register" back to 0xD. So you need to reselect the register every time you want to access a CMOS register.
+
+Note 2: Writing to specific CMOS registers can invalidate a BIOS checksum resulting in the BIOS unable to boot. Do not write to any register that you are not aware of its use.
+
+### RTC
+__Real-Time Clock__
+
+The RTC keeps track of the date and time, even when the computer is powered down. Before the RTC the computer would have to ask every boot for the current date or time.
+
+The RTC can generate clock ticks on IRQ8 (similarly to PIT on IRQ0). The highest feasible clock frequency is 8KHz. Using the RTC clock this way may actually generate more stable clock pulses than the PIT can generate. It also frees up the PIT for timing events that need near microsecond accuracy. Additionally, the RTC can generate an IRQ8 at a particular time of day. 
+
+### Getting Current Data And time from RTC
+
+To get each of the following values from the RTC, you should first ensure that you wont be effected by an update. Then select the associated "CMOS register" in the usual way, and read the value from Port 0x71.
+
+| Register | Contents | Range |
+|----------|----------|-------|
+| 0x00 | Seconds | 0-59 |
+| 0x02 | Minutes | 0-59 |
+| 0x04 | Hours | 0-23 or 1-12(highest bit pm) |
+| 0x06 | Weekday | 1-7, Sunday = 1 |
+| 0x07 | Day of Month | 1-31 |
+| 0x08 | Month | 1-12 |
+| 0x09 | Year | 0-99 |
+| 0x32 | Century (maybe) | 19-20 |
+| 0x0A | Status Register A | Na ? |
+| 0x0B | Status Register B | Na ? |
 
 
 
 Sources:
-https://wiki.osdev.org/8259_PIC
-http://www.osdever.net/bkerndev/Docs/irqs.htm
+https://wiki.osdev.org/CMOS
 
 PIT
 ---
@@ -190,3 +266,8 @@ arg6 - r9
 Then anything after that gets pushed onto the stack in reverse
 thats for x86_64
 ```
+C and Hardware Interop
+---
+
+### Memory Mapped Devices
+Devices that are mapped to memory are mapped to your ram instead if using ports or use both. For complicated MMD interfaces using a struct can be a useful way to avoid errors and also make your code more readable.

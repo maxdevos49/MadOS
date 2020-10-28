@@ -7,7 +7,7 @@ void outb(uint16_t port, uint8_t val)
                  : "a"(val), "Nd"(port));
 }
 
-uint8_t inb(uint16_t port)
+inline uint8_t inb(uint16_t port)
 {
     uint8_t return_val;
 
@@ -28,12 +28,6 @@ static inline void io_wait(void)
 
 void remap_pic()
 {
-
-    // uint8_t a1, a2;
-
-    // store the masked value of each PIC
-    // a1 = inb(PIC1_DATA);
-    // a2 = inb(PIC2_DATA);
 
     //Tell PIC's to start the initialization sequence
     outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);

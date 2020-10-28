@@ -20,7 +20,7 @@ void terminal_clear(void)
 
     uint64_t value = 0;
     value += clear_color << 8;
-    value += clear_color << 24;
+    value += clear_color << 24;//24 because color data is every other byte
     value += clear_color << 40;
     value += clear_color << 56;
 

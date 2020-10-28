@@ -19,18 +19,21 @@ KERNEL_OBJS=\
 	kernel.o \
 	tty.o\
 	io.o\
-	debug.o\
-	Interrupts/idt.o\
-	Interrupts/isr.o\
-	Interrupts/irq.o\
-	Devices/keyboard.o\
-	Heap/init_heap.o\
-	Heap/k_malloc.o\
-	Heap/k_calloc.o\
-	Heap/k_realloc.o\
-	Heap/k_free.o\
-	Heap/memory.o\
 	timer.o\
+	debug.o\
+	interrupts/idt.o\
+	interrupts/isr.o\
+	interrupts/irq.o\
+	devices/keyboard.o\
+	heap/init_heap.o\
+	heap/k_malloc.o\
+	heap/k_calloc.o\
+	heap/k_realloc.o\
+	heap/k_free.o\
+	heap/memory.o\
+	time/cmos.o\
+	time/rtc.o\
+
 
 KERNEL_CFLAGS:= -Ttext 0x8000 -mno-red-zone $(CFLAGS)  
 KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude  

@@ -10,20 +10,20 @@ enter_protected_mode:
     call enable_A20                       ; Allows use of extended memory
 
     cli                                   ; We must switch off interrupts until we have set-up the protected mode
-                                          ; otherwise interrupts will run riot.
+                                            ; otherwise interrupts will run riot.
     mov bx, LOADING_GDT_MSG
     call print_string
 
     lgdt [gdt_descriptor]                 ; Load our global descriptor table, which defines the
-                                          ; protected mode segments (e.g. for code and data)
+                                            ; protected mode segments (e.g. for code and data)
     mov eax, cr0                          ; To make the switch to protected mode, we set
     or eax, 0x1                           ; the first bit of CRO, a control register
     mov cr0, eax
 
     jmp CODE_SEG:init_32_bit              ; Make a far jump(i.e. to a new segment) to out 32-bit
-                                          ; code. This also forces the CPU to flush its cache of
-                                          ; pre-fetched and real-mode decoded instructions, which
-                                          ; can cause problems
+                                            ; code. This also forces the CPU to flush its cache of
+                                            ; pre-fetched and real-mode decoded instructions, which
+                                                ; can cause problems
 enable_A20:
 
     mov bx, ENABLE_A20_MSG

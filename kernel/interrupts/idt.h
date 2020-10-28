@@ -21,16 +21,9 @@ struct IDT64
     uint32_t zero;
 };
 
-//idt.c
-void idt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags);
 void idt_install();
-
-//isr.c
-void isrs_install(void);
-
-//irq.c
-void irq_install();
-void irq_install_handler(int irq, void (*handler)(struct registers *r));
-void irq_uninstall_handler(int irq);
+void interrupt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags);
+void interrupts_disable();
+void interrupts_enable();
 
 #endif

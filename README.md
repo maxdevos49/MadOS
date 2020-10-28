@@ -37,5 +37,5 @@ gcc:
 
   
 ### Supported Architectures:
-  - x86_64 only for now. Maybe more when I learn a thing or two.
+x86_64 only for now. Maybe more when I learn a thing or two.
 

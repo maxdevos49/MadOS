@@ -1,10 +1,18 @@
 #include <kernel/tty.h>
+
 #include <kernel/debug.h>
+
 #include <kernel/memory.h>
 #include <kernel/heap.h>
+
 #include <kernel/interrupts/idt.h>
+#include <kernel/interrupts/isr.h>
+#include <kernel/interrupts/irq.h>
+
 #include <kernel/devices/keyboard.h>
+
 #include <kernel/timer.h>
+#include <kernel/time/rtc.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -39,6 +47,13 @@
 // }
 // #endif
 
+void irq8_handler()
+{
+    printf("Hey from RTC reporting to you live on 1024hz\n");
+
+    RTC_acknowledge_irq8();
+}
+
 char *splash = //Load from binary?
     "=============================================================================="
     "\nWelcome to\n"
@@ -64,18 +79,22 @@ void kernel_main(void)
     idt_install();
     isrs_install();
     irq_install();
-    asm volatile("sti");
+
     install_keyboard();
     install_timer();
-    
+
+    interrupts_enable();
 
     printf("%s\n", splash);
+    struct RTC_time time = RTC_read_time();
+    printf("%d:%d:%d - %d/%d/%d\n", time.hour, time.minute, time.second, time.month, time.day, time.year);
 
     printf("Sleeping for 10 seconds\n");
     sleep_milliseconds(1000);
     printf("Done sleeping\n");
 
-#ifdef __test
-    // run_ctest(test_suites);
-#endif
+    irq_install_handler(8, irq8_handler);
+
+    RTC_enable_periodic_irq8();
+
 }

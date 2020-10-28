@@ -1,5 +1,5 @@
 #ifndef __CTEST_H
-#define __CTEST_H
+#define __CTEST_H 1
 
 #include <stdbool.h>
 

@@ -1,7 +1,7 @@
 #include <kernel/devices/keyboard.h>
 #include <kernel/devices/KB1.h>
 #include <kernel/io.h>
-#include <kernel/interrupts/idt.h>
+#include <kernel/interrupts/irq.h>
 #include <kernel/tty.h>
 #include <kernel/vga.h>
 #include <stdio.h>
