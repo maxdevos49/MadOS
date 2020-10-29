@@ -8,13 +8,13 @@
 static uint16_t cursor_position = 0;
 static uint8_t current_theme = VGA_COLOR_BLUE | VGA_COLOR_WHITE << 4;
 
-void init_terminal(void)
+void TTY_init(void)
 {
-    terminal_set_cursor_position(0);
-    terminal_clear();
+    TTY_set_cursor_position(0);
+    TTY_clear();
 }
 
-void terminal_clear(void)
+void TTY_clear(void)
 {
     uint64_t clear_color = current_theme;
 
@@ -30,17 +30,17 @@ void terminal_clear(void)
     }
 }
 
-uint16_t terminal_get_cursor_position(void)
+uint16_t TTY_get_cursor_position(void)
 {
     return cursor_position;
 }
 
-void terminal_set_cursor_position(uint16_t position)
+void TTY_set_cursor_position(uint16_t position)
 {
 
     if (position > VGA_WIDTH * VGA_HEIGHT - 1)
     {
-        terminal_scroll();
+        TTY_scroll();
         position = VGA_WIDTH * VGA_HEIGHT - VGA_WIDTH;
     }
 
@@ -62,9 +62,9 @@ void terminal_set_cursor_position(uint16_t position)
  *      \t  --> tab
  *      \v  --> vertical tab
  * */
-void terminal_putchar(char c)
+void TTY_putchar(char c)
 {
-    uint16_t index = terminal_get_cursor_position();
+    uint16_t index = TTY_get_cursor_position();
 
     switch (c)
     {
@@ -84,22 +84,22 @@ void terminal_putchar(char c)
         break;
     }
 
-    terminal_set_cursor_position(index);
+    TTY_set_cursor_position(index);
 }
 
-void terminal_write(const char *data, size_t size)
+void TTY_write(const char *data, size_t size)
 {
     uint64_t i;
     for (i = 0; i < size; i++)
-        terminal_putchar(*(data + i));
+        TTY_putchar(*(data + i));
 }
 
-void terminal_write_string(const char *str)
+void TTY_write_string(const char *str)
 {
-    terminal_write(str, strlen(str));
+    TTY_write(str, strlen(str));
 }
 
-void terminal_scroll()
+void TTY_scroll()
 {
     uint16_t length = VGA_WIDTH * VGA_HEIGHT * 2;
 
@@ -112,7 +112,7 @@ void terminal_scroll()
     }
 }
 
-void terminal_set_theme(enum vga_color background, enum vga_color foreground)
+void TTY_set_theme(enum vga_color background, enum vga_color foreground)
 {
     current_theme = foreground | background << 4;
 }

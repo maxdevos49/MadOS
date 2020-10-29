@@ -25,10 +25,8 @@ enter_protected_mode:
                                             ; pre-fetched and real-mode decoded instructions, which
                                                 ; can cause problems
 enable_A20:
-
     mov bx, ENABLE_A20_MSG
     call print_string
-
     in al, 0x92                           ; Allows for extended memory access on some machines
     or al, 2
     out 0x92, al

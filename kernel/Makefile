@@ -18,12 +18,12 @@ KERNEL_OBJS=\
 	boot/extended_boot.o\
 	kernel.o \
 	tty.o\
-	io.o\
 	timer.o\
 	debug.o\
 	interrupts/idt.o\
 	interrupts/isr.o\
 	interrupts/irq.o\
+	interrupts/pic.o\
 	devices/keyboard.o\
 	heap/init_heap.o\
 	heap/k_malloc.o\
@@ -33,6 +33,7 @@ KERNEL_OBJS=\
 	heap/memory.o\
 	time/cmos.o\
 	time/rtc.o\
+	time/pit.o\
 
 
 KERNEL_CFLAGS:= -Ttext 0x8000 -mno-red-zone $(CFLAGS)  

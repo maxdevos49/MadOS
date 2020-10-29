@@ -9,9 +9,9 @@ int putchar(int c)
 #if defined(__is_libk)
 
     if ((char)c == '\n')
-        terminal_putchar('\r');
+        TTY_putchar('\r');
 
-    terminal_putchar((char)c);
+    TTY_putchar(c);
 
 #else
     // TODO: Implement stdio and the write system call.

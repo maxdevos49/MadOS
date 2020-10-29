@@ -1,6 +1,6 @@
 #include <kernel/time/cmos.h>
 #include <kernel/io.h>
-#include <kernel/interrupts/idt.h>
+#include <kernel/interrupts/irq.h>
 
 static uint8_t century_register = CMOS_CENTURY_REGISTER_DEFAULT;
 static bool disable_nmi = CMOS_DISABLE_NMI;
@@ -35,7 +35,7 @@ void CMOS_read(uint8_t data[128])
     uint8_t index;
     for (index = 0; index < 128; index++)
     {
-        interrupts_disable();
+        uint64_t flags = IRQ_stash_and_disable();
 
         if (!disable_nmi)
             outb(CMOS_COMMAND_PORT, index);
@@ -44,7 +44,7 @@ void CMOS_read(uint8_t data[128])
 
         data[index] = inb(CMOS_DATA_PORT);
 
-        interrupts_enable();
+        IRQ_restore(flags);
     }
 }
 
@@ -57,7 +57,7 @@ void CMOS_write(uint8_t data[128])
     uint8_t index;
     for (index = 0; index < 128; index++)
     {
-        interrupts_disable();
+        uint64_t flags = IRQ_stash_and_disable();
 
         if (!disable_nmi)
             outb(CMOS_COMMAND_PORT, index);
@@ -66,7 +66,7 @@ void CMOS_write(uint8_t data[128])
 
         outb(CMOS_DATA_PORT, data[index]);
 
-        interrupts_enable();
+        IRQ_restore(flags);
     }
 }
 

@@ -32,9 +32,9 @@ void standard_keyboard_handler(uint8_t scan_code, char chr)
         switch (scan_code)
         {
         case 0x8e: //Backspace press
-            terminal_set_cursor_position(terminal_get_cursor_position() - 1);
+            TTY_set_cursor_position(TTY_get_cursor_position() - 1);
             putchar(' ');
-            terminal_set_cursor_position(terminal_get_cursor_position() - 1);
+            TTY_set_cursor_position(TTY_get_cursor_position() - 1);
             break;
         case 0x2a: //left shift press
             left_shift_pressed = true;
@@ -60,16 +60,16 @@ void keyboard_handler_0xE0(uint8_t scan_code)
     switch (scan_code)
     {
     case 0x50: //down arrow
-        terminal_set_cursor_position(terminal_get_cursor_position() + VGA_WIDTH);
+        TTY_set_cursor_position(TTY_get_cursor_position() + VGA_WIDTH);
         break;
     case 0x4B: //left arrow
-        terminal_set_cursor_position(terminal_get_cursor_position() - 1);
+        TTY_set_cursor_position(TTY_get_cursor_position() - 1);
         break;
     case 0x4D: //right arrow
-        terminal_set_cursor_position(terminal_get_cursor_position() + 1);
+        TTY_set_cursor_position(TTY_get_cursor_position() + 1);
         break;
     case 0x48: //up arrow
-        terminal_set_cursor_position(terminal_get_cursor_position() - VGA_WIDTH);
+        TTY_set_cursor_position(TTY_get_cursor_position() - VGA_WIDTH);
         break;
     }
 }
@@ -96,8 +96,8 @@ void keyboard_handler()
     last_scan_code = scan_code;
 }
 
-void install_keyboard()
+void KB_install(void)
 {
     printf("Installing Keyboard\n");
-    irq_install_handler(1, keyboard_handler);
+    IRQ_install_handler(1, keyboard_handler);
 }

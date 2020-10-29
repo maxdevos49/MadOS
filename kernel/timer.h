@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void install_timer();
+void Timer_install();
 void sleep_milliseconds(uint64_t milliseconds);
 void sleep_ticks(uint64_t ticks);
 

@@ -23,15 +23,15 @@ enum vga_color {
 	VGA_COLOR_WHITE = 15,
 };
 
-void init_terminal(void);
+void TTY_init();
 
-uint16_t terminal_get_cursor_position(void);
-void terminal_set_cursor_position(uint16_t position);
-void terminal_putchar(char c);
-void terminal_clear(void);
-void terminal_write(const char *data, size_t size);
-void terminal_write_string(const char *data);
-void terminal_scroll();
-void terminal_set_theme(enum vga_color background, enum vga_color foreground);
+uint16_t TTY_get_cursor_position();
+void TTY_set_cursor_position(uint16_t position);
+void TTY_putchar(char c);
+void TTY_clear();
+void TTY_write(const char *data, size_t size);
+void TTY_write_string(const char *data);
+void TTY_scroll();
+void TTY_set_theme(enum vga_color background, enum vga_color foreground);
 
 #endif

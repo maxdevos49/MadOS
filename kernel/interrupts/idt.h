@@ -21,9 +21,7 @@ struct IDT64
     uint32_t zero;
 };
 
-void idt_install();
-void interrupt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags);
-void interrupts_disable();
-void interrupts_enable();
+void IDT_install();
+void IDT_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags);
 
 #endif

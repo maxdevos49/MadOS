@@ -232,7 +232,7 @@ The PIT or also called the System Clock, is a very useful chip for accurately ge
 
 The chip has 3 channels(indexed 0 - 2):
   - 0: Tied to IRQ0 to interrupt the CPU at predictable and regular times
-  - 1: System specific(depends).
+  - 1: No longer present
   - 2: Connected to the system speaker.(Beep speaker)
 
 Typically you are only concerned with Channels 0 and 2. Channel 2 can be used to make your computer beep. 

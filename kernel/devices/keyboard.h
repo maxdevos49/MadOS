@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void install_keyboard(void);
+void KB_install(void);
 
 #endif

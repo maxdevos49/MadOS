@@ -26,36 +26,36 @@ void *irq_routines[16] =
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0};
 
-void irq_install_handler(int irq, void (*handler)(struct registers *r))
+void IRQ_install_handler(int irq, void (*handler)(struct registers *r))
 {
     irq_routines[irq] = handler;
 }
 
-void irq_uninstall_handler(int irq)
+void IRQ_uninstall_handler(int irq)
 {
     irq_routines[irq] = 0;
 }
 
-void irq_install()
+void IRQs_install()
 {
     printf("Installing IRQ Gates\n");
 
-    interrupt_set_gate(32, (uint64_t)irq0, 0x08, 0x8e);
-    interrupt_set_gate(33, (uint64_t)irq1, 0x08, 0x8e); //keyboard
-    interrupt_set_gate(34, (uint64_t)irq2, 0x08, 0x8e);
-    interrupt_set_gate(35, (uint64_t)irq3, 0x08, 0x8e);
-    interrupt_set_gate(36, (uint64_t)irq4, 0x08, 0x8e);
-    interrupt_set_gate(37, (uint64_t)irq5, 0x08, 0x8e);
-    interrupt_set_gate(38, (uint64_t)irq6, 0x08, 0x8e);
-    interrupt_set_gate(39, (uint64_t)irq7, 0x08, 0x8e);
-    interrupt_set_gate(40, (uint64_t)irq8, 0x08, 0x8e);
-    interrupt_set_gate(41, (uint64_t)irq9, 0x08, 0x8e);
-    interrupt_set_gate(42, (uint64_t)irq10, 0x08, 0x8e);
-    interrupt_set_gate(43, (uint64_t)irq11, 0x08, 0x8e);
-    interrupt_set_gate(44, (uint64_t)irq12, 0x08, 0x8e);
-    interrupt_set_gate(45, (uint64_t)irq13, 0x08, 0x8e);
-    interrupt_set_gate(46, (uint64_t)irq14, 0x08, 0x8e);
-    interrupt_set_gate(47, (uint64_t)irq15, 0x08, 0x8e);
+    IDT_set_gate(32, (uint64_t)irq0, 0x08, 0x8e);
+    IDT_set_gate(33, (uint64_t)irq1, 0x08, 0x8e); //keyboard
+    IDT_set_gate(34, (uint64_t)irq2, 0x08, 0x8e);
+    IDT_set_gate(35, (uint64_t)irq3, 0x08, 0x8e);
+    IDT_set_gate(36, (uint64_t)irq4, 0x08, 0x8e);
+    IDT_set_gate(37, (uint64_t)irq5, 0x08, 0x8e);
+    IDT_set_gate(38, (uint64_t)irq6, 0x08, 0x8e);
+    IDT_set_gate(39, (uint64_t)irq7, 0x08, 0x8e);
+    IDT_set_gate(40, (uint64_t)irq8, 0x08, 0x8e);
+    IDT_set_gate(41, (uint64_t)irq9, 0x08, 0x8e);
+    IDT_set_gate(42, (uint64_t)irq10, 0x08, 0x8e);
+    IDT_set_gate(43, (uint64_t)irq11, 0x08, 0x8e);
+    IDT_set_gate(44, (uint64_t)irq12, 0x08, 0x8e);
+    IDT_set_gate(45, (uint64_t)irq13, 0x08, 0x8e);
+    IDT_set_gate(46, (uint64_t)irq14, 0x08, 0x8e);
+    IDT_set_gate(47, (uint64_t)irq15, 0x08, 0x8e);
 }
 
 void irq_handler(struct registers *regs)

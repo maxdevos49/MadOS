@@ -1,6 +1,6 @@
 #include <kernel/time/rtc.h>
 #include <kernel/time/cmos.h>
-#include <kernel/interrupts/idt.h>
+#include <kernel/interrupts/irq.h>
 #include <stdio.h>
 
 bool RTC_get_update_in_progress_flag()
@@ -85,12 +85,12 @@ struct RTC_time RTC_read_time()
  * */
 void RTC_enable_periodic_irq8()
 {
-    interrupts_disable();
+    uint64_t flags = IRQ_stash_and_disable();
 
     uint8_t previous_value = CMOS_read_register(RTC_STATUS_REGISTER_B);
     CMOS_write_register(RTC_STATUS_REGISTER_B, previous_value | RTC_IRQ8_ENABLE);
 
-    interrupts_enable();
+    IRQ_restore(flags);
 }
 
 /**
@@ -98,11 +98,11 @@ void RTC_enable_periodic_irq8()
  * */
 void RTC_disable_periodic_irq8()
 {
-    interrupts_disable();
+    uint64_t flags = IRQ_stash_and_disable();
 
     RTC_set_periodic_rate(0);
 
-    interrupts_enable();
+    IRQ_restore(flags);
 }
 
 /**
@@ -130,12 +130,12 @@ void RTC_set_periodic_rate(uint8_t rate)
 {
     rate &= 0x0f; //Valid range is 2 - 15. This garuntees its atleast 0-15
 
-    interrupts_disable();
+    uint64_t flags = IRQ_stash_and_disable();
 
     uint8_t p = CMOS_read_register(RTC_STATUS_REGISTER_A);
     CMOS_write_register(RTC_STATUS_REGISTER_A, (p & 0xf0) | rate);
 
-    interrupts_disable();
+    IRQ_restore(flags);
 }
 
 /**

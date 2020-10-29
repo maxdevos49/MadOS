@@ -3,10 +3,11 @@
 #include <string.h>
 #include <kernel/interrupts/idt.h>
 #include <kernel/io.h>
+#include <kernel/interrupts/pic.h>
 
 extern struct IDT64 _idt[256]; // 4096 byte IDT
 
-void interrupt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags)
+void IDT_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags)
 {
     _idt[num].zero = 0;
     _idt[num].offset_low = (uint16_t)(base & 0x000000000000ffff);
@@ -19,7 +20,7 @@ void interrupt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags)
 
 extern void load_IDT(void);
 
-void idt_install(void)
+void IDT_install(void)
 {
     printf("Initializing IDT\n");
 
@@ -28,14 +29,4 @@ void idt_install(void)
 
     remap_pic();
     load_IDT();
-}
-
-void interrupts_disable()
-{
-    asm volatile("cli");
-}
-
-void interrupts_enable()
-{
-    asm volatile("sti");
 }

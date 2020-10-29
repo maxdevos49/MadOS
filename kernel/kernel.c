@@ -13,6 +13,8 @@
 
 #include <kernel/timer.h>
 #include <kernel/time/rtc.h>
+#include <kernel/time/pit.h>
+#include <kernel/io.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -49,7 +51,8 @@
 
 void irq8_handler()
 {
-    printf("Hey from RTC reporting to you live on 1024hz\n");
+    struct RTC_time time = RTC_read_time();
+    printf("%d:%d:%d - %d/%d/%d\n", time.hour, time.minute, time.second, time.month, time.day, time.year);
 
     RTC_acknowledge_irq8();
 }
@@ -68,33 +71,49 @@ char *splash = //Load from binary?
 
 void kernel_main(void)
 {
-    terminal_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
-    init_terminal();
+    TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
+    TTY_init();
     printf("Booting Kernel\n");
     init_memory((struct mem_map_entry *)0x5000);
 
     struct mem_map_entry **usable_memory = get_usable_memory_regions();
     init_heap(usable_memory[1]->base_address, 0x10000);
 
-    idt_install();
-    isrs_install();
-    irq_install();
+    IDT_install();
+    ISRs_install();
+    IRQs_install();
 
-    install_keyboard();
-    install_timer();
+    KB_install();
+    Timer_install();
 
-    interrupts_enable();
+    IRQ_enable();
 
     printf("%s\n", splash);
     struct RTC_time time = RTC_read_time();
     printf("%d:%d:%d - %d/%d/%d\n", time.hour, time.minute, time.second, time.month, time.day, time.year);
 
-    printf("Sleeping for 10 seconds\n");
+    // printf("Powering down in 10 seconds\n");
     sleep_milliseconds(1000);
+
+    // outw(0x604, 0x2000);
+
     printf("Done sleeping\n");
+    PIT_disable_periodic_irq0();
+    // PIT_configure(PIT_CH0_DATA_PORT, PIT_MODE_RATEGEN, 50);
 
-    irq_install_handler(8, irq8_handler);
+    // printf("PIT count: %d\n", PIT_read_count());
+    // printf("PIT count: %d\n", PIT_read_count());
+    // printf("PIT count: %d\n", PIT_read_count());
+    // printf("PIT count: %d\n", PIT_read_count());
+    // printf("PIT count: %d\n", PIT_read_count());
+    // printf("PIT count: %d\n", PIT_read_count());
+    // printf("PIT count: %d\n", PIT_read_count());
+    // printf("PIT count: %d\n", PIT_read_count());
+    // printf("PIT count: %d\n", PIT_read_count());
+    // printf("PIT count: %d\n", PIT_read_count());
 
-    RTC_enable_periodic_irq8();
+    // RTC_set_periodic_rate(15);
+    // IRQ_install_handler(8, irq8_handler);
 
+    // RTC_enable_periodic_irq8();
 }

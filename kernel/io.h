@@ -3,20 +3,65 @@
 
 #include <stdint.h>
 
-#define PIC1_COMMAND 0x20 //Master PIC
-#define PIC1_DATA 0x21
-#define PIC2_COMMAND 0xa0 //Slave PIC
-#define PIC2_DATA 0xa1
+static inline void outb(uint16_t port, uint8_t val)
+{
+    asm volatile("outb %0, %1"
+                 :
+                 : "a"(val), "Nd"(port));
+}
+static inline uint8_t inb(uint16_t port)
+{
+    uint8_t return_val;
 
-#define ICW1_INIT 0x10 //Initialization control word one
-#define ICW1_ICW4 0x01
-#define ICW1_8086 0x01
+    asm volatile("inb %1, %0"
+                 : "=a"(return_val)
+                 : "Nd"(port));
 
-void outb(uint16_t port, uint8_t val);
-uint8_t inb(uint16_t port);
+    return return_val;
+}
 
-void timer_phase(int hz);
+static inline void outw(uint16_t port, uint16_t val)
+{
+    asm volatile("outw %0, %1"
+                 :
+                 : "a"(val), "Nd"(port));
+}
+static inline uint16_t inw(uint16_t port)
+{
+    uint16_t return_val;
 
-void remap_pic();
+    asm volatile("inw %1, %0"
+                 : "=a"(return_val)
+                 : "Nd"(port));
+
+    return return_val;
+}
+
+static inline void outl(uint16_t port, uint32_t val)
+{
+    asm volatile("outl %0, %1"
+                 :
+                 : "a"(val), "Nd"(port));
+}
+static inline uint32_t inl(uint16_t port)
+{
+    uint32_t return_val;
+
+    asm volatile("inw %1, %0"
+                 : "=a"(return_val)
+                 : "Nd"(port));
+
+    return return_val;
+}
+
+static inline void io_wait(void)
+{
+    /* Port 0x80 is used for 'checkpoints' during POST. */
+    /* The Linux kernel seems to think it is free for use :-/ */
+    asm volatile("outb %%al, $0x80"
+                 :
+                 : "a"(0));
+    /* %%al instead of %0 makes no difference.  TODO: does the register need to be zeroed? */
+}
 
 #endif

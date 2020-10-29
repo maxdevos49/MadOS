@@ -1,6 +1,6 @@
 #include <kernel/timer.h>
 #include <kernel/interrupts/irq.h>
-#include <kernel/io.h>
+#include <kernel/time/pit.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -21,17 +21,17 @@ void sleep_ticks(uint64_t ticks)
 {
     uint64_t end_ticks = ticks + cpu_ticks;
 
-    while (cpu_ticks < end_ticks);
+    while (cpu_ticks < end_ticks)
+        ;
 }
 
 void sleep_milliseconds(uint64_t milliseconds)
 {
-
     sleep_ticks(milliseconds);
 }
 
-void install_timer()
+void Timer_install()
 {
-    timer_phase(100);
-    irq_install_handler(0, timer_handler);
+    PIT_set_periodic_frequency(100);
+    IRQ_install_handler(0, timer_handler);
 }
