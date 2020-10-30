@@ -1,10 +1,14 @@
 #ifndef __TIME_H
 #define __TIME_H
 
+#ifndef NULL
+#define NULL 0
+#endif
+
+//#define CLOCKS_PER_SEC
 
 typedef long long int clock_t;
-
-typedef long long int time_t; //TODO platform specific
+typedef long long int time_t;
 
 struct tm
 {
@@ -21,12 +25,6 @@ struct tm
 
 clock_t clock(void);
 char *ctime(const time_t *timer);
-
-//TODO system specific macro
-//#define CLOCKS_PER_SEC
-
-#ifndef NULL
-#define NULL 0
-#endif
+time_t mktime(struct tm *tp);
 
 #endif

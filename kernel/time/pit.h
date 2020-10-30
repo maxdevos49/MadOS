@@ -35,6 +35,5 @@ void PIT_configure(uint8_t channel_port, uint8_t mode, uint16_t hz);
 void PIT_enable_periodic_irq0();
 void PIT_disable_periodic_irq0();
 void PIT_set_periodic_frequency(uint16_t hz);
-uint16_t PIT_get_closest_frequency(uint16_t hz);
 
 #endif

@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 // #ifdef __test
 // //TODO relocate somewhere else
@@ -84,21 +85,31 @@ void kernel_main(void)
     IRQs_install();
 
     KB_install();
-    Timer_install();
+    TIMER_install();
 
     IRQ_enable();
 
     printf("%s\n", splash);
-    struct RTC_time time = RTC_read_time();
-    printf("%d:%d:%d - %d/%d/%d\n", time.hour, time.minute, time.second, time.month, time.day, time.year);
+
+    // struct tm tm;
+    // tm.tm_sec = 0;
+    // tm.tm_min = 20;
+    // tm.tm_hour = 3;
+    // tm.tm_mday = 22;
+    // tm.tm_mon = 10;
+    // tm.tm_year = 1956 - 1900;
+
+    // printf("Test time: %d\n", mktime(&tm));
+    // struct RTC_time time = RTC_read_time();
+    // printf("%d:%d:%d - %d/%d/%d\n", time.hour, time.minute, time.second, time.month, time.day, time.year);
 
     // printf("Powering down in 10 seconds\n");
-    sleep_milliseconds(1000);
+    // sleep_milliseconds(1000);
 
     // outw(0x604, 0x2000);
 
-    printf("Done sleeping\n");
-    PIT_disable_periodic_irq0();
+    // printf("Done sleeping\n");
+    // PIT_disable_periodic_irq0();
     // PIT_configure(PIT_CH0_DATA_PORT, PIT_MODE_RATEGEN, 50);
 
     // printf("PIT count: %d\n", PIT_read_count());

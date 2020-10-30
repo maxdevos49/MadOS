@@ -54,10 +54,5 @@ void PIT_disable_periodic_irq0()
 
 void PIT_set_periodic_frequency(uint16_t hz)
 {
-    PIT_configure(PIT_CH0_DATA_PORT, PIT_MODE_SQUAREGEN, hz);
-}
-
-uint16_t PIT_get_closest_frequency(uint16_t hz)
-{
-    //TODO
+    PIT_configure(PIT_CH0_DATA_PORT, PIT_MODE_RATEGEN, hz);
 }
