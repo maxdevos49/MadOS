@@ -37,16 +37,16 @@ OBJS=\
 	stdlib/calloc.o\
 	stdlib/free.o\
 	time/mktime.o\
+	time/clock.o\
+	time/ctime.o\
+	time/time.o
+
 
 # Do not edit below
 ###################################################################################
+LIBC_DEPS:=$(OBJS:.o=.d)
 
-all: $(BINARIES)
-
-libc.a: $(OBJS)
-	$(AR) rcs $@ $(OBJS)
-
-libk.a: $(OBJS)
+$(BINARIES): $(OBJS)
 	$(AR) rcs $@ $(OBJS)
 
 %.o: %.c
@@ -55,8 +55,11 @@ libk.a: $(OBJS)
 %.o: %.c
 	$(CC) $(LIBK_CFLAGS) $(LIBK_CPPFLAGS) -c $< -o $@
 
+# Not sure if this is doing anything or not
+-include $(LIBC_DEPS)
+
 .PHONY: install install-headers install-bin clean
-install: all install-headers install-bin
+install: install-headers install-bin
 
 install-headers:
 	rsync -avm --include='*.h' -f 'hide,! */' .  $(SYSROOT)$(USR_INCLUDE_DIR)

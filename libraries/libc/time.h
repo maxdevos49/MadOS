@@ -1,9 +1,13 @@
 #ifndef __TIME_H
 #define __TIME_H
 
+#include <stdint.h>
+
+
 #ifndef NULL
 #define NULL 0
 #endif
+
 
 //#define CLOCKS_PER_SEC
 
@@ -26,5 +30,6 @@ struct tm
 clock_t clock(void);
 char *ctime(const time_t *timer);
 time_t mktime(struct tm *tp);
+time_t time(time_t *args);
 
 #endif

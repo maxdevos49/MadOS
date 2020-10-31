@@ -2,13 +2,6 @@
 #include <kernel/io.h>
 #include <kernel/interrupts/irq.h>
 
-// void PIT_periodic_frequency(int hz)
-// {
-//     int divisor = 1193180 / hz;              /* Calculate our divisor */
-//     outb(PIT_COMMAND_PORT, 0x36);            //channel 0, hilobyte, square wave mode, 16-bit binary
-//     outb(PIT_CH0_DATA_PORT, divisor & 0xFF); /* Set low byte of divisor */
-//     outb(PIT_CH0_DATA_PORT, divisor >> 8);   /* Set high byte of divisor */
-// }
 
 // //TODO only reads channel 0. Also unsure if needed
 // uint32_t PIT_read_count()
@@ -44,7 +37,8 @@ void PIT_configure(uint8_t channel_port, uint8_t mode, uint16_t hz)
 
 void PIT_enable_periodic_irq0()
 {
-    outb(PIT_COMMAND_PORT, PIT_CHANNEL_0 | PIT_MODE_SQUAREGEN);
+    PIT_configure(PIT_CH0_DATA_PORT, PIT_MODE_RATEGEN, 1);
+
 }
 
 void PIT_disable_periodic_irq0()

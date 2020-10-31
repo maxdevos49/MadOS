@@ -27,6 +27,6 @@ void IDT_install(void)
     //Clear out entire IDT with zeros
     memset(&_idt, 0, sizeof(struct IDT64) * 256);
 
-    remap_pic();
+    PIC_remap();
     load_IDT();
 }

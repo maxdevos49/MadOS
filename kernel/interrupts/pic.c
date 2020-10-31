@@ -1,7 +1,7 @@
 #include <kernel/interrupts/pic.h>
 #include <kernel/io.h>
 
-void remap_pic()
+void PIC_remap()
 {
 
     //Tell PIC's to start the initialization sequence

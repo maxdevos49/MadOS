@@ -1,4 +1,5 @@
 #include <kernel/tty.h>
+#include <kernel/vga.h>
 
 #include <kernel/debug.h>
 
@@ -68,13 +69,15 @@ char *splash = //Load from binary?
     "| $$  $$$| $$  /$$$$$$$| $$  | $$| $$  | $$ \\____  $$\n"
     "| $$\\  $ | $$ /$$__  $$| $$  | $$| $$  | $$ /$$  \\ $$\n"
     "| $$ \\/  | $$|  $$$$$$$|  $$$$$$$|  $$$$$$/|  $$$$$$/\n"
-    "|__/     |__/ \\_______/ \\_______/ \\______/  \\______/ \n\n";
+    "|__/     |__/ \\_______/ \\_______/ \\______/  \\______/ \n";
 
 void kernel_main(void)
 {
     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
     TTY_init();
+    
     printf("Booting Kernel\n");
+
     init_memory((struct mem_map_entry *)0x5000);
 
     struct mem_map_entry **usable_memory = get_usable_memory_regions();
@@ -91,40 +94,16 @@ void kernel_main(void)
 
     printf("%s\n", splash);
 
-    // struct tm tm;
-    // tm.tm_sec = 0;
-    // tm.tm_min = 20;
-    // tm.tm_hour = 3;
-    // tm.tm_mday = 22;
-    // tm.tm_mon = 10;
-    // tm.tm_year = 1956 - 1900;
 
-    // printf("Test time: %d\n", mktime(&tm));
-    // struct RTC_time time = RTC_read_time();
-    // printf("%d:%d:%d - %d/%d/%d\n", time.hour, time.minute, time.second, time.month, time.day, time.year);
-
-    // printf("Powering down in 10 seconds\n");
-    // sleep_milliseconds(1000);
-
+    while(1)
+    {
+        TTY_set_cursor_position(TTY_get_cursor_position() - VGA_WIDTH);
+        printf("                                                                                ");
+        TTY_set_cursor_position(TTY_get_cursor_position() - VGA_WIDTH);
+        ctime(NULL);
+        TIMER_sleep_milliseconds(1000);
+    }
     // outw(0x604, 0x2000);
 
-    // printf("Done sleeping\n");
-    // PIT_disable_periodic_irq0();
-    // PIT_configure(PIT_CH0_DATA_PORT, PIT_MODE_RATEGEN, 50);
 
-    // printf("PIT count: %d\n", PIT_read_count());
-    // printf("PIT count: %d\n", PIT_read_count());
-    // printf("PIT count: %d\n", PIT_read_count());
-    // printf("PIT count: %d\n", PIT_read_count());
-    // printf("PIT count: %d\n", PIT_read_count());
-    // printf("PIT count: %d\n", PIT_read_count());
-    // printf("PIT count: %d\n", PIT_read_count());
-    // printf("PIT count: %d\n", PIT_read_count());
-    // printf("PIT count: %d\n", PIT_read_count());
-    // printf("PIT count: %d\n", PIT_read_count());
-
-    // RTC_set_periodic_rate(15);
-    // IRQ_install_handler(8, irq8_handler);
-
-    // RTC_enable_periodic_irq8();
 }

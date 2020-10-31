@@ -9,7 +9,6 @@ CFLAGS?=-O0 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=../sysroot -isystem=
 CPPFLAGS?=
 LIBS?=
 
-
 #Target
 KERNEL=MadOS.kernel
 
@@ -35,6 +34,11 @@ KERNEL_OBJS=\
 	time/rtc.o\
 	time/pit.o\
 
+# Ensures if we make a change to the library it gets relinked to the kernel 
+# without making a random change to the kernel. Only needed for statically linked 
+# libraries.
+KERNEL_LIB_PATHS=\
+	 ../libraries/libc/libk.a
 
 KERNEL_CFLAGS:= -Ttext 0x8000 -mno-red-zone $(CFLAGS)  
 KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude  
@@ -47,10 +51,9 @@ KERNEL_LINKER_LIST+=$(KERNEL_OBJS)
 KERNEL_DEPS:=$(KERNEL_LINKER_LIST:.o=.d)
 
 # Links MadOS.kernel
-$(KERNEL): $(KERNEL_LINKER_LIST)
+$(KERNEL): $(KERNEL_LINKER_LIST) $(KERNEL_LIB_PATHS)
 	$(CC) $(KERNEL_CFLAGS)  $(KERNEL_CPPFLAGS) -T"linker.ld" $(KERNEL_LINKER_LIST) $(KERNEL_LIBS) -o $(KERNEL)
 
-# Build a c file into a object file
 %.o: %.c
 	$(CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) $(KERNEL_LIBS) -c $< -o $@ 
 
@@ -64,7 +67,6 @@ install: install-headers install-bin
 
 install-headers:
 	rsync -avm --include='*.h' -f 'hide,! */' . $(SYSROOT)$(USR_INCLUDE_DIR)/kernel
-	# cp -RL include/. $(SYSROOT)$(USR_INCLUDE_DIR)
 
 install-bin: $(KERNEL)
 	cp -RL $(KERNEL) $(SYSROOT)$(KERNEL_DIR)

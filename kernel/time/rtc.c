@@ -61,10 +61,10 @@ struct RTC_time RTC_read_time()
         time.second = (time.second & 0x0f) + ((time.second / 16) * 10);
         time.century = (time.century & 0x0f) + ((time.century / 16) * 10);
     }
-    if (!(status_register_b & 0x02) && (time.hour & 0x80))
-    {
-        time.hour = ((time.hour & 0x7F) + 12) % 24;
-    }
+    // if (!(status_register_b & 0x02) && (time.hour & 0x80))
+    // {
+    //     time.hour = ((time.hour & 0x7F) + 12) % 24;
+    // }
 
     if (CMOS_get_century_register() != 0)
     {

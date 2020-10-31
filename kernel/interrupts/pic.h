@@ -10,6 +10,6 @@
 #define ICW1_ICW4 0x01
 #define ICW1_8086 0x01
 
-void remap_pic();
+void PIC_remap();
 
 #endif
