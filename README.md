@@ -2,7 +2,7 @@
 
 Name undecided. Let me know what you think.
 
-An operating system I am building mostly to get experience for low level development and to try something new other then web development. If I don't continue active development I atleast want to port Doom or similar game. 
+An operating system I am building mostly to get experience for low level development and to try something new other then web development. If I don't continue active development I atleast want to port Doom or a similar game. 
 
 ### Contributions
 All contributions are welcomed so long as they come with a detailed descriptions of what they do as I am still learning lots. Any pull request I do not accept I will provide a description why.

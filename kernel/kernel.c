@@ -16,6 +16,7 @@
 #include <kernel/time/rtc.h>
 #include <kernel/time/pit.h>
 #include <kernel/io.h>
+#include <kernel/pci/pci.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -94,19 +95,20 @@ void kernel_main(void)
 
     printf("%s\n", splash);
 
+    PCI_install();
 
-    while(1)
-    {
-        IRQ_disable();
-        uint16_t position = TTY_get_cursor_position();
-        TTY_set_cursor_position((VGA_WIDTH*VGA_HEIGHT) - (VGA_WIDTH*3));
-        printf("                                                                                ");
-        TTY_set_cursor_position(TTY_get_cursor_position() - VGA_WIDTH);
-        ctime(NULL);
-        TTY_set_cursor_position(position);
-        IRQ_enable();
-        TIMER_sleep_milliseconds(1000);
-    }
+    // while(1)
+    // {
+    //     IRQ_disable();
+    //     uint16_t position = TTY_get_cursor_position();
+    //     TTY_set_cursor_position((VGA_WIDTH*VGA_HEIGHT) - (VGA_WIDTH*3));
+    //     printf("                                                                                ");
+    //     TTY_set_cursor_position(TTY_get_cursor_position() - VGA_WIDTH);
+    //     ctime(NULL);
+    //     TTY_set_cursor_position(position);
+    //     IRQ_enable();
+    //     TIMER_sleep_milliseconds(1000);
+    // }
     // outw(0x604, 0x2000);
 
 

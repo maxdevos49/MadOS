@@ -60,12 +60,27 @@
 #define PCI_io_always_1 0x00000001
 
 //forward declare structs because they are long as f*ck
+struct PCI_Header_description;
 struct PCI_standard_header;
 struct PCI_to_PCI_bridge_header;
 struct PCI_to_cardbus_header;
 
-uint16_t PCI_config_readw(uint16_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+void PCI_install();
+
+uint32_t PCI_config_read_dw(uint16_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+void PCI_config_write_dw(uint16_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint32_t data);
+void PCI_check_device(uint8_t bus, uint8_t device);
 uint16_t PCI_check_vendor(uint8_t bus, uint8_t slot);
+struct PCI_Header_description
+{
+    uint64_t address;
+    uint8_t type;
+    uint8_t bus;
+    uint8_t device;
+    uint8_t class_code;
+    // uint8_t sub_code;
+    // uint8_t prog_if;
+};
 
 struct PCI_standard_header
 {
@@ -267,7 +282,7 @@ struct PCI_to_cardbus_header
     uint32_t io_limit_0; // 0x30
 
     //reg 0x0d
-    uint32_t io_limit_1; //0x34
+    uint32_t io_base_address_1; //0x34
 
     //reg 0x0e
     uint32_t io_limit_1; //0x38
@@ -275,7 +290,7 @@ struct PCI_to_cardbus_header
     //reg 0x0f
     uint16_t bridge_control; //os 0x3c
     uint8_t interrupt_pin;   //os 0x3e
-    uint8_t interrupt_pin;   //os 0x3f
+    uint8_t interrupt_line;  //os 0x3f
 
     //reg 0x10
     uint16_t subsystem_vendor_id; //0x40
@@ -285,8 +300,8 @@ struct PCI_to_cardbus_header
     uint32_t legacy_16_bit_card_base_address; // 0x44
 } __attribute__((__packed__));
 
-//todo probably dont make this static as it will make code size grow verrrryyy fast
-static const char* PCI_class_codes[] = {
+//todo probably dont make this static and define in .cpp file as it will make code size grow verrrryyy fast
+static const char *PCI_class_codes[] = {
     "Unclassified",
     "Mass Storage Controller",
     "Network Controller",
@@ -310,8 +325,6 @@ static const char* PCI_class_codes[] = {
     "Reserved",
     "Co-Processor",
     "Reserved",
-    "Unassigned Class"
-};
-
+    "Unassigned Class"};
 
 #endif

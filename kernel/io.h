@@ -47,7 +47,7 @@ static inline uint32_t inl(uint16_t port)
 {
     uint32_t return_val;
 
-    asm volatile("inw %1, %0"
+    asm volatile("inl %1, %0"
                  : "=a"(return_val)
                  : "Nd"(port));
 

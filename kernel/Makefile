@@ -33,6 +33,7 @@ KERNEL_OBJS=\
 	time/cmos.o\
 	time/rtc.o\
 	time/pit.o\
+	pci/config.o\
 
 # Ensures if we make a change to the library it gets relinked to the kernel 
 # without making a random change to the kernel. Only needed for statically linked 
