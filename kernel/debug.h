@@ -11,6 +11,6 @@ struct stack_frame
     uint32_t eip;
 };
 
-void trace_stack_trace(uint32_t);
+void strace(uint32_t max_frames);
 
 #endif

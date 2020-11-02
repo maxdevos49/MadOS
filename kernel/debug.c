@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-void trace_stack_trace(uint32_t max_frames)
+void strace(uint32_t max_frames)
 {
 
     struct stack_frame *stk;

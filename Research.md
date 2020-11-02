@@ -26,6 +26,10 @@ Notes, examples, and links of any useful resources I find interesting or useful.
     - [Passing Arguments to C Functions from ASM](#passing-arguments-to-c-functions-from-asm)
   - [C and Hardware Interop](#c-and-hardware-interop)
     - [Memory Mapped Devices](#memory-mapped-devices)
+  - [# PCI](#h1-idpci-5700pcih1)
+    - [PCI Configuration Space](#pci-configuration-space)
+    - [Configuration Space Access Mechanism #1](#configuration-space-access-mechanism-1)
+      - [CONFIG_ADDRESS bit table](#config_address-bit-table)
 
 <!-- /code_chunk_output -->
 
@@ -271,3 +275,62 @@ C and Hardware Interop
 
 ### Memory Mapped Devices
 Devices that are mapped to memory are mapped to your ram instead if using ports or use both. For complicated MMD interfaces using a struct can be a useful way to avoid errors and also make your code more readable.
+
+# PCI
+---
+__Peripheral Component Interconnect__
+
+The PCI bus was defined to establish a high performance and low cost local bus that would remain through several generations of products.The PCI bus component and add-in card interface is processor independent, enabling an efficient transition to future processors, as well as use with multiple processor architectures. A single PCI bus can drive a maximum of 10 loads. (Remember when counting the number of loads on the bus, a connector counts as one load and the PCI device counts as another, and sometimes two.)
+
+### PCI Configuration Space
+The PCI specification provides for totally software driven initialization and configuration of each device (or target) on the PCI Bus via a separate Configuration Address Space. All PCI devices, except host bus bridges, are required to provide 256 bytes of configuration registers for this purpose.
+
+Configuration read/write cycles are used to access the Configuration Space of each target device. A target is selected during a configuration access when its *IDSEL* signal is asserted. The *IDSEL* acts as the classic "chip select" signal. During the address phase of the configuration cycle, the processor can address one of 64 32-bit registers within the configuration space by placing the required register number on address lines 2 and 7(AD[7..2]) and the byte enable lines.
+
+PCI devices are inherently little-endian, meaning all multiple byte fields have the least significant values at the lower addresses. This requires a big-endian processor, such as a Power PC, to perform the proper byte swapping of data read from or written to the PCI device, including any accesses to the Configuration Address Space.
+
+Systems must provide a mechanism that allows access to the PCI configuration space, as most CPUs do not have any such mechanism. This task is usually performed by the Host to PCI Bridge (Host Bridge). Two distinct mechanisms are defined to allow the software to generate the required configuration accesses. Configuration mechanism #1 is the preferred method, while mechanism #2 is provided for backwards compatibility. Only configuration mechanism #1 will be described here, as it the only access mechanism that will be used on the future.
+
+### Configuration Space Access Mechanism #1 
+Two 32-bit I/O location are used the first location (0xCF8) is named CONFIG_ADDRESS, and the second (0xCFC) is called CONFIG_DATA. CONFIG_ADDRESS specifies the configuration address that is required to be accesses, while accesses to CONFIG_DATA will actually generate the configuration access and will transfer the data to or from the CONFIG_DATA register.
+
+| Name | I/O Address |
+|------|-------------|
+| CONFIG_ADDRESS | 0xcf8 |
+| CONFIG_DATA | 0xcfc |
+
+The CONFIG_ADDRESS is a 32-bit register with the format shown in the following figure. Bit 31 is an enable flag for determining when accesses to CONFIG_DATA should be translated to the configuration cycles. Bits 23 through 16 allow the configuration software to choose a specific PCI bus in the system. Bits 15 through 11 select the specific device on the PCI Bus. Bits 10 though 8 choose a specific function in a device(if the device supports multiple functions).
+
+The least significant byte selects the offset into the 256-byte configuration space available through this method. Since all reads and writes must be both 32-bits and aligned to work on all implementations, the two lowest buts of CONFIG_ADDRESS must be always zero, with the remaining siz bits allowing you to choose each of the 64 32-bits words. If you don't need all 32 bits, you'll have to perform the unaligned access in software by aligning the address, followed by masking and shifting the answer.
+
+#### CONFIG_ADDRESS bit table
+| bit # | Use |
+|-------|-----|
+| 31 | Enable Bit |
+| 30-24 | Reserved |
+| 23-16 | Bus Number |
+| 15-11 | Device Number | 
+| 10-8 | Function Number |
+| 7-0 | Register Offset |
+
+Example:
+```c
+//99% I screwed below up but I think its close
+// Enable on
+// Reserved bits
+// BUS #7
+// Device #1
+// Function #2
+// Register Offset 5
+uint32_t config_selector = 0b1000000000011100011000000101;
+uint32_t config_selector = 0x0801C605;
+```
+
+C Example:
+```c
+
+uint16_t pciConfigReadWord(uint16_t bus, uint8_t slot, uint8_t func, uint8_t offset)
+{
+  uint32_t address;
+  uint32_t lbus = (uint32_t)bus
+}

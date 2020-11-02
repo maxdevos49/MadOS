@@ -1,4 +1,4 @@
-# MadOS | CassandraOS | CassiopeiaOS
+# MadOS | CassandraOS | CassiopeiaOS | devOS
 
 Name undecided. Let me know what you think.
 

@@ -1,4 +1,4 @@
-#include <kernel/heap.h>
+#include <kernel/heap/heap.h>
 
 void *k_malloc(size_t size)
 {

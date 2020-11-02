@@ -3,8 +3,8 @@
 
 #include <kernel/debug.h>
 
-#include <kernel/memory.h>
-#include <kernel/heap.h>
+#include <kernel/heap/memory.h>
+#include <kernel/heap/heap.h>
 
 #include <kernel/interrupts/idt.h>
 #include <kernel/interrupts/isr.h>
@@ -97,10 +97,14 @@ void kernel_main(void)
 
     while(1)
     {
-        TTY_set_cursor_position(TTY_get_cursor_position() - VGA_WIDTH);
+        IRQ_disable();
+        uint16_t position = TTY_get_cursor_position();
+        TTY_set_cursor_position((VGA_WIDTH*VGA_HEIGHT) - (VGA_WIDTH*3));
         printf("                                                                                ");
         TTY_set_cursor_position(TTY_get_cursor_position() - VGA_WIDTH);
         ctime(NULL);
+        TTY_set_cursor_position(position);
+        IRQ_enable();
         TIMER_sleep_milliseconds(1000);
     }
     // outw(0x604, 0x2000);

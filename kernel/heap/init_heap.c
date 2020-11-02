@@ -1,4 +1,4 @@
-#include <kernel/heap.h>
+#include <kernel/heap/heap.h>
 #include <stdio.h>
 #include <stdlib.h>
 

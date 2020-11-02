@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #if defined(__is_libk)
-#include <kernel/heap.h>
+#include <kernel/heap/heap.h>
 #endif
 
 void *realloc(void *ptr, size_t size)

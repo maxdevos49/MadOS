@@ -1,4 +1,4 @@
-#include <kernel/heap.h>
+#include <kernel/heap/heap.h>
 #include <string.h>
 
 void *k_calloc(size_t num, size_t size)

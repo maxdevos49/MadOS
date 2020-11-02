@@ -7,4 +7,4 @@
 6. ACPI
 7. HPET
 8. APIC
-9.  IOAPIC`
+9. IOAPIC

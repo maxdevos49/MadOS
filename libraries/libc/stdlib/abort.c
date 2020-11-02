@@ -14,7 +14,7 @@ __attribute__((__noreturn__)) void abort(const char * msg)
     // TTY_set_cursor_position
     TTY_set_theme(VGA_COLOR_RED, VGA_COLOR_WHITE);
     printf("Kernel Panic: %s\n\n System will now Halt\n\n", msg);
-    trace_stack_trace(10);
+    strace(10);
     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
 
 #else
