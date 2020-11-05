@@ -26,10 +26,14 @@ Notes, examples, and links of any useful resources I find interesting or useful.
     - [Passing Arguments to C Functions from ASM](#passing-arguments-to-c-functions-from-asm)
   - [C and Hardware Interop](#c-and-hardware-interop)
     - [Memory Mapped Devices](#memory-mapped-devices)
-  - [# PCI](#h1-idpci-5700pcih1)
+  - [# PCI](#h1-idpci-1190pcih1)
     - [PCI Configuration Space](#pci-configuration-space)
     - [Configuration Space Access Mechanism #1](#configuration-space-access-mechanism-1)
       - [CONFIG_ADDRESS bit table](#config_address-bit-table)
+      - [Registers](#registers)
+        - [vendorID](#vendorid)
+        - [deviceID](#deviceid)
+        - [class](#class)
 
 <!-- /code_chunk_output -->
 
@@ -326,11 +330,14 @@ uint32_t config_selector = 0b1000000000011100011000000101;
 uint32_t config_selector = 0x0801C605;
 ```
 
-C Example:
-```c
+#### Registers
+Description of some common registers
 
-uint16_t pciConfigReadWord(uint16_t bus, uint8_t slot, uint8_t func, uint8_t offset)
-{
-  uint32_t address;
-  uint32_t lbus = (uint32_t)bus
-}
+##### vendorID
+16-bit register identifies a hardware manufacturer. For instance, every intel device is marked with the same vendor number, 0x8086. There is a global registry of such numbers, maintained by the PCI Special Interest Group, and manufacturers must apply to have a unique number assigned to them
+
+##### deviceID
+16-bit register, selected by the manufacturer; no official registration is required for the device ID. This ID is usually paired with the vendorID to make a unique 32-bit identifier for a hardware device. Typically drivers refer to the dw id to identify its device. You can find what value to look for in the hardware manual for a target device.
+
+##### class
+Every peripheral device belongs to a class. The class register is a 16-bit value where the top 8 bits identify the "base class"(or group). For example "ethernet" and "token ring" are two classes belong to the network group. 
