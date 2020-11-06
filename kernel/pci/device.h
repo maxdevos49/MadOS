@@ -9,7 +9,7 @@ struct pci_dev
 {
     // struct list_head bus_list;//TODO whats is this?
     struct pci_bus *bus;
-    struct pci_bus *subordinate; //Is this needed?
+    struct pci_bus *subordinate;
     uint8_t slot;
     uint32_t func;
     uint16_t vendor_id;
