@@ -95,7 +95,7 @@ void kernel_main(void)
 
     printf("%s\n", splash);
 
-    // PCI_install();
+    PCI_configure();
 
     // while(1)
     // {

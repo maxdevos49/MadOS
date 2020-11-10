@@ -1,8 +1,10 @@
 #include <string.h>
 
+#include <kernel/interrupts/irq.h>
+
 void *memmove(void *dst_ptr, const void *src_ptr, size_t size)
 {
-
+    IRQ_disable();//TODO why do interrupts screw with this?????
     //Must cast void pointers
     unsigned char *dst = (unsigned char *)dst_ptr;
     const unsigned char *src = (const unsigned char *)src_ptr;
@@ -22,6 +24,9 @@ void *memmove(void *dst_ptr, const void *src_ptr, size_t size)
             dst[i - 1] = src[i - 1];
         }
     }
+
+    IRQ_enable();
+
 
     return dst_ptr;
 }
