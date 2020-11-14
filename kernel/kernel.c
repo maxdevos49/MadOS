@@ -16,7 +16,7 @@
 #include <kernel/time/rtc.h>
 #include <kernel/time/pit.h>
 #include <kernel/io.h>
-#include <kernel/pci/pci.h>
+#include <kernel/pci/core.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -96,6 +96,8 @@ void kernel_main(void)
     printf("%s\n", splash);
 
     PCI_configure();
+
+    printf("Divide by zero. %d\n", 1/0);
 
     // while(1)
     // {

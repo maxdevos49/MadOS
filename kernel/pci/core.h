@@ -15,12 +15,6 @@ enum pci_io
     CONFIG_DATA_PORT = 0xCFC
 };
 
-enum pci_standard_header_registers
-{
-    device_id = 0x00,
-    vendor_id = 0x02,
-};
-
 void PCI_configure();
 
 int PCI_register_driver(struct pci_driver *driver);

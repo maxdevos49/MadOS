@@ -37,7 +37,8 @@
     }
 
 static struct pci_bus *root_bus;
-static int bus;
+static int buss;
+static int devicee;
 
 static const char *PCI_class_codes[] = {
     "Unclassified",
@@ -65,10 +66,7 @@ static const char *PCI_class_codes[] = {
     "Reserved",
     "Unassigned Class"};
 
-static const char *PCI_header_type[] = {
-    "PCI Standard Header",
-    "PCI to PCI bridge Header"
-    "PCI to Cardbus Header"};
+static void PCI_enumerate_bus(struct pci_bus *bus);
 
 /**
  * Returns non zero value if vendor is not valid
@@ -77,44 +75,119 @@ static inline int PCI_check_vendor(struct pci_bus *bus, int slot, int function)
 {
     uint16_t *val = NULL;
 
-    PCI_read(bus->number, slot, function, 0x02, sizeof(short), (uint32_t *)val);
+    PCI_read(bus->number, slot, function, VENDOR_ID, sizeof(short), (uint32_t *)val);
 
     return (*val == 0xffff);
 }
 
-/**
- * Returns non zero value if not multifunction
- * */
-static inline int PCI_check_multifunction(struct pci_bus *bus, int slot)
+static uint32_t PCI_check_bar_size(struct pci_dev *dev, int bar_num)
 {
-    uint8_t *val = NULL;
-    PCI_read(bus->number, slot, 0, 0x0d, sizeof(char), (uint32_t *)val);
+    uint32_t bar;
+    uint32_t size;
 
-    return (*val & 0x80) == 0;
+    //Get old value
+    PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (bar_num * 4)), &bar), (BAR0 + (bar_num * 4)));
+    //write ones
+    PCI_PROBE_ASSERT(PCI_write_config_dword(dev, (BAR0 + (bar_num * 4)), 0xfffffff0 | bar), (BAR0 + (bar_num * 4)));
+    //get size
+    PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (bar_num * 4)), &size), (BAR0 + (bar_num * 4)));
+    //restore value
+    PCI_PROBE_ASSERT(PCI_write_config_dword(dev, (BAR0 + (bar_num * 4)), bar), (BAR0 + (bar_num * 4)));
+
+    return (~(size & 0xfffffff0)) + 1;//TODO enum mask
+    // return size;
+}
+
+static void PCI_describe_bar(struct pci_dev *dev)
+{
+    TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_WHITE);
+    if (dev->header_type == 0)
+    { //5 bars
+
+        uint32_t bar;
+        for (int i = 0; i < 6; i++)
+        {
+            PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (i * 4)), &bar), (BAR0 * (i * 4)));
+
+            if ((bar & 0x00000001) == 0)//TODO mask enum
+            {
+                //Memory
+                if (((bar & 0xfffffff0)) == 0)
+                    continue;
+
+                printf("\tBar %d: Memory Base: %x, Prefetchable: %x, Type: %x, Size: %x\n", i, (bar & 0xFFFFFFF0), (bar & 0x00000008) != 0, (bar & 0x00000006), PCI_check_bar_size(dev, i));
+            }
+            else
+            {
+                if (((bar & 0xfffffffc)) == 0)
+                    continue;
+
+                //I/O Space
+                printf("\tBar %d: I/O Base: %x\n", i, (bar & 0xfffffffc) >> 2);
+            }
+        }
+    }
+    else if (dev->header_type == 1)
+    {
+        uint32_t bar;
+
+        //2 bars
+        for (int i = 0; i < 3; i++)
+        {
+            PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (i * 4)), &bar), (BAR0 * (i * 4)));
+
+            if ((bar & 0x00000001) == 0)
+            {
+                //Memory
+                if (((bar & 0xfffffff0)) == 0)
+                    continue;
+
+                printf("\tBar %d: Memory Base: %x, Prefetchable: %x, Type: %x, Size: %x\n", i, (bar & 0xfffffff0), (bar & 0x00000008) != 0, (bar & 0x00000006),PCI_check_bar_size(dev, i));
+            }
+            else
+            {
+                if (((bar & 0xfffffffc)) == 0)
+                    continue;
+
+                //I/O Space
+                printf("\tBar %d: I/O Base: %x\n", i, (bar & 0xfffffffc) >> 2);
+            }
+        }
+    }
+    TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
 }
 
 static void PCI_describe_device(struct pci_dev *dev)
 {
     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_LIGHT_BLUE);
-    printf("B: %d, S: %d, F: %d, Vend: %x, Dev: %x, Class: %s, SC: %x\n", dev->bus->number, dev->slot, dev->func, dev->vendor_id, dev->device_id, PCI_class_codes[dev->class_code], dev->subclass_code);
+    printf("B: %d, S: %d, F: %d, V: %x, D: %x, HT: %x, C: %s, SC: %x\n", dev->bus->number, dev->slot, dev->func, dev->vendor_id, dev->device_id, dev->header_type, PCI_class_codes[dev->class_code], dev->subclass_code);
     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_WHITE);
-    // TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_LIGHT_BLUE);
-    // printf("Bus #: %d, Slot #: %d, Function: %d\n", dev->bus->number, dev->slot, dev->func);
-    // TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_WHITE);
-
-
-    // printf("\tDev ID: %x, Vend ID: %x, Header: %s, Multi Func: %x\n", dev->device_id, dev->vendor_id, PCI_header_type[dev->header_type], dev->multi_function); //Why is device_id == 0x0000
-    // printf("\tSubsystem Device ID: %x, Subsystem Vendor ID: %x, Revision ID: %x\n", dev->subsystem_device_id, dev->subsystem_vendor_id, dev->revision_id); //Why is device_id == 0x0000
-    // printf("\tClass: %s, Sub Class: %x, Prog IF %x, Bist Capable: %x\n", PCI_class_codes[dev->class_code], dev->subclass_code, dev->prog_if, dev->bist_capable);
-    // printf("\tLatency Timer: %x, Cache Line Size: %x, Int Line: %x, Int Pin: %x\n", dev->latency_timer,dev->cache_line_size, dev->interrupt_line, dev->interrupt_pin);
-    // TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
 }
 
+static struct pci_bus *PCI_probe_bus(struct pci_dev *bus_dev)
+{
+    struct pci_bus *bus = malloc(sizeof(struct pci_bus));
+
+    INIT_LIST_HEAD(&bus->node);
+    INIT_LIST_HEAD(&bus->children);
+    INIT_LIST_HEAD(&bus->devices);
+    INIT_LIST_HEAD(&bus->slots);
+
+    list_add(&bus->node, &bus_dev->bus->children);
+
+    bus->parent = bus_dev->bus;
+    bus->self = bus_dev;
+
+    //TODO enum bus device
+    PCI_PROBE_ASSERT(PCI_read_config_byte(bus_dev, 0x1b, &bus->number), 0x1b);
+    return bus;
+}
 /**
  * Probes information about a PCI device
  * */
 static struct pci_dev *PCI_probe_device(struct pci_bus *bus, int slot, int function)
 {
+    devicee++;
     struct pci_dev *dev = malloc(sizeof(struct pci_dev));
 
     INIT_LIST_HEAD(&dev->node);
@@ -124,39 +197,54 @@ static struct pci_dev *PCI_probe_device(struct pci_bus *bus, int slot, int funct
     dev->slot = slot;
     dev->func = function;
 
-    PCI_PROBE_ASSERT(PCI_read_config_word(dev, 0x00, &dev->device_id), 0x00);
-    PCI_PROBE_ASSERT(PCI_read_config_word(dev, 0x02, &dev->vendor_id), 0x02);
+    PCI_PROBE_ASSERT(PCI_read_config_word(dev, DEVICE_ID, &dev->device_id), DEVICE_ID);
+    PCI_PROBE_ASSERT(PCI_read_config_word(dev, VENDOR_ID, &dev->vendor_id), VENDOR_ID);
 
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x08, &dev->class_code), 0x08);
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x09, &dev->subclass_code), 0x09);
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x0a, &dev->prog_if), 0x0a);
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x0b, &dev->revision_id), 0x0b);
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, CLASS_CODE, &dev->class_code), CLASS_CODE);
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, SUB_CLASS_CODE, &dev->subclass_code), SUB_CLASS_CODE);
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, PROG_IF, &dev->prog_if), PROG_IF);
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, REVISION_ID, &dev->revision_id), REVISION_ID);
 
-    PCI_PROBE_ASSERT(PCI_read_config_word(dev, 0x2c, &dev->subsystem_device_id), 0x2c);
-    PCI_PROBE_ASSERT(PCI_read_config_word(dev, 0x2e, &dev->subsystem_vendor_id), 0x2e);
+    PCI_PROBE_ASSERT(PCI_read_config_word(dev, SUBSYSTEM_DEVICE_ID, &dev->subsystem_device_id), SUBSYSTEM_DEVICE_ID);
+    PCI_PROBE_ASSERT(PCI_read_config_word(dev, SUBSYSTEM_VENDOR_ID, &dev->subsystem_vendor_id), SUBSYSTEM_VENDOR_ID);
 
-    uint8_t header_type;
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x0c, &header_type), 0x0c);
-    dev->header_type = (header_type & 0x03);
-    dev->multi_function = (header_type & 0x80) >> 7;
+    uint8_t header_reg;
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, HEADER, &header_reg), HEADER);
+    dev->header_type = (header_reg & 0x0f);
+    dev->multi_function = (header_reg & 0x80) >> 7;
 
     uint8_t bist;
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x0c, &bist), 0x0c);
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, BIST, &bist), BIST);
     dev->bist_capable = (bist & 0x80) >> 7;
 
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x0e, &dev->latency_timer), 0x0e);
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x0f, &dev->cache_line_size), 0x0f);
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, LATENCY_TIMER, &dev->latency_timer), LATENCY_TIMER);
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, CACHE_LINE_SIZE, &dev->cache_line_size), CACHE_LINE_SIZE);
 
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x3e, &dev->interrupt_pin), 0x3e);
-    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, 0x3f, &dev->interrupt_line), 0x3f);
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, INTERRUPT_PIN, &dev->interrupt_pin), INTERRUPT_PIN);
+    PCI_PROBE_ASSERT(PCI_read_config_byte(dev, INTERRUPT_LINE, &dev->interrupt_line), INTERRUPT_LINE);
 
     PCI_describe_device(dev);
+    PCI_describe_bar(dev);
+
+    //Is this a  PCI-to-PCI bridge?
+    if (dev->class_code == 0x06 && dev->subclass_code == 0x04)
+    {
+        struct pci_bus *new_bus = PCI_probe_bus(dev);
+        if (new_bus->number != dev->bus->number)
+        {
+            buss++;
+            PCI_enumerate_bus(new_bus);
+        }else{
+            free(new_bus);
+        }
+    }
 
     return dev;
 }
 
 static void PCI_enumerate_bus(struct pci_bus *bus)
 {
+    printf("Bus #: %x\n", bus->number);
 
     for (int slot = 0; slot < 32; slot++)
     {
@@ -171,8 +259,6 @@ static void PCI_enumerate_bus(struct pci_bus *bus)
         if (!dev->multi_function)
             continue;
 
-        //TODO is a device a bus?
-
         for (int function = 1; function < 8; function++)
         {
             //Not all functions are required to be implemented
@@ -181,39 +267,36 @@ static void PCI_enumerate_bus(struct pci_bus *bus)
 
             //populate new device info
             dev = PCI_probe_device(bus, slot, function);
-
-            list_add(&bus->devices, &dev->node);
-
-            //     //TODO is a device a bus?
         }
     }
 }
 
 void PCI_configure()
 {
-    bus = 0;
+    buss = 0;
+    devicee = 0;
     root_bus = malloc(sizeof(struct pci_bus));
 
-    root_bus->number = bus;
+    root_bus->number = buss;
     root_bus->parent = NULL;
 
     INIT_LIST_HEAD(&root_bus->node);
     INIT_LIST_HEAD(&root_bus->children);
     INIT_LIST_HEAD(&root_bus->devices);
 
-    //TODO get init bus device or is this NULL?
     PCI_enumerate_bus(root_bus);
+
+    printf("\n");
+    printf("Total Bus Count: %d, Total Device Count: %d\n", buss, devicee);
 }
 
 //x86 specific
 int PCI_read(uint16_t bus, uint8_t slot, uint8_t func, uint8_t offset, size_t size, uint32_t *val)
 {
-    uint32_t address;
     uint32_t l_bus = ((uint32_t)bus) << 16;
     uint32_t l_slot = ((uint32_t)slot) << 11;
     uint32_t l_func = ((uint32_t)func) << 8;
-
-    address = (uint32_t)(l_bus | l_slot | l_func | ((uint32_t)(offset & 0xfc)) | ((uint32_t)0x80000000));
+    uint32_t address = (uint32_t)(l_bus | l_slot | l_func | ((uint32_t)(offset & 0xfc)) | ((uint32_t)0x80000000));
 
     outl(CONFIG_ADDRESS_PORT, address);
 
@@ -280,44 +363,75 @@ int PCI_read(uint16_t bus, uint8_t slot, uint8_t func, uint8_t offset, size_t si
 //x86 specific
 int PCI_write(uint16_t bus, uint8_t slot, uint8_t func, uint8_t offset, size_t size, uint32_t val)
 {
-    uint32_t address;
-    uint32_t l_bus = (uint32_t)bus << 16;
-    uint32_t l_slot = (uint32_t)slot << 11;
-    uint32_t l_func = (uint32_t)func << 8;
+    uint32_t bitmask = 0xffffffff;
+    uint8_t shift_offset = 0;
+    uint32_t l_bus = ((uint32_t)bus) << 16;
+    uint32_t l_slot = ((uint32_t)slot) << 11;
+    uint32_t l_func = ((uint32_t)func) << 8;
 
-    address = (uint32_t)(l_bus | l_slot | l_func | (offset & 0xfc) | ((uint32_t)0x80000000));
+    uint32_t address = (uint32_t)(l_bus | l_slot | l_func | ((uint32_t)(offset & 0xfc)) | ((uint32_t)0x80000000));
 
-    if (size == 1)
+    if (size == sizeof(char))
     {
-        uint32_t *old_val = NULL;
-
-        PCI_read(bus, slot, func, offset, sizeof(int), old_val);
-        *old_val &= 0xffffff00;
-        val |= *old_val; //Dont clobber old values we are not targeting
-
-        outl(CONFIG_ADDRESS_PORT, address);
-        outl(CONFIG_DATA_PORT, val);
+        switch (offset % 4)
+        {
+        case 0: //0x00
+            bitmask = 0x00ffffff;
+            shift_offset = 24;
+            break;
+        case 1: //0x01
+            bitmask = 0xff00ffff;
+            shift_offset = 16;
+            break;
+        case 2: //0x02
+            bitmask = 0xffff00ff;
+            shift_offset = 8;
+            break;
+        case 3: //0x03
+            bitmask = 0xffffff00;
+            shift_offset = 0;
+            break;
+        default:
+            //Should never happen but incase it does we can report it
+            return 1;
+            break;
+        }
     }
-    else if (size == 2)
+    else if (size == sizeof(short))
     {
-        uint32_t *old_val = NULL;
-
-        PCI_read(bus, slot, func, offset, sizeof(int), old_val);
-        *old_val &= 0xffff0000;
-        val |= *old_val; //Dont clobber old values we are not targeting
-
-        outl(CONFIG_ADDRESS_PORT, address);
-        outl(CONFIG_DATA_PORT, val);
+        switch (offset % 4)
+        {
+        case 0: //0x00
+            bitmask = 0x0000ffff;
+            shift_offset = 16;
+            break;
+        case 2: //0x02
+            bitmask = 0xffff0000;
+            shift_offset = 0;
+            break;
+        default:
+            return 2;
+            break;
+        }
     }
-    else if (size == 3)
+    else if (size == sizeof(int))
     {
-        outl(CONFIG_ADDRESS_PORT, address);
-        outl(CONFIG_DATA_PORT, val);
+        bitmask = 0x0000000;
+        shift_offset = 0;
     }
     else
     {
-        return 0;
+        return 1;
     }
+
+    uint32_t *old_val = NULL;
+    PCI_PROBE_ASSERT(PCI_read(bus, slot, func, offset, sizeof(int), old_val), offset);
+
+    *old_val &= bitmask;
+    *old_val |= (val << shift_offset);
+
+    outl(CONFIG_ADDRESS_PORT, address);
+    outl(CONFIG_DATA_PORT, *old_val);
 
     return 0;
 }
