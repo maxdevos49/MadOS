@@ -76,7 +76,7 @@ void kernel_main(void)
 {
     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
     TTY_init();
-    
+
     printf("Booting Kernel\n");
 
     init_memory((struct mem_map_entry *)0x5000);
@@ -96,22 +96,4 @@ void kernel_main(void)
     printf("%s\n", splash);
 
     PCI_configure();
-
-    printf("Divide by zero. %d\n", 1/0);
-
-    // while(1)
-    // {
-    //     IRQ_disable();
-    //     uint16_t position = TTY_get_cursor_position();
-    //     TTY_set_cursor_position((VGA_WIDTH*VGA_HEIGHT) - (VGA_WIDTH*3));
-    //     printf("                                                                                ");
-    //     TTY_set_cursor_position(TTY_get_cursor_position() - VGA_WIDTH);
-    //     ctime(NULL);
-    //     TTY_set_cursor_position(position);
-    //     IRQ_enable();
-    //     TIMER_sleep_milliseconds(1000);
-    // }
-    // outw(0x604, 0x2000);
-
-
 }

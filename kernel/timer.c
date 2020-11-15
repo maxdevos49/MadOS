@@ -21,9 +21,7 @@ static void rtc_handler()
     rtc_ticks++;
 
     if (rtc_ticks % 64 == 0)
-    {
         epoch_time++;
-    }
 
     RTC_acknowledge_irq8();
 }

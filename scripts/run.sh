@@ -5,4 +5,8 @@ set -e
 
 . ./scripts/build.sh
 
-qemu-system-x86_64 -drive format=raw,media=disk,file=MadOS.img 
+qemu-system-x86_64 -drive format=raw,media=disk,file=MadOS.img -device ahci,id=ahci 
+
+
+
+# -drive format=raw,media=disk,file=MadOS.img 

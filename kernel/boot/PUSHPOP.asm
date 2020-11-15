@@ -8,7 +8,6 @@
 
     push rsi
     push rdi
-    push rsp
 
     push r8
     push r9
@@ -30,7 +29,6 @@
     pop r9
     pop r8
 
-    pop rsp
     pop rdi
     pop rsi
 

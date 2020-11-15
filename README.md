@@ -5,7 +5,7 @@ Name undecided. Let me know what you think.
 An operating system I am building mostly to get experience for low level development and to try something new other then web development. If I don't continue active development I atleast want to port Doom or a similar game. 
 
 ### Contributions
-All contributions are welcomed so long as they come with a detailed descriptions of what they do as I am still learning lots.
+All contributions are welcomed so long as they come with a detailed descriptions of what they do as I am still learning.
 
 ### Current Goals:
   - [ ] Working Filesystem
@@ -17,13 +17,13 @@ All contributions are welcomed so long as they come with a detailed descriptions
   - [ ] Play Original Doom for the first time
 
 ### Dependencies:
-I sourced everything from `Homebrew` and edited the formulas that did not have the initial desired configurations
+I sourced everything from https://brew.sh and edited the formulas that did not have the initial desired configurations
 
-nasm:
+###### nasm:
 ```sh
 % brew install nasm
 ```
-binutils:
+##### binutils:
 ```sh
 % export EDITOR=nano
 % brew edit x86_64-elf-binutils
@@ -31,17 +31,17 @@ binutils:
 % brew install --build-from-source x86_64-elf-binutils
 ```
 
-gcc:
+##### gcc:
 ```sh
 % brew install x86_64-elf-gcc
 ```
 
-### Compiling
+### Compile
 ```sh
 % ./scripts/compile.sh
 ```
 
-### Running in Qemu
+### Compile and run in Qemu
 ```sh
 % ./scripts/run.sh
 ```

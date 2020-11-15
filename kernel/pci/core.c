@@ -37,8 +37,6 @@
     }
 
 static struct pci_bus *root_bus;
-static int buss;
-static int devicee;
 
 static const char *PCI_class_codes[] = {
     "Unclassified",
@@ -94,7 +92,7 @@ static uint32_t PCI_check_bar_size(struct pci_dev *dev, int bar_num)
     //restore value
     PCI_PROBE_ASSERT(PCI_write_config_dword(dev, (BAR0 + (bar_num * 4)), bar), (BAR0 + (bar_num * 4)));
 
-    return (~(size & 0xfffffff0)) + 1;//TODO enum mask
+    return (~(size & 0xfffffff0)) + 1; //TODO enum mask
     // return size;
 }
 
@@ -109,7 +107,7 @@ static void PCI_describe_bar(struct pci_dev *dev)
         {
             PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (i * 4)), &bar), (BAR0 * (i * 4)));
 
-            if ((bar & 0x00000001) == 0)//TODO mask enum
+            if ((bar & 0x00000001) == 0) //TODO mask enum
             {
                 //Memory
                 if (((bar & 0xfffffff0)) == 0)
@@ -142,7 +140,7 @@ static void PCI_describe_bar(struct pci_dev *dev)
                 if (((bar & 0xfffffff0)) == 0)
                     continue;
 
-                printf("\tBar %d: Memory Base: %x, Prefetchable: %x, Type: %x, Size: %x\n", i, (bar & 0xfffffff0), (bar & 0x00000008) != 0, (bar & 0x00000006),PCI_check_bar_size(dev, i));
+                printf("\tBar %d: Memory Base: %x, Prefetchable: %x, Type: %x, Size: %x\n", i, (bar & 0xfffffff0), (bar & 0x00000008) != 0, (bar & 0x00000006), PCI_check_bar_size(dev, i));
             }
             else
             {
@@ -187,11 +185,10 @@ static struct pci_bus *PCI_probe_bus(struct pci_dev *bus_dev)
  * */
 static struct pci_dev *PCI_probe_device(struct pci_bus *bus, int slot, int function)
 {
-    devicee++;
     struct pci_dev *dev = malloc(sizeof(struct pci_dev));
 
     INIT_LIST_HEAD(&dev->node);
-    list_add(&bus->devices, &dev->node);
+    list_add(&dev->node, &bus->devices);
 
     dev->bus = bus;
     dev->slot = slot;
@@ -223,18 +220,16 @@ static struct pci_dev *PCI_probe_device(struct pci_bus *bus, int slot, int funct
     PCI_PROBE_ASSERT(PCI_read_config_byte(dev, INTERRUPT_PIN, &dev->interrupt_pin), INTERRUPT_PIN);
     PCI_PROBE_ASSERT(PCI_read_config_byte(dev, INTERRUPT_LINE, &dev->interrupt_line), INTERRUPT_LINE);
 
-    PCI_describe_device(dev);
-    PCI_describe_bar(dev);
-
     //Is this a  PCI-to-PCI bridge?
     if (dev->class_code == 0x06 && dev->subclass_code == 0x04)
     {
         struct pci_bus *new_bus = PCI_probe_bus(dev);
         if (new_bus->number != dev->bus->number)
         {
-            buss++;
             PCI_enumerate_bus(new_bus);
-        }else{
+        }
+        else
+        {
             free(new_bus);
         }
     }
@@ -244,7 +239,6 @@ static struct pci_dev *PCI_probe_device(struct pci_bus *bus, int slot, int funct
 
 static void PCI_enumerate_bus(struct pci_bus *bus)
 {
-    printf("Bus #: %x\n", bus->number);
 
     for (int slot = 0; slot < 32; slot++)
     {
@@ -273,11 +267,9 @@ static void PCI_enumerate_bus(struct pci_bus *bus)
 
 void PCI_configure()
 {
-    buss = 0;
-    devicee = 0;
     root_bus = malloc(sizeof(struct pci_bus));
 
-    root_bus->number = buss;
+    root_bus->number = 0;
     root_bus->parent = NULL;
 
     INIT_LIST_HEAD(&root_bus->node);
@@ -286,8 +278,18 @@ void PCI_configure()
 
     PCI_enumerate_bus(root_bus);
 
-    printf("\n");
-    printf("Total Bus Count: %d, Total Device Count: %d\n", buss, devicee);
+    struct list_head *start_node = &root_bus->devices;
+    struct list_head *dev_node = start_node->prev;
+
+    while (dev_node != start_node)
+    {
+        struct pci_dev *dev = list_entry(dev_node, struct pci_dev, node);
+
+        PCI_describe_device(dev);
+        PCI_describe_bar(dev);
+
+        dev_node = dev_node->prev;
+    }
 }
 
 //x86 specific

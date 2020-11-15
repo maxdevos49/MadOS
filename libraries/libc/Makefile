@@ -29,6 +29,7 @@ OBJS=\
 	string/memcpy.o\
 	string/memmove.o\
 	string/memset.o\
+	string/memset64.o\
 	stdlib/abort.o\
 	stdlib/rand.o\
 	stdlib/abs.o\

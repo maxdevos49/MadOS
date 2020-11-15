@@ -20,7 +20,7 @@ void TTY_clear(void)
 
     uint64_t value = 0;
     value += clear_color << 8;
-    value += clear_color << 24;//24 because color data is every other byte
+    value += clear_color << 24; //24 because color data is every other byte
     value += clear_color << 40;
     value += clear_color << 56;
 
@@ -101,15 +101,13 @@ void TTY_write_string(const char *str)
 
 void TTY_scroll()
 {
+    uint64_t *src_ptr = (uint64_t*)VGA_MEMORY;
+    uint64_t *dst_ptr = (uint64_t*)(VGA_MEMORY - (VGA_WIDTH * 2));
     uint16_t length = VGA_WIDTH * VGA_HEIGHT * 2;
 
-    memmove(VGA_MEMORY, VGA_MEMORY + (VGA_WIDTH * 2), length);
+    memmove(dst_ptr, src_ptr, length);
+    memset64(VGA_MEMORY + length - (VGA_WIDTH * 2), 0x00, (VGA_WIDTH * 2));
 
-    for (uint16_t i = 0; i < VGA_WIDTH; i++)
-    {
-        *(VGA_MEMORY + length + i * 2) = (char)' ';
-        *(VGA_MEMORY + length + i * 2 + 1) = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
-    }
 }
 
 void TTY_set_theme(enum vga_color background, enum vga_color foreground)

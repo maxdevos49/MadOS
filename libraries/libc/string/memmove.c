@@ -1,57 +1,50 @@
 #include <string.h>
 
-#include <kernel/interrupts/irq.h>
-
 void *memmove(void *dst_ptr, const void *src_ptr, size_t size)
 {
-    IRQ_disable();//TODO why do interrupts screw with this?????
-    //Must cast void pointers
-    unsigned char *dst = (unsigned char *)dst_ptr;
-    const unsigned char *src = (const unsigned char *)src_ptr;
+    size_t i;
 
-    //depending which pointer has a higher memory address we do not want to overwrite any data because its possible the two regions can overlap
-    if (dst < src)
+    if (size < 8)
     {
-        for (size_t i = 0; i < size; i++)
-        {
-            dst[i] = src[i];
-        }
+        uint8_t *dst = (uint8_t *)dst_ptr;
+        const uint8_t *src = (uint8_t *)src_ptr;
+
+        if (dst < src)
+            for (i = 0; i < size; i++)
+                dst[i] = src[i];
+        else
+            for (i = size; i != 0; i--)
+                dst[i - 1] = src[i - 1];
+
+        return dst_ptr;
     }
     else
     {
-        for (size_t i = size; i != 0; i--)
-        {
-            dst[i - 1] = src[i - 1];
-        }
+        uint64_t *dst = (uint64_t *)dst_ptr;
+        const uint64_t *src = (uint64_t *)src_ptr;
+
+        if (dst < src)
+            for (i = 0; i < size / 8; i++)
+                dst[i] = src[i];
+        else
+            for (i = size / 8; i != 0; i--)
+                dst[i - 1] = src[i - 1];
     }
 
-    IRQ_enable();
+    //If the size is not aligned on 8 byte addresses clean up last few bytes
+    if (((i * 8) - size) != 0)
+    {
+        i *= 8;
+        uint8_t *dst = (uint8_t *)dst_ptr;
+        const uint8_t *src = (uint8_t *)src_ptr;
 
+        if (dst < src)
+            for (; i < size; i++)
+                dst[i] = src[i];
+        else
+            for (; i != 0; i--)
+                dst[i - 1] = src[i - 1];
+    }
 
     return dst_ptr;
 }
-
-// #ifdef __test
-
-// #include <ctest.h>
-
-// void test_memmove(void)
-// {
-//     int i;
-//     int buffer_size = 1000;
-//     char buffer[buffer_size];
-
-//     //init buffer to zero
-//     memset(buffer, 0, sizeof(char) * buffer_size);
-
-//     //make 2nd half of buffer different
-//     memset(buffer + (buffer_size / 2), 'A', sizeof(char) * (buffer_size / 2));
-
-//     memmove(buffer, buffer + buffer_size / 2, sizeof(char) * (buffer_size / 2));
-
-//     for (i = 0; i < buffer_size && buffer[i] == 'A'; i++)
-//         ;
-//     ctest_assert("Error: buffer should be all 'A'", i == buffer_size);
-// }
-
-// #endif
