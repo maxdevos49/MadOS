@@ -116,5 +116,5 @@ void fault_handler(struct registers *regs)
     if (regs->int_num < 32)
     {
         abort(exception_messages[regs->int_num]);
-    };
+    }
 }

@@ -18,6 +18,7 @@ extern "C"
     void *memset64(void *, uint64_t, size_t);
     size_t strlen(const char *);
     int strcmp(const char *, const char *);
+    char *strcpy(char *__restrict, const char *__restrict);
 
 #ifndef NULL
 #define NULL 0

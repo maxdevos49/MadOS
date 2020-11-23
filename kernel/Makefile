@@ -15,6 +15,7 @@ KERNEL=MadOS.kernel
 # Objects
 KERNEL_OBJS=\
 	boot/extended_boot.o\
+	boot/binaries.o\
 	kernel.o \
 	tty.o\
 	timer.o\
@@ -34,7 +35,9 @@ KERNEL_OBJS=\
 	time/rtc.o\
 	time/pit.o\
 	pci/core.o\
-	# pci/config.o\
+	filesystems/fs.o\
+	filesystems/initrd.o\
+
 
 # Ensures if we make a change to the library it gets relinked to the kernel 
 # without making a random change to the kernel. Only needed for statically linked 

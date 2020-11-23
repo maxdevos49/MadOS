@@ -1,6 +1,6 @@
 ; Constants(Think like c macros)
 PROGRAM_SPACE equ 0x8000  
-SECTOR_COUNT equ 100
+SECTOR_COUNT equ 101
 
 ; Loads extended program
 read_disk:

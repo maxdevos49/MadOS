@@ -1,5 +1,5 @@
 #ifndef __KERNEL_FILESYSTEM_FS_H
-#define __KERNEL_FILESYSTEM_FS_H 0
+#define __KERNEL_FILESYSTEM_FS_H 1
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -45,16 +45,17 @@ struct fs_node
     struct fs_node *ptr; //Used by mountpoints and symlinks
 };
 
-struct dirent{
+struct dirent
+{
     char name[128]; // Filename
     uint32_t ino;   // Inode number. Required by POSIX
 };
 
-extern struct fs_node *fs_node; // Filesystem root
+extern struct fs_node *fs_root; // Filesystem root
 
 uint32_t read_fs(struct fs_node *node, uint32_t offset, uint32_t size, uint8_t *buffer);
 uint32_t write_fs(struct fs_node *node, uint32_t offset, uint32_t size, uint8_t *buffer);
-void open_fs(struct fs_node *node, uint8_t read, uint8_t write);
+void open_fs(struct fs_node *node);
 void close_fs(struct fs_node *node);
 
 struct dirent *readdir_fs(struct fs_node *node, uint32_t index);

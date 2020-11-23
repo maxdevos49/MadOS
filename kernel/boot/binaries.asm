@@ -1,3 +1,5 @@
+[bits 64]
+
 %macro INC_BIN 2
     SECTION .rodata
     GLOBAL %1
@@ -7,4 +9,4 @@
     %1_size: dq %1_size - %1
 %endmacro
 
-; INC_BIN splash, "splash.txt"
+INC_BIN initrd_data_header, "boot/initrd.img"

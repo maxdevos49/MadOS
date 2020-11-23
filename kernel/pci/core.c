@@ -20,15 +20,17 @@
 #include <kernel/pci/core.h>
 #include <kernel/pci/device.h>
 #include <kernel/pci/bus.h>
+
 #include <kernel/io.h>
 #include <kernel/list.h>
 
-#include <stdint.h>
-#include <stdlib.h>
-
 #include <kernel/tty.h>
 #include <kernel/vga.h>
+
+#include <stdint.h>
+#include <stdlib.h>
 #include <stdio.h>
+
 
 #define PCI_PROBE_ASSERT(test, offset)                                \
     if (test)                                                         \
@@ -225,13 +227,9 @@ static struct pci_dev *PCI_probe_device(struct pci_bus *bus, int slot, int funct
     {
         struct pci_bus *new_bus = PCI_probe_bus(dev);
         if (new_bus->number != dev->bus->number)
-        {
             PCI_enumerate_bus(new_bus);
-        }
         else
-        {
             free(new_bus);
-        }
     }
 
     return dev;
@@ -278,18 +276,19 @@ void PCI_configure()
 
     PCI_enumerate_bus(root_bus);
 
-    struct list_head *start_node = &root_bus->devices;
-    struct list_head *dev_node = start_node->prev;
+    // struct list_head *start_node = &root_bus->devices;
+    // struct list_head *dev_node = start_node->prev;
 
-    while (dev_node != start_node)
-    {
-        struct pci_dev *dev = list_entry(dev_node, struct pci_dev, node);
+    // while (dev_node != start_node)
+    // {
 
-        PCI_describe_device(dev);
-        PCI_describe_bar(dev);
+    //     struct pci_dev *dev = list_entry(dev_node, struct pci_dev, node);
 
-        dev_node = dev_node->prev;
-    }
+    //     PCI_describe_device(dev);
+    //     PCI_describe_bar(dev);
+
+    //     dev_node = dev_node->prev;
+    // }
 }
 
 //x86 specific

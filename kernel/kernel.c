@@ -17,6 +17,8 @@
 #include <kernel/time/pit.h>
 #include <kernel/io.h>
 #include <kernel/pci/core.h>
+#include <kernel/filesystems/fs.h>
+#include <kernel/filesystems/initrd.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -92,8 +94,40 @@ void kernel_main(void)
     TIMER_install();
 
     IRQ_enable();
+    fs_root = INITRD_init();
 
     printf("%s\n", splash);
 
-    PCI_configure();
+    // PCI_configure();
+
+    
+
+    int i = 0;
+    struct dirent *node = 0;
+    while ((node = readdir_fs(fs_root, i)) != NULL)
+    {
+        printf("Found file: %s\n", node->name);
+
+        struct fs_node *fsnode = finddir_fs(fs_root, node->name);
+        printf("node: %x\n", fsnode);
+        if ((fsnode->flags & 0x7) == FS_DIRECTORY)
+            printf("\t(directory)\n");
+        else
+        {
+            printf("\t contents: \"");
+
+            char buf[256];
+            // printf("Node loc: %x\n", fsnode);
+
+            int sz = read_fs(fsnode, 0, 254, (uint8_t *)buf);
+
+            int j;
+            for (j = 0; j < sz; j++)
+                printf("%c", (buf[j]));
+
+            printf("\"\n");
+        }
+
+        i++;
+    }
 }
