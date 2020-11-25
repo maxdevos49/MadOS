@@ -18,57 +18,66 @@ struct initrd_file_header
 
 int main(int argc, char *argv[])
 {
-    int num_headers = (argc - 1) / 2;
+    uint32_t num_headers = argc - 1;
+    printf("\nNumber of Files: %d\n", num_headers);
 
-    //Only supports 64 files
-    struct initrd_file_header headers[64];
+    struct initrd_file_header *headers = malloc(sizeof(struct initrd_file_header) * num_headers);
 
-    printf("size of header: %ld\n", sizeof(struct initrd_file_header));
+    uint32_t data_offset = sizeof(struct initrd_header) + (sizeof(struct initrd_file_header) * num_headers);
+    printf("Data offset: %x\n", data_offset);
 
-    //offset
-    unsigned int off = (sizeof(struct initrd_file_header) * 64) + sizeof(struct initrd_header);
-
-    int i;
-    for (i = 0; i < num_headers; i++)
+    printf("Building File Headers:\n");
+    for (int i = 0; i < num_headers; i++)
     {
+        printf("\t%s\n", argv[i+1]);
 
-        printf("writing file %s->%s at 0x%x\n", argv[i * 2 + 1], argv[i * 2 + 2], off);
-        strcpy(headers[i].name, argv[i * 2 + 2]);
+        headers[i].magic = 0xbf;
+        strcpy(headers[i].name, argv[i + 1]);
+        headers[i].offset = data_offset;
 
-        headers[i].offset = off;
-        FILE *stream = fopen(argv[i * 2 + 1], "r");
-        if (stream == 0)
+        FILE *stream = fopen(argv[i +1], "r");
+        if (stream == NULL)
         {
-            printf("Error: file not found: %s\n", argv[i * 2 + 1]);
+            printf("Error: file not found: %s\n", argv[i +1]);
             return 1;
         }
 
         fseek(stream, 0, SEEK_END);
+
         headers[i].length = ftell(stream);
-        off += headers[i].length;
 
         fclose(stream);
-        headers[i].magic = 0xBF;
+
+        data_offset += headers[i].length;
     }
 
     FILE *write_stream = fopen("./initrd.img", "w");
-    uint8_t *data = (uint8_t *)malloc(off);
 
-    fwrite(&num_headers, sizeof(int), 1, write_stream);
-    fwrite(headers, sizeof(struct initrd_file_header), 64, write_stream);
+    fwrite(&num_headers, sizeof(struct initrd_header), 1, write_stream);
+    fwrite(headers, sizeof(struct initrd_file_header), num_headers, write_stream);
 
-    for (i = 0; i < num_headers; i++)
+    printf("Writing File Data:\n");
+    for (int i = 0; i < num_headers; i++)
     {
-        FILE *read_stream = fopen(argv[i * 2 + 1], "r");
+        FILE *read_stream = fopen(argv[i + 1], "r");
+        if (read_stream == NULL)
+        {
+            printf("Error: file not found: %s\n", argv[i +1]);
+            return 1;
+        }
+
         uint8_t *buf = (uint8_t *)malloc(headers[i].length);
         fread(buf, 1, headers[i].length, read_stream);
+
+        printf("\t%s: %d bytes\n", argv[i+1], headers[i].length);
         fwrite(buf, 1, headers[i].length, write_stream);
         fclose(read_stream);
         free(buf);
     }
 
+    printf("Writing Complete. Total Bytes: %ld\n", ftell(write_stream));
     fclose(write_stream);
-    free(data);
+
 
     return 0;
 }

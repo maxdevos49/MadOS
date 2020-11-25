@@ -4,25 +4,26 @@
 #include <string.h>
 #include <stdio.h>
 
+extern struct initrd_header initrd_data_header;
+
 static struct initrd_header *initrd_header;     //File System header
 static struct initrd_file_header *file_headers; //List of file headers
-static struct fs_node *initrd_root;             //Root directory node
-static struct fs_node *initrd_dev;              //Dev directory node
-static struct fs_node *root_nodes;              //List of file nodes
-static uint32_t root_node_count;                //Number of file nodes
 
+static struct fs_node *initrd_root; //Root directory node
+static struct fs_node *initrd_dev;  //Dev directory node
+
+static struct fs_node *root_nodes;
+//List of file nodes
+static uint32_t root_node_count; //Number of file nodes
 static struct dirent dirent;
 
-extern struct initrd_header initrd_data_header;
 /**
  * Reads from a fs_node in a ramdisk filesystem
  * */
 static uint32_t initrd_read(struct fs_node *node, uint32_t offset, uint32_t size, uint8_t *buffer)
 {
-    
+
     struct initrd_file_header header = file_headers[node->inode];
-    // printf("%x\n", (file_headers + node->inode)->offset);
-    printf("Read Loc: %x\n", header.offset);
 
     if (offset > header.length)
         return NULL;
@@ -30,7 +31,7 @@ static uint32_t initrd_read(struct fs_node *node, uint32_t offset, uint32_t size
     if (offset + size > header.length)
         size = header.length - offset;
 
-    memcpy(buffer, (uint8_t *)(long)(header.offset + offset), size);
+    memcpy(buffer, (void *)(long)(header.offset + offset), size);
 
     return size;
 }
@@ -78,8 +79,8 @@ struct fs_node *INITRD_init()
     printf("Initlizing Ram Disk\n");
 
     initrd_header = (struct initrd_header *)&initrd_data_header;
-    file_headers = (struct initrd_file_headers*)(initrd_header + sizeof(struct initrd_header));
-   
+    file_headers = (struct initrd_file_headers *)((long long)&initrd_data_header + (long long)sizeof(struct initrd_header));
+
     //root directory
     initrd_root = (struct fs_node *)malloc(sizeof(struct fs_node));
     strcpy(initrd_root->name, "initrd");
@@ -111,16 +112,17 @@ struct fs_node *INITRD_init()
     root_nodes = (struct fs_node *)malloc(sizeof(struct fs_node) * initrd_header->nfiles);
     root_node_count = initrd_header->nfiles;
 
-    // For every file...
     uint32_t i;
-    for (i = 0; i < initrd_header->nfiles; i++)
+    for (i = 0; i < root_node_count; i++)
     {
         // Edit the file's header - currently it holds the file offset
         // relative to the start of the ramdisk. We want it relative to the start
         // of memory.
-        file_headers[i].offset += (uint64_t)initrd_header;
+        file_headers[i].offset += (uint32_t)&initrd_data_header;
+
         // Create a new file node.
         strcpy(root_nodes[i].name, (char *)&file_headers[i].name);
+
         root_nodes[i].mask = root_nodes[i].uid = root_nodes[i].gid = 0;
         root_nodes[i].length = file_headers[i].length;
         root_nodes[i].inode = i;

@@ -109,21 +109,21 @@ void kernel_main(void)
         printf("Found file: %s\n", node->name);
 
         struct fs_node *fsnode = finddir_fs(fs_root, node->name);
-        printf("node: %x\n", fsnode);
+        // printf("node: %x\n", fsnode);
         if ((fsnode->flags & 0x7) == FS_DIRECTORY)
             printf("\t(directory)\n");
         else
         {
             printf("\t contents: \"");
 
-            char buf[256];
+            uint8_t buffer[256];
             // printf("Node loc: %x\n", fsnode);
 
-            int sz = read_fs(fsnode, 0, 254, (uint8_t *)buf);
+            int sz = read_fs(fsnode, 0, 50, buffer);
 
             int j;
             for (j = 0; j < sz; j++)
-                printf("%c", (buf[j]));
+                printf("%c", (buffer[j]));
 
             printf("\"\n");
         }
