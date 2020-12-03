@@ -40,6 +40,8 @@ enum pci_dev_standard_registers
 
 };
 
+struct pci_dev;
+
 struct pci_dev
 {
     uint16_t vendor_id;

@@ -1,4 +1,4 @@
-#include <kernel/heap/heap.h>
+#include <kernel/memory/heap.h>
 #include <stdlib.h>
 
 static void combine_free_segments(struct mem_seg_header *a, struct mem_seg_header *b);

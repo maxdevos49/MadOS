@@ -3,8 +3,8 @@
 
 #include <kernel/debug.h>
 
-#include <kernel/heap/memory.h>
-#include <kernel/heap/heap.h>
+#include <kernel/memory/memory.h>
+#include <kernel/memory/heap.h>
 
 #include <kernel/interrupts/idt.h>
 #include <kernel/interrupts/isr.h>
@@ -96,11 +96,10 @@ void kernel_main(void)
     IRQ_enable();
     fs_root = INITRD_init();
 
+    PCI_configure();
+    
     printf("%s\n", splash);
 
-    // PCI_configure();
-
-    
 
     int i = 0;
     struct dirent *node = 0;

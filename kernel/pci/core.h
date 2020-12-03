@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <stdio.h>
-
 enum pci_io
 {
     CONFIG_ADDRESS_PORT = 0xCF8,

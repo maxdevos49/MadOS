@@ -1,5 +1,10 @@
 #ifndef __KERNEL_API_SYSCALL_H
-#define __KERNEL_API_SYSCALL_H 0
+#define __KERNEL_API_SYSCALL_H 1
+
+void SYSCALL_malloc();
+void SYSCALL_free();
+
+// void SYSCALL_mmap();
 
 void SYSCALL_open();
 void SYSCALL_write();
@@ -18,6 +23,5 @@ void SYSCALL_beep();
 void SYSCALL_reboot();
 void SYSCALL_shutdown();
 void SYSCALL_halt();
-
 
 #endif

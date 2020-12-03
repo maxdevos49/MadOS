@@ -265,6 +265,7 @@ static void PCI_enumerate_bus(struct pci_bus *bus)
 
 void PCI_configure()
 {
+    printf("Enumerating PCI Bus\n");
     root_bus = malloc(sizeof(struct pci_bus));
 
     root_bus->number = 0;

@@ -26,7 +26,7 @@ Notes, examples, and links of any useful resources I find interesting or useful.
     - [Passing Arguments to C Functions from ASM](#passing-arguments-to-c-functions-from-asm)
   - [C and Hardware Interop](#c-and-hardware-interop)
     - [Memory Mapped Devices](#memory-mapped-devices)
-  - [# PCI](#h1-idpci-1190pcih1)
+  - [# PCI](#-pci)
     - [PCI Configuration Space](#pci-configuration-space)
     - [Configuration Space Access Mechanism #1](#configuration-space-access-mechanism-1)
       - [CONFIG_ADDRESS bit table](#config_address-bit-table)
@@ -34,6 +34,11 @@ Notes, examples, and links of any useful resources I find interesting or useful.
         - [vendorID](#vendorid)
         - [deviceID](#deviceid)
         - [class](#class)
+  - [# MMU](#-mmu)
+    - [Translation](#translation)
+    - [Protection](#protection)
+- [Paging](#paging)
+    - [Page Directory](#page-directory)
 
 <!-- /code_chunk_output -->
 
@@ -341,3 +346,27 @@ Description of some common registers
 
 ##### class
 Every peripheral device belongs to a class. The class register is a 16-bit value where the top 8 bits identify the "base class"(or group). For example "ethernet" and "token ring" are two classes belong to the network group. 
+
+# MMU
+---
+__Memory Management Unit__
+
+The MMU, or Memory Management Unit, is a component of many computers that handles memory translation, memory protection, and other purposes specific to each architecture.
+
+### Translation
+The MMU's main service to the computer is memory translation. Memory translation is a process by which virtual addresses are converted to physical addresses. WE can say that the virtual addresses are mapped to the physical address. This gives us the ability to create a memory model in out own fashion. That is, we can rearrange how memory seems to be ordered.
+
+For instance, this technique is used when creating a Higher Half Kernel.  The kernel is located at location x, but when paging is initialized the MMU is told to map location x to 0xC0000000. THis then creates the effect that the kernel is at 0xC0000000.
+
+### Protection
+Because we can make memory seem however we want, we can make each process appear that it is the only process on the machine. Moreover, because the process can only see the memory that it has, it cannot modify or copy any other application's memory. This means that if an application is to fail, it will fail, but nothing else.
+
+# Paging
+Paging is a system which allows each process to see a full virtual address space, without actually requiring the full amount of physical memory to be available or present. Paging introduces the benefit if  page-level protection. In this system, user processes can only see and modify data which is paged in on there own address space, providing hardware-based isolation. System pages are also protected from user processes. On the x86-64 architecture, page-level protection completely supersedes Segmentation as the memory protection mechanism. 
+
+Paging is achieved through the use of the Memory Management Unit(MMU). On the x86, the MMU maps memory through a series of tables, two to be exact. They are the paging directory (PD), and the paging table (PT).
+
+ Both tables contain 1024 4-byte entires, making them 4 KiB each. In the page directory, each entry points to a page table. In the page table, each entry points to a physical address that is then mapped to a virtual address found by calculating the offset within the directory and the offset within the table. This can be done as the entire table system represents a linear 4-GiB virtual memory map.  
+
+### Page Directory
+The topmost paging structure is the page directory. It is essentially an array of page directory entries. 

@@ -4,6 +4,8 @@
 #include <kernel/pci/device.h>
 #include <kernel/list.h>
 
+struct pci_bus;
+
 struct pci_bus
 {
     uint8_t number;

@@ -25,12 +25,12 @@ KERNEL_OBJS=\
 	interrupts/irq.o\
 	interrupts/pic.o\
 	devices/keyboard.o\
-	heap/init_heap.o\
-	heap/k_malloc.o\
-	heap/k_calloc.o\
-	heap/k_realloc.o\
-	heap/k_free.o\
-	heap/memory.o\
+	memory/init_heap.o\
+	memory/k_malloc.o\
+	memory/k_calloc.o\
+	memory/k_realloc.o\
+	memory/k_free.o\
+	memory/memory.o\
 	time/cmos.o\
 	time/rtc.o\
 	time/pit.o\

@@ -1,6 +1,9 @@
 #include <kernel/interrupts/idt.h>
 #include <kernel/interrupts/isr.h>
 
+#include <kernel/tty.h>
+#include <kernel/vga.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -115,6 +118,41 @@ void fault_handler(struct registers *regs)
 {
     if (regs->int_num < 32)
     {
+        if (regs->int_num == 14)
+        { //page fault
+            TTY_set_theme(VGA_COLOR_RED, VGA_COLOR_WHITE);
+            switch (regs->err_code)
+            {
+            case 0x0:
+                printf("\n[Error Code: %x] Supervisory process tried to read a non-present page entry.\n", regs->err_code);
+                break;
+            case 0x1:
+                printf("\n[Error Code: %x] Supervisory process tried to read a page and caused a protection fault.\n", regs->err_code);
+                break;
+            case 0x2:
+                printf("\n[Error Code: %x] Supervisory process tried to write to a non-present page entry.\n", regs->err_code);
+                break;
+            case 0x3:
+                printf("\n[Error Code: %x] Supervisory process tried to write a page and caused a protection fault.\n", regs->err_code);
+                break;
+            case 0x4:
+                printf("\n[Error Code: %x] User process tried to read a non-present page entry.\n", regs->err_code);
+                break;
+            case 0x5:
+                printf("\n[Error Code: %x] User process tried to read a page and caused a protection fault.\n", regs->err_code);
+                break;
+            case 0x6:
+                printf("\n[Error Code: %x] User process tried to write to a non-present page entry.\n", regs->err_code);
+                break;
+            case 0x7:
+                printf("\n[Error Code: %x] User process tried to write a page and caused a protection fault.\n", regs->err_code);
+                break;
+            default:
+                printf("\nUnknown Page fault error. Error Code: %x\n", regs->err_code);
+                break;
+            }
+        }
+
         abort(exception_messages[regs->int_num]);
     }
 }

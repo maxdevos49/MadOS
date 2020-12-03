@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <kernel/heap/memory.h>
+#include <kernel/memory/memory.h>
 
 static uint8_t usable_memory_regions_count = 0;
 static struct mem_map_entry *usable_memory_regions[10];

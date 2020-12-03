@@ -79,7 +79,7 @@ struct fs_node *INITRD_init()
     printf("Initlizing Ram Disk\n");
 
     initrd_header = (struct initrd_header *)&initrd_data_header;
-    file_headers = (struct initrd_file_headers *)((long long)&initrd_data_header + (long long)sizeof(struct initrd_header));
+    file_headers = (void *)((long long)&initrd_data_header + sizeof(struct initrd_header));
 
     //root directory
     initrd_root = (struct fs_node *)malloc(sizeof(struct fs_node));
@@ -112,28 +112,27 @@ struct fs_node *INITRD_init()
     root_nodes = (struct fs_node *)malloc(sizeof(struct fs_node) * initrd_header->nfiles);
     root_node_count = initrd_header->nfiles;
 
-    uint32_t i;
-    for (i = 0; i < root_node_count; i++)
+    for (int i = 0; i < (int)root_node_count; i++)
     {
         // Edit the file's header - currently it holds the file offset
         // relative to the start of the ramdisk. We want it relative to the start
-        // of memory.
-        file_headers[i].offset += (uint32_t)&initrd_data_header;
+        // of file data memory.
+        file_headers[i].offset += (uint64_t)&initrd_data_header;
 
         // Create a new file node.
         strcpy(root_nodes[i].name, (char *)&file_headers[i].name);
 
-        root_nodes[i].mask = root_nodes[i].uid = root_nodes[i].gid = 0;
+        root_nodes[i].mask = root_nodes[i].uid = root_nodes[i].gid = NULL;
         root_nodes[i].length = file_headers[i].length;
         root_nodes[i].inode = i;
         root_nodes[i].flags = FS_FILE;
         root_nodes[i].read = &initrd_read;
-        root_nodes[i].write = 0;
-        root_nodes[i].readdir = 0;
-        root_nodes[i].finddir = 0;
-        root_nodes[i].open = 0;
-        root_nodes[i].close = 0;
-        root_nodes[i].impl = 0;
+        root_nodes[i].write = NULL;
+        root_nodes[i].readdir = NULL;
+        root_nodes[i].finddir = NULL;
+        root_nodes[i].open = NULL;
+        root_nodes[i].close = NULL;
+        root_nodes[i].impl = NULL;
     }
 
     return initrd_root;

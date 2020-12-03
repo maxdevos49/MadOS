@@ -1,4 +1,4 @@
-#include <kernel/heap/heap.h>
+#include <kernel/memory/heap.h>
 #include <string.h>
 
 void *k_realloc(void *ptr, size_t size)
