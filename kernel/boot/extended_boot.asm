@@ -74,7 +74,8 @@ init_32_bit:
 
 init_64_bit:
     call activate_SSE
-    xor ebp, ebp                          ; Mark it as null
+    
+    xor rbp, rbp                          ; Mark it as null
     call kernel_main
     jmp $
 

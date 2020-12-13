@@ -19,6 +19,7 @@
 #include <kernel/pci/core.h>
 #include <kernel/filesystems/fs.h>
 #include <kernel/filesystems/initrd.h>
+#include <kernel/devices/mouse.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -53,6 +54,12 @@
 //     printf("\tTODO\n");
 // }
 // #endif
+
+struct vector2
+{
+    int64_t x;
+    int64_t y;
+};
 
 void irq8_handler()
 {
@@ -90,43 +97,103 @@ void kernel_main(void)
     ISRs_install();
     IRQs_install();
 
-    KB_install();
     TIMER_install();
 
     IRQ_enable();
     fs_root = INITRD_init();
 
     PCI_configure();
-    
+    KB_install();
+    MOUSE_install();
+
     printf("%s\n", splash);
 
-
-    int i = 0;
-    struct dirent *node = 0;
-    while ((node = readdir_fs(fs_root, i)) != NULL)
+    struct mouse_packet packet;
+    struct vector2 mouse;
+    mouse.x = 0;
+    mouse.y = 0;
+    uint16_t previous_position = 0;
+    while (true)
     {
-        printf("Found file: %s\n", node->name);
-
-        struct fs_node *fsnode = finddir_fs(fs_root, node->name);
-        // printf("node: %x\n", fsnode);
-        if ((fsnode->flags & 0x7) == FS_DIRECTORY)
-            printf("\t(directory)\n");
-        else
+        if (MOUSE_poll(&packet))
         {
-            printf("\t contents: \"");
+            int16_t x_mov = packet.x_movement;
+            int16_t y_mov = packet.y_movement;
 
-            uint8_t buffer[256];
-            // printf("Node loc: %x\n", fsnode);
+            if (packet.x_sign == 1)
+                x_mov = x_mov | 0xFFFFFF00;
 
-            int sz = read_fs(fsnode, 0, 50, buffer);
+            if (packet.y_sign == 1)
+                y_mov = y_mov | 0xFFFFFF00;
 
-            int j;
-            for (j = 0; j < sz; j++)
-                printf("%c", (buffer[j]));
+            mouse.x += x_mov;
+            mouse.y -= y_mov;
 
-            printf("\"\n");
+            int64_t scale = 1000;
+
+            if (mouse.x > scale)
+                mouse.x = scale;
+
+            if (mouse.x < 0)
+                mouse.x = 0;
+
+            if (mouse.y > scale)
+                mouse.y = scale;
+
+            if (mouse.y < 0)
+                mouse.y = 0;
+
+            uint16_t cursor_p = TTY_get_cursor_position();
+
+            TTY_set_cursor_position(120);
+            printf("X: %d", mouse.x);
+            TTY_set_cursor_position(200);
+            printf("Y: %d", mouse.y);
+
+            struct vector2 mouse_s;
+            mouse_s.x = (((VGA_WIDTH - 1) * mouse.x) / scale);
+            mouse_s.y = (((VGA_HEIGHT - 1) * mouse.y) / scale);
+
+            TTY_set_cursor_position(140);
+            printf("X: %d", mouse_s.x);
+            TTY_set_cursor_position(220);
+            printf("Y: %d", mouse_s.y);
+            TTY_set_cursor_position(cursor_p);
+
+            //draw mouse
+            *(VGA_MEMORY + (previous_position * 2) + 1) = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
+            int16_t position = (mouse_s.y * VGA_WIDTH) + mouse_s.x;
+            previous_position = position;
+            *(VGA_MEMORY + (position * 2) + 1) = VGA_COLOR_BLACK | VGA_COLOR_WHITE << 4;
         }
-
-        i++;
     }
+
+    // int i = 0;
+    // struct dirent *node = 0;
+    // while ((node = readdir_fs(fs_root, i)) != NULL)
+    // {
+    //     printf("Found file: %s\n", node->name);
+
+    //     struct fs_node *fsnode = finddir_fs(fs_root, node->name);
+    //     // printf("node: %x\n", fsnode);
+    //     if ((fsnode->flags & 0x7) == FS_DIRECTORY)
+    //         printf("\t(directory)\n");
+    //     else
+    //     {
+    //         printf("\t contents: \"");
+
+    //         uint8_t buffer[256];
+    //         // printf("Node loc: %x\n", fsnode);
+
+    //         int sz = read_fs(fsnode, 0, 50, buffer);
+
+    //         int j;
+    //         for (j = 0; j < sz; j++)
+    //             printf("%c", (buffer[j]));
+
+    //         printf("\"\n");
+    //     }
+
+    //     i++;
+    // }
 }

@@ -1,3 +1,7 @@
+;
+; Implementation for legacy PAE???
+;
+
 PAGE_DIRECTORY_PTR_ENTRY equ 0x1000
 
 setup_identity_paging:
@@ -25,7 +29,7 @@ setup_identity_paging:
     add edi, 0x1000
 
     ; Initilizing page directory entries.
-    mov ebx, 0x00000003 ; attributes: supervisor, read/write, not present
+    mov ebx, 0x00000003 ; attributes: supervisor, read/write, present
     mov ecx, 512 ; how many times to loop
     .set_directory_entry:
         mov dword [edi], ebx
@@ -33,12 +37,14 @@ setup_identity_paging:
         add edi, 8
         loop .set_directory_entry
 
-    ; Set bit 5 in cr4 to Enable PAE
+    ; Set bit 5 in cr4 to Enable PAE. MUST be enabled before enabling long mode
     mov eax, cr4
     or eax, 1 << 5
     mov cr4, eax
 
-    ; Enable Long mode now that paging is set up
+
+
+    ; Enable Long mode now that pae paging is set up
     mov ecx, 0xc0000080
     rdmsr           ; Uses ecx to pick a MSR register. This case 0xc0000080 means the EFER register
     or eax, 1 << 8  ; Enable Long mode
@@ -48,5 +54,5 @@ setup_identity_paging:
     mov eax, cr0
     or eax, 0x80000000
     mov cr0, eax
-
+    
     ret

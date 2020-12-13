@@ -1,54 +1,95 @@
+#include <kernel/memory/paging.h>
+
+#include <string.h>
+
+const uint64_t *KERNEL_PML4 = 0x1000;
+
 /**
- * Legacy paging
+ * Reinitialize paging while taking advantage of long mode
  * */
-
-#include <stdint.h>
-#include <stddef.h>
-#include <cpuid.h>
-
-extern void PAGING_load_page_directory(uint32_t *directory);
-extern void PAGING_enable();
-
-uint32_t page_directory[1024] __attribute__((aligned(4096)));
-uint32_t first_page_table[1024] __attribute__((aligned(4096)));
-
 void PAGING_init()
 {
-    uint32_t i;
-    for (i = 0; i < 1024; i++)
-    {
-        //Sets the following flags for each directory
-        // Supervisor: only kernel can access them.
-        // Write Enabled: It can be both read from and written too.
-        // Not Present: The page table is not present.
-        page_directory[i] = 0x00000002;
+    memset(KERNEL_PML4, 0, sizeof(uint64_t) * 512);
 
-        //As the address is page aligned, it will always leave 12 bits zeroed.
-        // Those bits are used by the attributes
-        first_page_table[i] = (i * 0x1000) | 3; //attributes: supervisor level, read/write, present
+    for (int i = 0; i < 194; i++) //identity maps up to 0xbffff
+        PAGING_map(i * 0x1000, PAGE_PRES | PAGE_RW);
+
+    //TODO virtual map heap??
+
+    PAGING_switch_cr3(KERNEL_PML4);
+}
+
+static uint64_t *PAGING_first_available_physical_frame()
+{
+    //TODO;
+    return NULL;
+}
+
+void PAGING_map(void *virtual_address, uint64_t flags)
+{
+    uint64_t *physical_address = PAGING_first_available_physical_frame();
+
+    printf("Mapping Page: %x -> %x\n", physical_address, virtual_address);
+    printf("PML4: %d, PDPE: %d, PDE: %d, PTE: %d, PP: %x", PML4_offset(virtual_address), PDPE_offset(virtual_address), PDE_offset(virtual_address), PTE_offset(virtual_address), PP_offset(virtual_address));
+
+    uint64_t pml4_entry = PAGING_get_pml4_entry(PAGING_get_cr3(), virtual_address);
+    if (!(pml4_entry & PE_present_mask))
+    {
+        uint64_t *table = kmalloc_a(sizeof(uint64_t) * 512); //TODO
+        memset64(table, 0, sizeof(uint64_t) * 512);
+        pml4_entry = ((uint64_t)table & PE_address_mask) | PE_present_mask | PE_rw_mask;
     }
 
-    //attributes: supervisor level, ead/write, present
-    page_directory[0] = ((uint32_t)first_page_table) | 3;
+    uint64_t pdp_entry = PAGING_get_pdp_entry(pml4_entry, virtual_address);
+    if (!(pdp_entry & PE_present_mask))
+    {
+        uint64_t *table = kmalloc_a(sizeof(uint64_t) * 512); //TODO
+        memset64(table, 0, sizeof(uint64_t) * 512);
+        pdp_entry = ((uint64_t)table & PE_address_mask) | PE_present_mask | PE_rw_mask;
+    }
 
-    PAGING_load_page_directory(page_directory);
-    PAGING_enable();
+    uint64_t pd_entry = PAGING_get_pd_entry(pdp_entry, virtual_address);
+    if (!(pd_entry & PE_present_mask))
+    {
+        uint64_t *table = kmalloc_a(sizeof(uint64_t) * 512); //TODO
+        memset64(table, 0, sizeof(uint64_t) * 512);
+        pd_entry = ((uint64_t)table & PE_address_mask) | PE_present_mask | PE_rw_mask;
+    }
+
+    uint64_t pt_entry = PAGING_get_pdp_entry(pml4_entry, virtual_address);
+    if (pdp_entry & PE_present_mask)
+        return; //already mapped
+
+    //todo
 }
 
-void* PAGING_virtual_to_physical_address()
+void PAGING_unmap(void *virtual_address)
 {
     //TODO
-    return NULL;
 }
 
-void *PAGING_map()
+uint64_t *PAGING_virt_to_phys_address(void *virtual_address)
 {
-    //TODO
-    return NULL;
+    uint64_t pml4_entry = PAGING_get_pml4_entry(PAGING_get_cr3(), virtual_address);
+    if (!(pml4_entry & PE_present_mask))
+        return NULL;
+
+    uint64_t pdp_entry = PAGING_get_pdp_entry(pml4_entry, virtual_address);
+    if (!(pdp_entry & PE_present_mask))
+        return NULL;
+
+    uint64_t pd_entry = PAGING_get_pd_entry(pdp_entry, virtual_address);
+    if (!(pd_entry & PE_present_mask))
+        return NULL;
+
+    uint64_t pt_entry = PAGING_get_pt_entry(pd_entry, virtual_address);
+    if (!(pt_entry & PE_present_mask))
+        return NULL;
+
+    return (pt_entry & PE_address_mask) | PP_offset(virtual_address);
 }
 
-void PAGING_unmap()
+void PAGING_fault(struct registers *regs)
 {
-    //TODO
-    return NULL;
+    //TODO when support is added for this
 }

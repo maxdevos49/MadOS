@@ -25,6 +25,7 @@ KERNEL_OBJS=\
 	interrupts/irq.o\
 	interrupts/pic.o\
 	devices/keyboard.o\
+	devices/mouse.o\
 	memory/init_heap.o\
 	memory/k_malloc.o\
 	memory/k_calloc.o\
