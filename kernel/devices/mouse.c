@@ -114,7 +114,5 @@ void MOUSE_install()
     printf("Installing Mouse\n");
     mouse_id = MOUSE_get_id();
 
-    printf("Mouse id: %x\n", mouse_id);
-
     MOUSE_stream_enable();
 }

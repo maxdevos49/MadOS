@@ -3,6 +3,7 @@
 
 #include <kernel/tty.h>
 #include <kernel/vga.h>
+#include <kernel/debug.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -158,7 +159,7 @@ void fault_handler(struct registers *regs)
         TTY_set_theme(VGA_COLOR_RED, VGA_COLOR_WHITE);
         printf("Kernel Panic: %s\n\n System will now Halt\n\n", exception_messages[regs->int_num]);
         printf("Error code: %x\n", regs->err_code);
-        strace(5);
+        // strace(5);
         TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
 
 

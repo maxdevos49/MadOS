@@ -1,14 +1,12 @@
 [bits 16]
-
 mov bx, EXTENDED_SPACE_SUCCESS_MSG
 call print_string
-
 jmp enter_protected_mode
 
 enter_protected_mode:
     call detect_memory                    ; Detects memory used
+    call detect_vesa_mode
     call enable_A20                       ; Allows use of extended memory
-
     cli                                   ; We must switch off interrupts until we have set-up the protected mode
                                             ; otherwise interrupts will run riot.
     mov bx, LOADING_GDT_MSG
@@ -35,10 +33,11 @@ enable_A20:
 %include "boot/print.asm"
 %include "boot/gdt.asm"
 %include "boot/detect_memory.asm"
+%include "boot/vesa.asm"
 
 ; ; 16 BIT Global Variables
 EXTENDED_SPACE_SUCCESS_MSG: db "We are successfully in extended space",0xA, 0xD, 0
-ENABLE_A20_MSG: db "Enabling", 132, " A20",0xA, 0xD, 0
+ENABLE_A20_MSG: db "Enabling A20",0xA, 0xD, 0
 LOADING_GDT_MSG: db "Loading GDT",0xA, 0xD, 0
 
 
@@ -70,6 +69,7 @@ init_32_bit:
 [bits 64]
 [extern kernel_main]
 
+%include "boot/PUSHPOP.asm"
 %include "boot/idt_init.asm"
 
 init_64_bit:

@@ -39,6 +39,7 @@ Notes, examples, and links of any useful resources I find interesting or useful.
     - [Protection](#protection)
 - [Paging](#paging)
     - [Page Directory](#page-directory)
+- [VESA](#vesa)
 
 <!-- /code_chunk_output -->
 
@@ -370,3 +371,7 @@ Paging is achieved through the use of the Memory Management Unit(MMU). On the x8
 
 ### Page Directory
 The topmost paging structure is the page directory. It is essentially an array of page directory entries. 
+
+# VESA
+__Video Electronics Standard Association__
+

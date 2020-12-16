@@ -20,6 +20,7 @@
 #include <kernel/filesystems/fs.h>
 #include <kernel/filesystems/initrd.h>
 #include <kernel/devices/mouse.h>
+#include <kernel/devices/vesa.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -69,7 +70,7 @@ void irq8_handler()
     RTC_acknowledge_irq8();
 }
 
-char *splash = //Load from binary?
+char *splash =
     "=============================================================================="
     "\nWelcome to\n"
     " /$$      /$$                 /$$  /$$$$$$   /$$$$$$ \n"
@@ -83,12 +84,13 @@ char *splash = //Load from binary?
 
 void kernel_main(void)
 {
+
     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
     TTY_init();
 
     printf("Booting Kernel\n");
 
-    init_memory((struct mem_map_entry *)0x5000);
+    init_memory((struct mem_map_entry *)0x6000);
 
     struct mem_map_entry **usable_memory = get_usable_memory_regions();
     init_heap(usable_memory[1]->base_address, 0x10000);
@@ -106,65 +108,142 @@ void kernel_main(void)
     KB_install();
     MOUSE_install();
 
-    printf("%s\n", splash);
+    VESA_install();
 
+    // printf("%s\n", splash);
+
+    uint16_t position = 0;
+    uint16_t previous_position = 0;
     struct mouse_packet packet;
     struct vector2 mouse;
+    struct vector2 scale;
+    struct vector2 velocity;
+
+    uint8_t previous_color = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
+
+    uint8_t left_btn = 0;
+    uint64_t click_count = 0;
+    int16_t start_select;
+
     mouse.x = 0;
     mouse.y = 0;
-    uint16_t previous_position = 0;
+
+    scale.x = 1080;
+    scale.y = 720;
+
     while (true)
     {
         if (MOUSE_poll(&packet))
         {
-            int16_t x_mov = packet.x_movement;
-            int16_t y_mov = packet.y_movement;
+            velocity.x = packet.x_movement;
+            velocity.y = packet.y_movement;
 
             if (packet.x_sign == 1)
-                x_mov = x_mov | 0xFFFFFF00;
+                velocity.x = velocity.x | 0xFFFFFFFFFFFFFF00;
 
             if (packet.y_sign == 1)
-                y_mov = y_mov | 0xFFFFFF00;
+                velocity.y = velocity.y | 0xFFFFFFFFFFFFFF00;
 
-            mouse.x += x_mov;
-            mouse.y -= y_mov;
+            mouse.x += velocity.x;
+            mouse.y -= velocity.y;
 
-            int64_t scale = 1000;
-
-            if (mouse.x > scale)
-                mouse.x = scale;
+            if (mouse.x > scale.x)
+                mouse.x = scale.x;
 
             if (mouse.x < 0)
                 mouse.x = 0;
 
-            if (mouse.y > scale)
-                mouse.y = scale;
+            if (mouse.y > scale.y)
+                mouse.y = scale.y;
 
             if (mouse.y < 0)
                 mouse.y = 0;
 
-            uint16_t cursor_p = TTY_get_cursor_position();
-
-            TTY_set_cursor_position(120);
-            printf("X: %d", mouse.x);
-            TTY_set_cursor_position(200);
-            printf("Y: %d", mouse.y);
-
             struct vector2 mouse_s;
-            mouse_s.x = (((VGA_WIDTH - 1) * mouse.x) / scale);
-            mouse_s.y = (((VGA_HEIGHT - 1) * mouse.y) / scale);
+            mouse_s.x = (((VGA_WIDTH - 1) * mouse.x) / scale.x);
+            mouse_s.y = (((VGA_HEIGHT - 1) * mouse.y) / scale.y);
+            position = (mouse_s.y * VGA_WIDTH) + mouse_s.x;
 
-            TTY_set_cursor_position(140);
-            printf("X: %d", mouse_s.x);
-            TTY_set_cursor_position(220);
-            printf("Y: %d", mouse_s.y);
-            TTY_set_cursor_position(cursor_p);
+            //Handle click
+            if (packet.left_button == 1 && left_btn == 0)
+            { //Mouse Down
+                left_btn = 1;
+                click_count = 1;
+
+                int16_t start;
+                int16_t end;
+
+                if (start_select > previous_position)
+                {
+                    start = (start_select - abs(start_select - previous_position)) + 1;
+                    end = start_select;
+                }
+                else
+                {
+                    start = start_select;
+                    end = previous_position;
+                }
+
+                //Unselect
+                for (int i = start; i < end; i++)
+                    *(VGA_MEMORY + (i * 2) + 1) = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
+
+                start_select = position;
+                TTY_set_cursor_position((VGA_WIDTH * mouse_s.y) + mouse_s.x);
+            }
+            else if (packet.left_button == 1 && left_btn == 1)
+            { //Mouse Drag
+                click_count++;
+
+                if (click_count > 1)
+                {
+                    TTY_set_cursor_position((VGA_WIDTH * mouse_s.y) + mouse_s.x);
+
+                    int16_t start;
+                    int16_t end;
+
+                    if (start_select > previous_position)
+                    {
+                        start = (start_select - abs(start_select - previous_position)) + 1;
+                        end = start_select;
+                    }
+                    else
+                    {
+                        start = start_select;
+                        end = previous_position;
+                    }
+
+                    //Unselect
+                    for (int i = start; i < end; i++)
+                        *(VGA_MEMORY + (i * 2) + 1) = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
+
+                    if (start_select > position)
+                    {
+                        start = start_select - abs(start_select - position) + 1;
+                        end = start_select;
+                    }
+                    else
+                    {
+                        start = start_select;
+                        end = position;
+                    }
+
+                    //Select
+                    for (int i = start; i < end; i++)
+                        *(VGA_MEMORY + (i * 2) + 1) = VGA_COLOR_WHITE | VGA_COLOR_BLUE << 4;
+                }
+            }
+            else if (packet.left_button == 0 && left_btn == 1)
+            { //Mouse Up
+                left_btn = 0;
+                click_count = 0;
+            }
 
             //draw mouse
-            *(VGA_MEMORY + (previous_position * 2) + 1) = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
-            int16_t position = (mouse_s.y * VGA_WIDTH) + mouse_s.x;
-            previous_position = position;
+            *(VGA_MEMORY + (previous_position * 2) + 1) = previous_color;
+            previous_color = *(VGA_MEMORY + (position * 2) + 1);
             *(VGA_MEMORY + (position * 2) + 1) = VGA_COLOR_BLACK | VGA_COLOR_WHITE << 4;
+            previous_position = position;
         }
     }
 

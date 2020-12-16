@@ -12,6 +12,7 @@ LIBS?=
 #Target
 KERNEL=MadOS.kernel
 
+
 # Objects
 KERNEL_OBJS=\
 	boot/extended_boot.o\
@@ -26,6 +27,7 @@ KERNEL_OBJS=\
 	interrupts/pic.o\
 	devices/keyboard.o\
 	devices/mouse.o\
+	devices/vesa.o\
 	memory/init_heap.o\
 	memory/k_malloc.o\
 	memory/k_calloc.o\
@@ -63,8 +65,8 @@ $(KERNEL): $(KERNEL_LINKER_LIST) $(KERNEL_LIB_PATHS)
 %.o: %.c
 	$(CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) $(KERNEL_LIBS) -c $< -o $@ 
 
-%.o: %.asm	
-	$(NASM) -f elf64 $^ -o $@
+%.o: %.asm
+	$(NASM) -f elf64 $^ -o $@ -MD $@.d
 
 -include $(KERNEL_DEPS)
 

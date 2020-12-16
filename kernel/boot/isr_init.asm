@@ -1,7 +1,5 @@
 [bits 64]
 
-%include "boot/PUSHPOP.asm"
-
 ; 0: Divide By Zero Exception
 GLOBAL isr0
 isr0:

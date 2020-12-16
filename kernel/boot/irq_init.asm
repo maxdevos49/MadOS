@@ -1,7 +1,5 @@
 [bits 64]
 
-%include "boot/PUSHPOP.asm"
-
 ; 32: IRQ0
 GLOBAL irq0
 irq0:
