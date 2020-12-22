@@ -27,7 +27,7 @@ void PIC_remap()
     outb(PIC2_DATA, ICW1_8086);
     io_wait();
 
-    //restore the saved mask of the PIC
+    //Unmask all interrupts because there is common stub to catch all of them
     outb(PIC1_DATA, 0x0);
     outb(PIC2_DATA, 0x0);
 }

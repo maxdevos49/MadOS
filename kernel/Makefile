@@ -46,11 +46,12 @@ KERNEL_OBJS=\
 # without making a random change to the kernel. Only needed for statically linked 
 # libraries.
 KERNEL_LIB_PATHS=\
-	 ../libraries/libc/libk.a
+	 ../libraries/libc/libk.a\
+	 ../libraries/libgraphics/libgraphics.a
 
 KERNEL_CFLAGS:= -Ttext 0x8000 -mno-red-zone $(CFLAGS)  
 KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude  
-KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc -ltest
+KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc -ltest -lgraphics
 
 # Do not edit below
 ###################################################################################

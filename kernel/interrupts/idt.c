@@ -20,7 +20,7 @@ void IDT_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags)
 
 extern void load_IDT(void);
 
-void IDT_install(void)
+void  IDT_install(void)
 {
     printf("Initializing IDT\n");
 

@@ -5,6 +5,15 @@ jmp enter_protected_mode
 
 enter_protected_mode:
     call detect_memory                    ; Detects memory used
+    
+    xor ax, ax
+    mov es, ax
+    mov di, FONT
+    call load_font
+    
+    mov ax, 1024 ; Width
+    mov bx, 768 ; Height
+    mov cl, 32 ; bpp
     call detect_vesa_mode
     call enable_A20                       ; Allows use of extended memory
     cli                                   ; We must switch off interrupts until we have set-up the protected mode
@@ -30,19 +39,17 @@ enable_A20:
     out 0x92, al
     ret
 
+%include "boot/vesa.asm"
 %include "boot/print.asm"
 %include "boot/gdt.asm"
 %include "boot/detect_memory.asm"
-%include "boot/vesa.asm"
 
-; ; 16 BIT Global Variables
+; 16 BIT Global Variables
 EXTENDED_SPACE_SUCCESS_MSG: db "We are successfully in extended space",0xA, 0xD, 0
 ENABLE_A20_MSG: db "Enabling A20",0xA, 0xD, 0
 LOADING_GDT_MSG: db "Loading GDT",0xA, 0xD, 0
 
-
 [bits 32]
-
 init_32_bit:
 
     mov ax, DATA_SEG                      ; Now in PM our old segments are meaningless,

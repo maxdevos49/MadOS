@@ -19,7 +19,7 @@ struct IDT64
     uint16_t offset_mid;
     uint32_t offset_high;
     uint32_t zero;
-};
+} __attribute__((__packed__));;
 
 void IDT_install();
 void IDT_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags);

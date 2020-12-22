@@ -20,5 +20,5 @@ export CFLAGS="-O0 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=$SYSROOT -isy
 export CPPFLAGS="-D__test"
 export LIBS=
 
-export SYSTEM_LIBRARY_PROJECTS="libraries/libtest libraries/libc"
+export SYSTEM_LIBRARY_PROJECTS="libraries/libtest libraries/libc libraries/libgraphics"
 export SYSTEM_PROJECTS="$SYSTEM_LIBRARY_PROJECTS Boot Kernel"

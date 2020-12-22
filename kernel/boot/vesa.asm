@@ -1,97 +1,168 @@
 [bits 16]
 
 VBE_INFO:
-    .signature:		resb 4 ; indicate support for VBE 2.0+
-    .version:       resb 2
-    .oem:           resb 4
-    .capabilities:  resb 4
-    .video_modes:   resb 4
-    .video_memory:  resb 2
-    .software_rev:  resb 2
-    .vendor:        resb 4
-    .product_name:  resb 4
-    .product_rev:   resb 4
-    .table_data:	resb 512-34
+    .signature:		dd 0        ; indicate support for VBE 2.0+
+    .version:       dw 0
+    .oem:           dd 0
+    .capabilities:  dd 0
+    .video_modes:   dd 0
+    .video_memory:  dw 0
+    .software_rev:  dw 0
+    .vendor:        dd 0
+    .product_name:  dd 0
+    .product_rev:   dd 0
+    .table_data:	times 478 db 0
     GLOBAL VBE_INFO
 
+
 VBE_MODE_INFO:
-    .attributes:        resb 2
-    .window_a:          resb 1
-    .window_b:          resb 1
-    .granularity:       resb 2
-    .window_size:       resb 2
-    .segment_a:         resb 2
-    .segment_b:         resb 2
-    .win_func_ptr:      resb 4
-    .pitch:             resb 2
-    .width:             resb 2
-    .height:            resb 2
-    .w_char:            resb 1
-    .y_char:            resb 1
-    .planes:            resb 1
-    .bpp:               resb 1
-    .banks:             resb 1
-    .memory_model:      resb 1
-    .bank_size:         resb 1
-    .image_pages:       resb 1
-    .reserved0:         resb 1
-    .red_mask:          resb 1
-    .red_position:      resb 1
-    .green_mask:        resb 1
-    .green_position:    resb 1
-    .blue_mask:         resb 1
-    .blue_position:     resb 1
-    .reserved_mask:     resb 1
-    .reserved_position: resb 1
-    .direct_color_attributes:   resb 1
-    .framebuffer:               resb 4
-    .off_screen_mem_off:        resb 4
-    .off_screen_mem_size:       resb 2
-    .reserved1:                 resb 206
+    .attributes:        dw 0
+    .window_a:          db 0
+    .window_b:          db 0
+    .granularity:       dw 0
+    .window_size:       dw 0
+    .segment_a:         dw 0
+    .segment_b:         dw 0
+    .win_func_ptr:      dd 0
+    .pitch:             dw 0
+    .width:             dw 0
+    .height:            dw 0
+    .w_char:            db 0
+    .y_char:            db 0
+    .planes:            db 0
+    .bpp:               db 0
+    .banks:             db 0
+    .memory_model:      db 0
+    .bank_size:         db 0
+    .image_pages:       db 0
+    .reserved0:         db 0
+    .red_mask:          db 0
+    .red_position:      db 0
+    .green_mask:        db 0
+    .green_position:    db 0
+    .blue_mask:         db 0
+    .blue_position:     db 0
+    .reserved_mask:     db 0
+    .reserved_position: db 0
+    .direct_color_attributes:   db 0
+    .framebuffer:               dd 0
+    .off_screen_mem_off:        dd 0
+    .off_screen_mem_size:       dw 0
+    .reserved1:                 times 206 db 0
     GLOBAL VBE_MODE_INFO
 
-current_mode: resb 2
+FONT:
+    times 4096 db 0
+    GLOBAL FONT
 
- detect_vesa_mode:
-    mov bx, VESA_MSG
-    call print_string
+    ; https://stanislavs.org/helppc/int_10-11.html
+load_font:
+    ; ask BIOS to return VGA bitmap fonts
+    push ds
+    push es
+    ;ask BIOS to return VGA bitmap fonts
+    mov ax, 1130h
+    mov bh, 6
+    int 10h
+    ;copy charmap   
+    push es
+    pop ds
+    pop es
+    mov si, bp
+    mov cx, 256*16/4
+    rep movsd
+    pop	ds
+    ret
 
-    ; Get Vesa info
-    mov ax, 0
-    mov es, ax
+detect_vesa_mode:
+    mov [.width], ax
+    mov [.height], bx
+    mov [.bpp], cl
+
+    sti
+
+    push es                  ; some VESA BIOSes destroy ES, or so I read
+    mov ax, 0x4F00           ; get VBE BIOS info
     mov di, VBE_INFO
-    mov ax, 0x4f00
     int 0x10
-    cmp ax, 0x4f
+    pop es
+
+    cmp ax, 0x4F             ; BIOS doesn't support VBE?
     jne vesa_error
 
-    ; .find_mode:
+    mov ax, word[VBE_INFO.video_modes]
+    mov [.offset], ax
+    mov ax, word[VBE_INFO.video_modes+2]
+    mov [.segment], ax
 
-    ; ;TODO
+    mov ax, [.segment]
+    mov fs, ax
+    mov si, [.offset]
 
-    ; mov ax,  word [current_mode]
-    ; cmp ax, 0xffff
-    ; jne .find_mode
-
-    ; Set Mode
-    mov ax, 0x4f02
-    mov bx, 0x4198
-    int 0x10
-    cmp ax, 0x4f
-    jne vesa_error
-
-    ; Get Mode Info
+.find_mode:
+    mov dx, [fs:si]
+    add si, 2
+    mov [.offset], si
+    mov [.mode], dx
     mov ax, 0
-    mov es, ax
+    mov fs, ax
+
+    cmp word [.mode], 0xFFFF ; end of list?
+    je vesa_mode_not_found
+
+    push es
+    mov ax, 0x4F01           ; get VBE mode info
+    mov cx, [.mode]
     mov di, VBE_MODE_INFO
-    mov ax, 0x4f01
-    mov cx, 0x0198
     int 0x10
-    cmp ax, 0x4f
+    pop es
+
+    cmp ax, 0x4F
     jne vesa_error
+
+    mov ax, [.width]
+    cmp ax, [VBE_MODE_INFO.width]
+    jne .next_mode
+
+    mov ax, [.height]
+    cmp ax, [VBE_MODE_INFO.height]
+    jne .next_mode
+
+    mov al, [.bpp]
+    cmp al, [VBE_MODE_INFO.bpp]
+    jne .next_mode
+
+    ; Set the mode
+    push es
+    mov ax, 0x4F02
+    mov bx, [.mode]
+    or bx, 0x4000            ; enable LFB
+    mov di, 0                ; not sure if some BIOSes need this... anyway it doesn't hurt
+    int 0x10
+    pop es
+
+    cmp ax, 0x4F
+    jne vesa_error
+
+    clc                      ; ???
+
+
 
     ret
 
+.next_mode:
+    mov ax, [.segment]
+    mov fs, ax
+    mov si, [.offset]
+    jmp .find_mode
+
+
+.width				dw 0
+.height				dw 0
+.bpp				db 0
+.segment			dw 0
+.offset				dw 0
+.mode				dw 0
 
 vesa_error:
     mov bx, VESA_ERROR_MSG
@@ -107,3 +178,4 @@ vesa_mode_not_found:
 VESA_MSG: db "Loading VESA information",0xA, 0xD,0
 VESA_ERROR_MSG: db "Failed to retrieve VESA BIOS information",0xA, 0xD,0
 VESA_NOT_FOUND_MSG: db "Failed to find a desired VESA Mode",0xA, 0xD,0
+TRY: db "TRY",0xA, 0xD,0
