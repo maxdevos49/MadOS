@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include <kernel/debug.h>
+#include <kernel/timer.h>
+
 bool left_shift_pressed = false;
 bool right_shift_pressed = false;
 uint8_t last_scan_code;
@@ -89,6 +92,12 @@ void keyboard_handler()
         keyboard_handler_0xE0(scan_code);
         break;
     default:
+        if (chr == 's'){
+            strace(10);
+
+            // TIMER_sleep_milliseconds(100);//Does not work because already in interrupt code
+        }
+        
         standard_keyboard_handler(scan_code, chr);
         break;
     }

@@ -1,6 +1,7 @@
-#include <graphics.h>
+#include "graphics.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -12,37 +13,29 @@ enum GRAPHICS_MODE
     TEXT,
     LINE
 };
-
 enum GRAPHICS_CURRENT_BUFFER
 {
     FRAMEBUFFER,
     BUFFER0,
     BUFFER1
 };
-
-struct GRAPHICS_CONTEXT
+struct __graphics_context
 {
-    //readonly
-    void *framebuffer;
+    int x_offset;
+    int y_offset;
+    int ctx_width;
+    int ctx_height;
+    uint32_t pitch;
+
     void *buffer0;
     void *buffer1;
     size_t buffer_size;
-    int screen_width;
-    int screen_height;
-    int bpp;
-    int pitch;
-    uint8_t *font;
+
     enum GRAPHICS_BUFFER_COUNT buffer_count;
 
     //Always current drawing buffer
     void *buffer;
     enum GRAPHICS_CURRENT_BUFFER current_back_buffer;
-
-    //Optimization rectangle maybe??
-    int left_edit;
-    int right_edit;
-    int top_edit;
-    int bottom_edit;
 
     //draw origin
     int origin_x;
@@ -78,137 +71,227 @@ static int g_abs(int n)
     return n * -1;
 }
 
-static struct GRAPHICS_CONTEXT ctx;
+static struct GRAPHICS_BUFFER _buffer;
 
-/**
- * Works so long as we have a valid framebuffer
- * */
-static int graphics_error(char *str, int error_code)
+int graphics_init(struct GRAPHICS_BUFFER *buffer)
 {
-    ctx.buffer = ctx.framebuffer;
-    set_stroke(0x00ffffff);
-    draw_text(ctx.screen_width / 2 - (strlen(str) * CHAR_WIDTH) / 2, ctx.screen_height / 2 - CHAR_HEIGHT / 2, str);
+    if (buffer == NULL)
+        return 1;
 
-    while (1)
-        ;
-    return error_code;
-}
+    if ((_buffer.bpp = buffer->bpp) != 32)
+        return 2;
 
-int graphics_init(struct GRAPHICS_BUFFER *buffer, enum GRAPHICS_BUFFER_COUNT buffer_count)
-{
-    ctx.framebuffer = buffer->framebuffer;
-    ctx.screen_width = buffer->width;
-    ctx.screen_height = buffer->height;
-    ctx.pitch = buffer->pitch;
-    ctx.font = buffer->font;
-    ctx.buffer_count = buffer_count;
+    if ((_buffer.font = buffer->font) == NULL)
+        return 3;
 
-    //Make sure its a supported bpp
-    if (buffer->bpp != 32)
-        return graphics_error("Invalid bpp. Excepted bpp == 32", 1); //Invalid bpp
+    if ((_buffer.framebuffer = buffer->framebuffer) == NULL)
+        return 4;
 
-    ctx.bpp = buffer->bpp;
+    if ((_buffer.height = buffer->height) <= 0)
+        return 5;
 
-    //Default buffer state
-    ctx.buffer0 = NULL;
-    ctx.buffer1 = NULL;
-    ctx.current_back_buffer = FRAMEBUFFER;
-    ctx.buffer = ctx.framebuffer;
+    if ((_buffer.width = buffer->width) <= 0)
+        return 6;
 
-    //Optimization rectangle init
-    ctx.left_edit = 0;
-    ctx.right_edit = 0;
-    ctx.top_edit = 0;
-    ctx.bottom_edit = 0;
+    if ((_buffer.pitch = buffer->pitch) <= 0)
+        return 7;
 
-    set_origin(0, 0);
-    rect(0, 0, 0, 0);
-    move_to(0, 0);
-    set_fill(0x00000000);   //black
-    set_stroke(0x00ffffff); //white
-    set_line_width(4);      // 4 px
-
-    //Buffer count init
-    if (buffer_count == DOUBLE)
-    {
-        ctx.buffer0 = (void *)((uint64_t)malloc(ctx.screen_width * ctx.screen_height * sizeof(uint32_t)) & 0xfffffff0);
-
-        if (ctx.buffer0 == NULL)
-            return graphics_error("Malloc Error: buffer0 is null.", 4);
-
-        ctx.buffer1 = NULL;
-        ctx.current_back_buffer = BUFFER0;
-        ctx.buffer = ctx.buffer0;
-    }
-    else if (buffer_count == TRIPLE)
-    {
-        ctx.buffer0 = malloc(ctx.screen_width * ctx.screen_height * sizeof(uint32_t));
-        if (ctx.buffer0 == NULL)
-            return graphics_error("Malloc Error: buffer0 is null.", 4);
-
-        ctx.buffer1 = malloc(ctx.screen_width * ctx.screen_height * sizeof(uint32_t));
-        if (ctx.buffer0 == NULL)
-            return graphics_error("Malloc Error: buffer1 is null.", 4);
-
-        ctx.current_back_buffer = BUFFER0;
-        ctx.buffer = ctx.buffer0;
-    }
-    else if (buffer_count != SINGLE)
-    {
-        return graphics_error("Invalid buffer Count", 2);
-    }
-
-    clear_rect(0, 0, ctx.screen_width, ctx.screen_height);
+    _buffer.valid = 1;
 
     return 0;
 }
 
-void swap_buffer()
+int graphics_uninit()
+{
+    if (_buffer.valid == 0)
+        return 1;
+
+    _buffer.valid = 0;
+    _buffer.framebuffer = NULL;
+    _buffer.font = NULL;
+    _buffer.bpp = 0;
+    _buffer.height = 0;
+    _buffer.width = 0;
+    _buffer.pitch = 0;
+
+    return 0;
+}
+
+GRAPHICS_CONTEXT *get_graphics_ctx(enum GRAPHICS_BUFFER_COUNT buffer_count, int x, int y, int width, int height)
+{
+    printf("Gettings Graphics context\n");
+    GRAPHICS_CONTEXT *ctx = (struct __graphics_context *)malloc(sizeof(struct __graphics_context));
+
+    if (ctx == NULL)
+    {
+        print_error(ctx, "CTX malloc error", 1);
+        return NULL;
+    }
+
+    if (_buffer.valid == 0)
+    {
+        print_error(ctx, "Invalid Buffer", 1);
+        return NULL;
+    }
+
+    ctx->buffer_count = buffer_count;
+
+    ctx->x_offset = x;
+    ctx->y_offset = y;
+    ctx->ctx_width = width;
+    ctx->ctx_height = height;
+    ctx->pitch = width * sizeof(uint32_t);
+
+    //Default buffer state
+    ctx->buffer0 = NULL;
+    ctx->buffer1 = NULL;
+    ctx->current_back_buffer = FRAMEBUFFER;
+    ctx->buffer = _buffer.framebuffer;
+    ctx->buffer_size = width * height;
+
+    set_origin(ctx, 0, 0);
+    rect(ctx, 0, 0, 0, 0);
+    move_to(ctx, 0, 0);
+    set_fill(ctx, 0x00000000);   //black
+    set_stroke(ctx, 0x00ffffff); //white
+    set_line_width(ctx, 4);      // 4 px
+
+    //Buffer count init
+    if (buffer_count == DOUBLE)
+    {
+        ctx->buffer0 = malloc(ctx->ctx_width * ctx->ctx_height * sizeof(uint32_t));
+
+        if (ctx->buffer0 == NULL)
+        {
+            print_error(ctx, "Malloc Error: buffer0 is null.", 4);
+            return NULL;
+        }
+
+        ctx->buffer1 = NULL;
+        ctx->current_back_buffer = BUFFER0;
+        ctx->buffer = ctx->buffer0;
+    }
+    else if (buffer_count == TRIPLE)
+    {
+        ctx->buffer0 = malloc(ctx->ctx_width * ctx->ctx_height * sizeof(uint32_t));
+        if (ctx->buffer0 == NULL)
+        {
+            print_error(ctx, "Malloc Error: buffer0 is null.", 4);
+            return NULL;
+        }
+
+        ctx->buffer1 = malloc(ctx->ctx_width * ctx->ctx_height * sizeof(uint32_t));
+        if (ctx->buffer0 == NULL)
+        {
+            print_error(ctx, "Malloc Error: buffer1 is null.", 4);
+            return NULL;
+        }
+
+        ctx->current_back_buffer = BUFFER0;
+        ctx->buffer = ctx->buffer0;
+    }
+    else if (buffer_count != SINGLE)
+    {
+        print_error(ctx, "Invalid buffer Count", 2);
+        return NULL;
+    }
+
+    clear_rect(ctx, 0, 0, ctx->ctx_width, ctx->ctx_height);
+    swap_buffer(ctx);
+
+    return ctx;
+}
+
+int destroy_graphics_ctx(GRAPHICS_CONTEXT *ctx)
+{
+    if (ctx == NULL)
+        return 1;
+
+    if (ctx->buffer_count == DOUBLE)
+    {
+        free(ctx->buffer0);
+    }
+    else if (ctx->buffer_count == TRIPLE)
+    {
+        free(ctx->buffer0);
+        free(ctx->buffer1);
+    }
+
+    free(ctx);
+
+    return 0;
+}
+
+int print_error(GRAPHICS_CONTEXT *ctx, char *str, int error_code)
+{
+    ctx->buffer = _buffer.framebuffer;
+    ctx->current_back_buffer = FRAMEBUFFER;
+
+    set_stroke(ctx, 0x00ffffff);
+    draw_text(ctx, _buffer.width / 2 - (strlen(str) * CHAR_WIDTH) / 2, _buffer.height / 2 - CHAR_HEIGHT / 2, str);
+    printf("%s\n", str);
+
+    return error_code;
+}
+
+void swap_buffer(GRAPHICS_CONTEXT *ctx)
 {
     //If single buffering there is no need to swap anything
-    if (ctx.current_back_buffer == FRAMEBUFFER)
+    if (ctx->current_back_buffer == FRAMEBUFFER)
         return;
 
-    uint64_t *f_offset = (uint64_t *)ctx.framebuffer;
-    uint64_t *b_offset = (uint64_t *)ctx.buffer;
+    int x, y, w, h;
+    x = ctx->x_offset;
+    y = ctx->y_offset;
+    w = ctx->ctx_width + x;
+    h = ctx->ctx_height + y;
 
-    for (int i = 0; i < (ctx.screen_height * ctx.screen_width) / 2; i++)
-        f_offset[i] = b_offset[i];
+    printf("X:%d Y:%d W:%d H:%d\n", x, y, w, h);
+
+    for (int i = y; i < h; i++)
+    {
+        uint32_t *f_offset = (uint32_t *)((uint64_t)_buffer.framebuffer + (_buffer.width * i));
+        uint32_t *b_offset = (uint32_t *)((uint64_t)ctx->buffer + (_buffer.width * i));
+
+        for (int j = x; j < w; j++)
+            f_offset[j] = b_offset[j];
+    }
 
     //If double buffering then there is no back buffer swap
-    if (ctx.buffer_count == DOUBLE)
+    if (ctx->buffer_count == DOUBLE)
         return;
 
     //Swap target buffers
-    if (ctx.current_back_buffer == BUFFER0)
+    if (ctx->current_back_buffer == BUFFER0)
     {
-        ctx.buffer = ctx.buffer1;
-        ctx.current_back_buffer = BUFFER1;
+        ctx->buffer = ctx->buffer1;
+        ctx->current_back_buffer = BUFFER1;
     }
-    else if (ctx.current_back_buffer == BUFFER1)
+    else if (ctx->current_back_buffer == BUFFER1)
     {
-        ctx.buffer = ctx.buffer0;
-        ctx.current_back_buffer = BUFFER0;
+        ctx->buffer = ctx->buffer0;
+        ctx->current_back_buffer = BUFFER0;
     }
 }
 
-void set_origin(int x, int y)
+void set_origin(GRAPHICS_CONTEXT *ctx, int x, int y)
 {
-    ctx.origin_x = x;
-    ctx.origin_y = y;
+    ctx->origin_x = x;
+    ctx->origin_y = y;
 }
 
-void fill()
+void fill(GRAPHICS_CONTEXT *ctx)
 {
-    if (ctx.mode == RECT)
+    // printf("Fill(): 0x%x\n", fill);
+    if (ctx->mode == RECT)
     {
-        int left = ctx.x + ctx.origin_x;
-        int right = ctx.x + ctx.w + ctx.origin_x;
-        int top = ctx.y + ctx.origin_y;
-        int bottom = ctx.y + ctx.h + ctx.origin_y;
+        int left = ctx->x + ctx->origin_x;
+        int right = left + ctx->w;
+        int top = ctx->y + ctx->origin_y;
+        int bottom = top + ctx->h;
 
-        int width = ctx.screen_width;
-        int height = ctx.screen_height;
+        int width = ctx->ctx_width;
+        int height = ctx->ctx_height;
 
         if (left < 0)
             left = 0;
@@ -232,21 +315,23 @@ void fill()
 
         for (int i = top; i < bottom; i++)
         {
-            uint32_t *offset = (i * ctx.pitch + ctx.buffer);
+            uint32_t *offset = (uint32_t *)((uint64_t)i * (uint64_t)_buffer.width + (uint64_t)ctx->buffer);
 
             for (int j = left; j < right; j++)
-                offset[j] = ctx.fill_32;
+                offset[j] = ctx->fill_32;
         }
+
+        // printf("L:%d R:%d T:%d B:%d W:%d H:%d M:%d\n", left, right, top, bottom, width, height, ctx->mode);
     }
 }
 
-void set_fill(uint32_t color)
+void set_fill(GRAPHICS_CONTEXT *ctx, uint32_t color)
 {
-    ctx.fill_64 = color32_to_color64(color);
-    ctx.fill_32 = color;
+    ctx->fill_64 = color32_to_color64(color);
+    ctx->fill_32 = color;
 }
 
-static void render_line(int x0, int y0, int x1, int y1)
+static void render_line(GRAPHICS_CONTEXT *ctx, int x0, int y0, int x1, int y1)
 {
 
     int dx = g_abs(x1 - x0);
@@ -257,7 +342,7 @@ static void render_line(int x0, int y0, int x1, int y1)
 
     while (1)
     {
-        pixel(x0, y0, ctx.stroke_32);
+        pixel(ctx, x0, y0, ctx->stroke_32);
 
         if (x0 == x1 && y0 == y1)
             break;
@@ -277,101 +362,101 @@ static void render_line(int x0, int y0, int x1, int y1)
     }
 }
 
-void stroke()
+void stroke(GRAPHICS_CONTEXT *ctx)
 {
-    int left = ctx.x;
-    int top = ctx.y;
-    int right = left + ctx.w;
-    int bottom = top + ctx.h;
+    int left = ctx->x;
+    int top = ctx->y;
+    int right = left + ctx->w;
+    int bottom = top + ctx->h;
 
-    if (ctx.mode == RECT)
+    if (ctx->mode == RECT)
     {
-        move_to(left, top);
-        line_to(right, top);
-        stroke();
-        line_to(right, bottom);
-        stroke();
-        line_to(left, bottom);
-        stroke();
-        line_to(left, top);
-        stroke();
-        ctx.mode = RECT;
-        move_to(left, top);
+        move_to(ctx, left, top);
+        line_to(ctx, right, top);
+        stroke(ctx);
+        line_to(ctx, right, bottom);
+        stroke(ctx);
+        line_to(ctx, left, bottom);
+        stroke(ctx);
+        line_to(ctx, left, top);
+        stroke(ctx);
+        ctx->mode = RECT;
+        move_to(ctx, left, top);
     }
-    else if (ctx.mode == LINE)
+    else if (ctx->mode == LINE)
     {
-        int x0 = ctx.x;
-        int y0 = ctx.y;
+        int x0 = ctx->x;
+        int y0 = ctx->y;
 
-        int x1 = ctx.line_x;
-        int y1 = ctx.line_y;
-        for (int i = -ctx.line_width / 2; i < ctx.line_width / 2; i++)
+        int x1 = ctx->line_x;
+        int y1 = ctx->line_y;
+        for (int i = -ctx->line_width / 2; i < ctx->line_width / 2; i++)
         {
-            render_line(x0 + i, y0 + i, x1 + i, y1 + i);
+            render_line(ctx, x0 + i, y0 + i, x1 + i, y1 + i);
         }
     }
 }
 
-void set_stroke(uint32_t color)
+void set_stroke(GRAPHICS_CONTEXT *ctx, uint32_t color)
 {
-    ctx.stroke_64 = color32_to_color64(color);
-    ctx.stroke_32 = color;
+    ctx->stroke_64 = color32_to_color64(color);
+    ctx->stroke_32 = color;
 }
 
-void set_line_width(uint32_t thickness)
+void set_line_width(GRAPHICS_CONTEXT *ctx, uint32_t thickness)
 {
-    ctx.line_width = thickness;
+    ctx->line_width = thickness;
 }
 
-void move_to(int x, int y)
+void move_to(GRAPHICS_CONTEXT *ctx, int x, int y)
 {
-    ctx.x = x;
-    ctx.y = y;
-    ctx.line_x = x;
-    ctx.line_y = y;
-    ctx.mode = NONE;
+    ctx->x = x;
+    ctx->y = y;
+    ctx->line_x = x;
+    ctx->line_y = y;
+    ctx->mode = NONE;
 }
 
-void line_to(int x, int y)
+void line_to(GRAPHICS_CONTEXT *ctx, int x, int y)
 {
-    ctx.x = ctx.line_x;
-    ctx.y = ctx.line_y;
-    ctx.line_x = x;
-    ctx.line_y = y;
-    ctx.mode = LINE;
-    stroke();
+    ctx->x = ctx->line_x;
+    ctx->y = ctx->line_y;
+    ctx->line_x = x;
+    ctx->line_y = y;
+    ctx->mode = LINE;
+    stroke(ctx);
 }
 
-void rect(int x, int y, int w, int h)
+void rect(GRAPHICS_CONTEXT *ctx, int x, int y, int w, int h)
 {
-    ctx.x = x;
-    ctx.y = y;
-    ctx.w = w;
-    ctx.h = h;
-    ctx.mode = RECT;
+    ctx->x = x;
+    ctx->y = y;
+    ctx->w = w;
+    ctx->h = h;
+    ctx->mode = RECT;
 }
 
-void stroke_rect(int x, int y, int w, int h)
+void stroke_rect(GRAPHICS_CONTEXT *ctx, int x, int y, int w, int h)
 {
-    rect(x, y, w, h);
-    stroke();
+    rect(ctx, x, y, w, h);
+    stroke(ctx);
 }
 
-void fill_rect(int x, int y, int w, int h)
+void fill_rect(GRAPHICS_CONTEXT *ctx, int x, int y, int w, int h)
 {
-    rect(x, y, w, h);
-    fill();
+    rect(ctx, x, y, w, h);
+    fill(ctx);
 }
 
-void clear_rect(int x, int y, int w, int h)
+void clear_rect(GRAPHICS_CONTEXT *ctx, int x, int y, int w, int h)
 {
-    uint32_t color = ctx.fill_32;
-    set_fill(0x00000000);
-    fill_rect(x - ctx.origin_x, y - ctx.origin_y, w, h);
-    set_fill(color);
+    uint32_t color = ctx->fill_32;
+    set_fill(ctx, 0x00000000);
+    fill_rect(ctx, x - ctx->origin_x, y - ctx->origin_y, w, h);
+    set_fill(ctx, color);
 }
 
-void draw_char(int x, int y, uint8_t c)
+void draw_char(GRAPHICS_CONTEXT *ctx, int x, int y, uint8_t c)
 {
     int cx, cy;
     int mask[8] = {1, 2, 4, 8, 16, 32, 64, 128};
@@ -386,51 +471,76 @@ void draw_char(int x, int y, uint8_t c)
         return;
 
     //CULL bottom and right
-    if (right > ctx.screen_width + CHAR_WIDTH || bottom > ctx.screen_height + CHAR_HEIGHT)
+    if (right > ctx->ctx_width + CHAR_WIDTH || bottom > ctx->ctx_height + CHAR_HEIGHT)
         return;
 
-    uint8_t *glyph = (uint8_t *)((uint64_t)ctx.font + (uint64_t)c * (uint64_t)16);
+    uint8_t *glyph = (uint8_t *)((uint64_t)_buffer.font + (uint64_t)c * (uint64_t)16);
 
     for (cy = 0; cy < 16; cy++)
     {
-        uint32_t *offset = (uint32_t *)((top + cy) * ctx.pitch + (uint64_t)ctx.buffer);
+        uint32_t *offset = (uint32_t *)((top + cy) * ctx->pitch + (uint64_t)ctx->buffer);
 
         for (cx = 0; cx < 8; cx++)
         {
-            if (left + CHAR_WIDTH - cx + 1 > ctx.screen_width)
+            if (left + CHAR_WIDTH - cx + 1 > ctx->ctx_width)
                 continue;
 
             if (glyph[cy] & mask[cx])
-                offset[left - cx + CHAR_WIDTH] = ctx.stroke_32;
+                offset[left - cx + CHAR_WIDTH] = ctx->stroke_32;
         }
     }
 }
 
-void draw_text(int x, int y, char *txt)
+void draw_text(GRAPHICS_CONTEXT *ctx, int x, int y, char *txt)
 {
-    int sx = x + ctx.origin_x;
-    int sy = y + ctx.origin_y;
+    int sx = x + ctx->origin_x;
+    int sy = y + ctx->origin_y;
 
     int i = 0;
     int offset = 0;
     while (txt[i] != NULL)
     {
-        draw_char(sx + offset, sy, txt[i]);
+        draw_char(ctx, sx + offset, sy, txt[i]);
         i++;
         offset += CHAR_WIDTH;
     }
 }
 
-void pixel(int x, int y, uint32_t color)
+void pixel(GRAPHICS_CONTEXT *ctx, int x, int y, uint32_t color)
 {
-    int sx = x + ctx.origin_x;
-    int sy = y + ctx.origin_y;
+    int sx = x + ctx->origin_x;
+    int sy = y + ctx->origin_y;
 
-    if (sx < 0 || sx > ctx.screen_width)
+    if (sx < 0 || sx > ctx->ctx_width)
         return;
 
-    if (sy < 0 || sy > ctx.screen_height)
+    if (sy < 0 || sy > ctx->ctx_height)
         return;
 
-    *((uint32_t *)(sy * ctx.pitch + (sx * 4) + (uint64_t)ctx.buffer)) = color;
+    *((uint32_t *)(sy * ctx->pitch + (sx * 4) + (uint64_t)ctx->buffer)) = color;
+}
+
+uint32_t get_screen_width()
+{
+    return _buffer.width;
+}
+
+uint32_t get_screen_height()
+{
+    return _buffer.height;
+}
+
+uint32_t get_ctx_width(GRAPHICS_CONTEXT *ctx)
+{
+    return ctx->ctx_width;
+}
+
+uint32_t get_ctx_height(GRAPHICS_CONTEXT *ctx)
+{
+    return ctx->ctx_height;
+}
+
+uint32_t get_ctx_pitch(GRAPHICS_CONTEXT *ctx)
+{
+    return ctx->pitch;
 }

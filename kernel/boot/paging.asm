@@ -27,6 +27,8 @@ setup_identity_paging:
     mov dword [edi], 0x800000f3;Gb 3
     add edi, 0x8
     mov dword [edi], 0xc00000f3;Gb 4
+    add edi, 0x8
+    mov dword [edi], 0x1000000f3;Gb 5
 
     ; ; init PD entry
     ; mov dword [edi], 0x4003

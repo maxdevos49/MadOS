@@ -35,7 +35,7 @@ void TIMER_install()
 
     //Configure PIT for timers
     printf("\tConfiguring PIT... %dhz\n", TIMER_PIT_FREQUENCY);
-    PIT_set_periodic_frequency(TIMER_PIT_FREQUENCY);
+    // PIT_set_periodic_frequency(TIMER_PIT_FREQUENCY);
     PIT_disable_periodic_irq0();
 
     //Configure RTC

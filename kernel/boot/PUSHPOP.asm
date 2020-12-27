@@ -5,7 +5,8 @@
     push rbx
     push rcx
     push rdx
-
+    push rbp
+    
     push rsi
     push rdi
 
@@ -32,6 +33,7 @@
     pop rdi
     pop rsi
 
+    pop rbp
     pop rdx
     pop rcx
     pop rbx

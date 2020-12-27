@@ -115,53 +115,72 @@ void ISRs_install()
     IDT_set_gate(31, (uint64_t)isr31, 0x08, 0x8E);
 }
 
+static void page_fault(struct registers *regs)
+{
+
+    switch (regs->err_code)
+    {
+    case 0x0:
+        printf("[Error Code: %x] Supervisory process tried to read a non-present page entry.\n", regs->err_code);
+        break;
+    case 0x1:
+        printf("[Error Code: %x] Supervisory process tried to read a page and caused a protection fault.\n", regs->err_code);
+        break;
+    case 0x2:
+        printf("[Error Code: %x] Supervisory process tried to write to a non-present page entry.\n", regs->err_code);
+        break;
+    case 0x3:
+        printf("[Error Code: %x] Supervisory process tried to write a page and caused a protection fault.\n", regs->err_code);
+        break;
+    case 0x4:
+        printf("[Error Code: %x] User process tried to read a non-present page entry.\n", regs->err_code);
+        break;
+    case 0x5:
+        printf("[Error Code: %x] User process tried to read a page and caused a protection fault.\n", regs->err_code);
+        break;
+    case 0x6:
+        printf("[Error Code: %x] User process tried to write to a non-present page entry.\n", regs->err_code);
+        break;
+    case 0x7:
+        printf("[Error Code: %x] User process tried to write a page and caused a protection fault.\n", regs->err_code);
+        break;
+    default:
+        printf("Unknown Page fault error. Error Code: %x\n", regs->err_code);
+        break;
+    }
+    printf("[Instruction Pointer: 0x%x]\n\n", regs->rip);
+}
+
+static void general_protection_fault(struct registers *regs)
+{
+    printf("[Error code: 0x%x]\n", regs->err_code);
+    printf("[Instruction Pointer: 0x%x]\n\n", regs->rip);
+}
+
 void fault_handler(struct registers *regs)
 {
+
     if (regs->int_num < 32)
     {
-        if (regs->int_num == 14)
-        { //page fault
-            TTY_set_theme(VGA_COLOR_RED, VGA_COLOR_WHITE);
-            switch (regs->err_code)
-            {
-            case 0x0:
-                printf("\n[Error Code: %x] Supervisory process tried to read a non-present page entry.\n", regs->err_code);
-                break;
-            case 0x1:
-                printf("\n[Error Code: %x] Supervisory process tried to read a page and caused a protection fault.\n", regs->err_code);
-                break;
-            case 0x2:
-                printf("\n[Error Code: %x] Supervisory process tried to write to a non-present page entry.\n", regs->err_code);
-                break;
-            case 0x3:
-                printf("\n[Error Code: %x] Supervisory process tried to write a page and caused a protection fault.\n", regs->err_code);
-                break;
-            case 0x4:
-                printf("\n[Error Code: %x] User process tried to read a non-present page entry.\n", regs->err_code);
-                break;
-            case 0x5:
-                printf("\n[Error Code: %x] User process tried to read a page and caused a protection fault.\n", regs->err_code);
-                break;
-            case 0x6:
-                printf("\n[Error Code: %x] User process tried to write to a non-present page entry.\n", regs->err_code);
-                break;
-            case 0x7:
-                printf("\n[Error Code: %x] User process tried to write a page and caused a protection fault.\n", regs->err_code);
-                break;
-            default:
-                printf("\nUnknown Page fault error. Error Code: %x\n", regs->err_code);
-                break;
-            }
+        TTY_set_theme(VGA_COLOR_RED, VGA_COLOR_WHITE);
+        printf("\nKernel Panic: %s\n\n System will now Halt\n\nDetails:\n\n", exception_messages[regs->int_num]);
+
+        switch (regs->int_num)
+        {
+        case 13:
+            general_protection_fault(regs);
+            break;
+        case 14:
+            page_fault(regs);
+            break;
+        default:
+            printf("[Error code: %x]\n", regs->err_code);
+            break;
         }
 
-        // abort(exception_messages[regs->int_num]);
+        strace(10);
 
-        TTY_set_theme(VGA_COLOR_RED, VGA_COLOR_WHITE);
-        printf("Kernel Panic: %s\n\n System will now Halt\n\n", exception_messages[regs->int_num]);
-        printf("Error code: %x\n", regs->err_code);
-        // strace(5);
         TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
-
 
         while (1)
             ;

@@ -132,21 +132,19 @@ detect_vesa_mode:
     cmp al, [VBE_MODE_INFO.bpp]
     jne .next_mode
 
-    ; Set the mode
-    push es
-    mov ax, 0x4F02
-    mov bx, [.mode]
-    or bx, 0x4000            ; enable LFB
-    mov di, 0                ; not sure if some BIOSes need this... anyway it doesn't hurt
-    int 0x10
-    pop es
+    ;Set the mode
+    ; push es
+    ; mov ax, 0x4F02
+    ; mov bx, [.mode]
+    ; or bx, 0x4000            ; enable LFB
+    ; mov di, 0                ; not sure if some BIOSes need this... anyway it doesn't hurt
+    ; int 0x10
+    ; pop es
 
-    cmp ax, 0x4F
-    jne vesa_error
+    ; cmp ax, 0x4F
+    ; jne vesa_error
 
     clc                      ; ???
-
-
 
     ret
 

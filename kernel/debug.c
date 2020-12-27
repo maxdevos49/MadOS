@@ -9,14 +9,12 @@ void strace(uint32_t max_frames)
     asm volatile("mov %%rbp,%0"
                  : "=r"(stk)::);
 
-    printf("Stack trace: %x \n", strace);
+    printf("Stack trace: \n\t0x%x \t %s - %s:%d\n", strace, __func__, __FILE__, 5);
 
     for (uint32_t frame = 0; (stk != NULL) && (frame < max_frames); ++frame)
     {
-        // printf("%x --- \t",stk);
-
         //Unwind to previous stack frame
-        printf("  0x%x\n", stk->eip); //Ignore vscode complaining because its assigned with the inline assembly
+        printf("\t0x%x \t %s - %s:%d\n", stk->eip, "??", "??", 0);
         stk = stk->ebp;
     }
 }

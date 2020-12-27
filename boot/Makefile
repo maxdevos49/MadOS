@@ -21,6 +21,8 @@ install-bin: $(BINARIES)
 install-headers:
 	@echo No Boot Headers
 
+debug:
+
 clean:
 	@find . -type f -name "*.o" -delete -print
 	@find . -type f -name "*.bin" -delete -print

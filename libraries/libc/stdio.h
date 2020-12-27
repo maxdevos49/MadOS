@@ -12,15 +12,14 @@ extern "C"
 {
 #endif
 
+    typedef struct _io_buffer
+    {
+        //TODO
+    } FILE;
+
     int printf(const char *__restrict, ...);
     int putchar(int);
     int puts(const char *);
-
-#ifdef __test
-    void test_printf();
-// char* test_putchar();
-// char* test_puts();
-#endif
 
 #if defined(__cplusplus)
 }

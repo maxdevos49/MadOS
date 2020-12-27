@@ -1,5 +1,7 @@
 #include <kernel/memory/heap.h>
 
+#include <stdlib.h>
+
 void *k_malloc(size_t size)
 {
     uint64_t rem = size % 8;
@@ -55,12 +57,13 @@ void *k_malloc(size_t size)
 
         if (current_mem_seg->next_free_segment == NULL)
         {
-            // abort();
+            abort("Heap out of physical space");
             return NULL; //Should never technically happen unless hit the physical ram limit of the system
         }
 
         current_mem_seg = current_mem_seg->next_free_segment;
     }
 
-    return 0; // should also never get here;
+    abort("Heap done fucked up");
+    return NULL; // should also never get here;
 }

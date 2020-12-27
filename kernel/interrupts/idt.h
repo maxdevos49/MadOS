@@ -5,7 +5,7 @@
 
 struct registers
 {
-    uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rdi, rsi, rdx, rcx, rbx, rax;
+    uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rdi, rsi, rbp, rdx, rcx, rbx, rax;
     uint64_t int_num, err_code;
     uint64_t rip, cs, rflags, useresp, ss;
 };
@@ -19,7 +19,7 @@ struct IDT64
     uint16_t offset_mid;
     uint32_t offset_high;
     uint32_t zero;
-} __attribute__((__packed__));;
+} __attribute__((__packed__));
 
 void IDT_install();
 void IDT_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags);

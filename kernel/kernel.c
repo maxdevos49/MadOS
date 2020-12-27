@@ -28,6 +28,8 @@
 #include <time.h>
 #include <graphics.h>
 
+#include "pacman/pacman.h"
+
 // #ifdef __test
 // //TODO relocate somewhere else
 // #include <ctest.h>
@@ -85,10 +87,7 @@ char *splash =
 
 void kernel_main(void)
 {
-
-    TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
     TTY_init();
-
     printf("Booting Kernel\n");
 
     init_memory((struct mem_map_entry *)0x6000);
@@ -101,59 +100,16 @@ void kernel_main(void)
     IRQs_install();
 
     TIMER_install();
-
-    IRQ_enable();
-
-    fs_root = INITRD_init();
-
-    PCI_configure();
     KB_install();
     MOUSE_install();
 
-    struct GRAPHICS_BUFFER buffer;
+    IRQ_enable();
+    fs_root = INITRD_init();
+    VESA_install();
 
-    VESA_install(&buffer);
+    // PCI_configure();
 
-    graphics_init(&buffer, DOUBLE);
-
-    int width = 28;
-    int height = 31;
-    int swidth = buffer.width;
-    int sheight = buffer.height;
-    int scale = sheight / height;
-    int x = 0;
-    int y = 0;
-    while (1)
-    {
-        IRQ_disable();
-
-        set_fill(0x0000ff);
-        set_line_width(2);
-
-        for (int i = 0; i < height; i++)
-        {
-            if (i > 2 && i < height - 2)
-                set_fill(0x0000ff);
-            else
-                set_fill(0);
-
-            for (int j = 0; j < width; j++)
-            {
-                fill_rect(j * (scale), i * (scale), scale, scale);
-            }
-        }
-
-        x += 2;
-        set_fill(0x00ff00);
-        fill_rect(x, y, 100, 100);
-
-        draw_text(12 * scale, scale, "High Score");
-
-        swap_buffer();
-        IRQ_enable();
-
-        TIMER_sleep_milliseconds(20);
-    }
+    pacman_main(0, NULL);
 
     // printf("%s\n", splash);
 

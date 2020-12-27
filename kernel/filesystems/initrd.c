@@ -76,7 +76,7 @@ static struct fs_node *initrd_finddir(struct fs_node *node, char *name)
 
 struct fs_node *INITRD_init()
 {
-    printf("Initlizing Ram Disk\n");
+    printf("Initializing Ram Disk\n");
 
     initrd_header = (struct initrd_header *)&initrd_data_header;
     file_headers = (void *)((long long)&initrd_data_header + sizeof(struct initrd_header));

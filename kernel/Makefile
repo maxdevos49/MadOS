@@ -5,6 +5,7 @@
 #Defaults
 NASM?=nasm
 CC?=x86_64-elf-gcc
+OBJCOPY?=x86_64-elf-objcopy
 CFLAGS?=-O0 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=../sysroot -isystem=../sysroot/usr/include
 CPPFLAGS?=
 LIBS?=
@@ -40,6 +41,12 @@ KERNEL_OBJS=\
 	pci/core.o\
 	filesystems/fs.o\
 	filesystems/initrd.o\
+	stack_smash.o\
+	pacman/pacman.o\
+	pacman/ai.o\
+	pacman/render.o\
+	pacman/input.o
+
 
 
 # Ensures if we make a change to the library it gets relinked to the kernel 
@@ -49,7 +56,7 @@ KERNEL_LIB_PATHS=\
 	 ../libraries/libc/libk.a\
 	 ../libraries/libgraphics/libgraphics.a
 
-KERNEL_CFLAGS:= -Ttext 0x8000 -mno-red-zone $(CFLAGS)  
+KERNEL_CFLAGS:=-Ttext 0x8000 $(CFLAGS)  
 KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude  
 KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc -ltest -lgraphics
 
@@ -59,15 +66,23 @@ KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc -ltest -lgraphics
 KERNEL_LINKER_LIST+=$(KERNEL_OBJS)
 KERNEL_DEPS:=$(KERNEL_LINKER_LIST:.o=.d)
 
+TMP:=$(filter-out 	boot/extended_boot.o boot/binaries.o, $(KERNEL_OBJS))
+KERNEL_DEBUG:=$(TMP:.o=.s)
+
 # Links MadOS.kernel
 $(KERNEL): $(KERNEL_LINKER_LIST) $(KERNEL_LIB_PATHS)
-	$(CC) $(KERNEL_CFLAGS)  $(KERNEL_CPPFLAGS) -T"linker.ld" $(KERNEL_LINKER_LIST) $(KERNEL_LIBS) -o $(KERNEL)
+	$(CC) $(KERNEL_CFLAGS)  $(KERNEL_CPPFLAGS) -T"linker.ld" $(KERNEL_LINKER_LIST) $(KERNEL_LIBS) -o $(KERNEL).elf
+	$(OBJCOPY) -O binary $(KERNEL).elf $(KERNEL)
+
 
 %.o: %.c
 	$(CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) $(KERNEL_LIBS) -c $< -o $@ 
 
 %.o: %.asm
 	$(NASM) -f elf64 $^ -o $@ -MD $@.d
+
+%.s: %.c
+	$(CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) $(KERNEL_LIBS) -S -masm=intel -fverbose-asm $< -o $@
 
 -include $(KERNEL_DEPS)
 
@@ -80,7 +95,11 @@ install-headers:
 install-bin: $(KERNEL)
 	cp -RL $(KERNEL) $(SYSROOT)$(KERNEL_DIR)
 
+debug: $(KERNEL_DEBUG)
+
 clean:
 	@find . -type f -name "*.o" -delete -print
 	@find . -type f -name "*.d" -delete -print
+	@find . -type f -name "*.s" -delete -print
 	@find . -type f -name "*.kernel" -delete -print
+	@find . -type f -name "*.elf" -delete -print

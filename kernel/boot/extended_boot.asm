@@ -4,42 +4,43 @@ call print_string
 jmp enter_protected_mode
 
 enter_protected_mode:
-    call detect_memory                    ; Detects memory used
-    
+    call detect_memory                             ; Detects memory used
+
     xor ax, ax
     mov es, ax
     mov di, FONT
     call load_font
-    
-    mov ax, 1024 ; Width
-    mov bx, 768 ; Height
-    mov cl, 32 ; bpp
+
+    mov ax, 1024                                  ; Width
+    mov bx, 768                                   ; Height
+    mov cl, 32                                    ; bpp
     call detect_vesa_mode
-    call enable_A20                       ; Allows use of extended memory
-    cli                                   ; We must switch off interrupts until we have set-up the protected mode
-                                            ; otherwise interrupts will run riot.
+    
+    call enable_A20                                ; Allows use of extended memory
+    cli                                            ; We must switch off interrupts until we have set-up the protected mode
+                                                   ; otherwise interrupts will run riot.
     mov bx, LOADING_GDT_MSG
     call print_string
 
-    lgdt [gdt_descriptor]                 ; Load our global descriptor table, which defines the
-                                            ; protected mode segments (e.g. for code and data)
-    mov eax, cr0                          ; To make the switch to protected mode, we set
-    or eax, 0x1                           ; the first bit of CRO, a control register
+    lgdt [gdt_descriptor]                          ; Load our global descriptor table, which defines the
+                                                   ; protected mode segments (e.g. for code and data)
+    mov eax, cr0                                   ; To make the switch to protected mode, we set
+    or eax, 0x1                                    ; the first bit of CRO, a control register
     mov cr0, eax
 
-    jmp CODE_SEG:init_32_bit              ; Make a far jump(i.e. to a new segment) to out 32-bit
-                                            ; code. This also forces the CPU to flush its cache of
-                                            ; pre-fetched and real-mode decoded instructions, which
-                                                ; can cause problems
+    jmp CODE_SEG:init_32_bit                       ; Make a far jump(i.e. to a new segment) to out 32-bit
+                                                   ; code. This also forces the CPU to flush its cache of
+                                                   ; pre-fetched and real-mode decoded instructions, which
+                                                   ; can cause problems
 enable_A20:
     mov bx, ENABLE_A20_MSG
     call print_string
-    in al, 0x92                           ; Allows for extended memory access on some machines
+    in al, 0x92                                    ; Allows for extended memory access on some machines
     or al, 2
     out 0x92, al
     ret
 
-%include "boot/vesa.asm"
+    %include "boot/vesa.asm"
 %include "boot/print.asm"
 %include "boot/gdt.asm"
 %include "boot/detect_memory.asm"
@@ -52,14 +53,14 @@ LOADING_GDT_MSG: db "Loading GDT",0xA, 0xD, 0
 [bits 32]
 init_32_bit:
 
-    mov ax, DATA_SEG                      ; Now in PM our old segments are meaningless,
-    mov ds, ax                            ; so we point our segment registers to the
-    mov ss, ax                            ; data sector we defined in our GDT
+    mov ax, DATA_SEG                               ; Now in PM our old segments are meaningless,
+    mov ds, ax                                     ; so we point our segment registers to the
+    mov ss, ax                                     ; data sector we defined in our GDT
     mov es, ax
     mov fs, ax
     mov gs, ax
 
-    mov ebp, 0x90000                      ; Update our stack position so it is right at the top of free space
+    mov ebp, 0x90000                               ; Update our stack position so it is right at the top of free space
     mov esp, ebp
 
     call detect_cpu_id
@@ -81,12 +82,15 @@ init_32_bit:
 
 init_64_bit:
     call activate_SSE
-    
-    xor rbp, rbp                          ; Mark it as null
+
+    mov rbp, 0x8000000
+    mov rsp, rbp
+
+    xor rbp, rbp                                   ; Mark it as null
     call kernel_main
     jmp $
 
-activate_SSE:                             ; Allows for use of the math co-processor?
+activate_SSE:                                      ; Allows for use of the math co-processor?
     mov rax, cr0
     and ax, 0b11111101
     or ax, 0b00000001

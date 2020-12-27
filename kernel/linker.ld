@@ -1,5 +1,5 @@
-/* OUTPUT_FORMAT(elf64-x86-64) */
-OUTPUT_FORMAT(binary)
+OUTPUT_FORMAT(elf64-x86-64)
+/* OUTPUT_FORMAT(binary) */
 /* https://stackoverflow.com/questions/34129461/should-i-make-my-own-os-kernel-elf-or-raw-binary */
 
 ENTRY(kernel_main)

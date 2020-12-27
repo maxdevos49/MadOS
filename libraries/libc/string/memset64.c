@@ -1,8 +1,10 @@
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 
 void *memset64(void *buff_ptr, uint64_t value, size_t size)
 {
+    printf("Warning memset64 is broken\n");
     size_t i = 0;
 
     if (size < 8)
@@ -13,8 +15,11 @@ void *memset64(void *buff_ptr, uint64_t value, size_t size)
         return buff_ptr;
     }
 
-    while (i < size / 8)
-        ((uint64_t *)buff_ptr)[i++] = value;
+    while (i < (size / 8))
+    {
+        ((uint64_t *)buff_ptr)[i] = value;
+        i++;
+    }
 
     i *= 8;
     while (i < size)

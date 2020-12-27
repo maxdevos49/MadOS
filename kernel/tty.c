@@ -6,7 +6,7 @@
 #include <kernel/io.h>
 
 static uint16_t cursor_position = 0;
-static uint8_t current_theme = VGA_COLOR_BLUE | VGA_COLOR_WHITE << 4;
+static uint8_t current_theme = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
 
 void TTY_init(void)
 {
@@ -101,13 +101,20 @@ void TTY_write_string(const char *str)
 
 void TTY_scroll()
 {
-    uint64_t *src_ptr = (uint64_t*)VGA_MEMORY;
-    uint64_t *dst_ptr = (uint64_t*)(VGA_MEMORY - (VGA_WIDTH * 2));
+    uint64_t *src_ptr = (uint64_t *)VGA_MEMORY;
+    uint64_t *dst_ptr = (uint64_t *)(VGA_MEMORY - (VGA_WIDTH * 2));
     uint16_t length = VGA_WIDTH * VGA_HEIGHT * 2;
 
     memmove(dst_ptr, src_ptr, length);
-    memset64(VGA_MEMORY + length - (VGA_WIDTH * 2), 0x00, (VGA_WIDTH * 2));
+    // memset64(VGA_MEMORY + length - (VGA_WIDTH * 2), 0x00, (VGA_WIDTH * 2));
+    for (int i = 0; i < VGA_WIDTH; i++)
+    {
+        int offset = length - VGA_WIDTH*2;
 
+        // printf("Offset: %d", offset);
+        *(VGA_MEMORY + offset + i * 2) = ' ';
+        *(VGA_MEMORY + offset + i * 2 + 1) = current_theme;
+    }
 }
 
 void TTY_set_theme(enum vga_color background, enum vga_color foreground)

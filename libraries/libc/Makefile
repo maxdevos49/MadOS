@@ -57,6 +57,10 @@ $(BINARIES): $(OBJS)
 %.o: %.c
 	$(CC) $(LIBK_CFLAGS) $(LIBK_CPPFLAGS) -c $< -o $@
 
+%.s: %.c
+	$(CC) $(LIBK_CFLAGS) $(LIBK_CPPFLAGS) -S -masm=intel -fverbose-asm $< -o $@
+
+
 # Not sure if this is doing anything or not
 -include $(LIBC_DEPS)
 
@@ -69,7 +73,10 @@ install-headers:
 install-bin: $(BINARIES)
 	cp -RL $(BINARIES) $(SYSROOT)$(USR_LIB_DIR)
 
+debug: $(OBJS:.o=.s)
+
 clean:
 	@find . -type f -name "*.o" -delete -print
 	@find . -type f -name "*.d" -delete -print
 	@find . -type f -name "*.a" -delete -print
+	@find . -type f -name "*.s" -delete -print
