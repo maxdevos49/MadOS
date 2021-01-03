@@ -23,6 +23,7 @@
 #include <kernel/devices/vesa.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -104,14 +105,59 @@ void kernel_main(void)
     MOUSE_install();
 
     IRQ_enable();
-    fs_root = INITRD_init();
-    VESA_install();
-
+    // fs_root = INITRD_init();
     // PCI_configure();
 
-    pacman_main(0, NULL);
+    VESA_install();
 
-    // printf("%s\n", splash);
+    GRAPHICS_CONTEXT *ctx = get_graphics_ctx(DOUBLE, get_screen_width() / 2, 0, get_screen_width() / 2, get_screen_height() / 2);
+
+    char buffer[1000];
+
+    sprintf(buffer, "Width: 0x%06x, Height: %8d, Test Float: %2.9f\n", get_screen_width(), get_screen_height(), 22241.22987f);
+    printf(buffer);
+
+
+    draw_text(ctx, 0, 0, buffer);
+
+    draw_text(ctx, 0, CHAR_HEIGHT, "Context 1: Line Demo");
+
+    move_to(ctx, get_ctx_width(ctx) / 2, get_ctx_height(ctx) / 2);
+    set_line_width(ctx, 2);
+    for (int i = 0; i < 25; i++)
+    {
+        int x = (rand() % get_ctx_width(ctx) - 20) + 10;
+        int y = (rand() % get_ctx_height(ctx) - 20) + 10;
+
+        line_to(ctx, x, y);
+    }
+
+    swap_buffer(ctx);
+
+    destroy_graphics_ctx(ctx); //Cleans up context
+
+    ctx = get_graphics_ctx(DOUBLE, get_screen_width() / 2, get_screen_height() / 2, get_screen_width() / 2, get_screen_height() / 2);
+
+    set_fill(ctx, 0x00ff0000);
+    fill_rect(ctx, 0, 0, get_ctx_width(ctx), get_ctx_width(ctx));
+
+    draw_text(ctx, 0, 0, "MadOS Kernel");
+    draw_text(ctx, 0, CHAR_HEIGHT, "Context 2: Rectangle Demo");
+
+    for (int i = 0; i < 100; i++)
+    {
+        int color = rand() % 0xffffffff;
+        int x = rand() % get_ctx_width(ctx);
+        int y = rand() % get_ctx_height(ctx) + CHAR_HEIGHT * 2;
+        int size = rand() % 50;
+        set_fill(ctx, color);
+        fill_rect(ctx, x, y, size, size);
+    }
+
+    swap_buffer(ctx);
+    destroy_graphics_ctx(ctx); //Cleans up context
+
+    pacman_main(0, NULL); //Aka context 3
 
     // uint16_t position = 0;
     // uint16_t previous_position = 0;
@@ -160,91 +206,11 @@ void kernel_main(void)
     //         if (mouse.y < 0)
     //             mouse.y = 0;
 
-    //         struct vector2 mouse_s;
-    //         mouse_s.x = (((VGA_WIDTH - 1) * mouse.x) / scale.x);
-    //         mouse_s.y = (((VGA_HEIGHT - 1) * mouse.y) / scale.y);
-    //         position = (mouse_s.y * VGA_WIDTH) + mouse_s.x;
+    //         clear_rect(ctx,0,0,get_ctx_width(ctx), get_ctx_height(ctx));
+    //         set_fill(ctx, 0x00ff00ff);
+    //         fill_rect(ctx, mouse.x, mouse.y, 10,10);
+    //         swap_buffer(ctx);
 
-    //         //Handle click
-    //         if (packet.left_button == 1 && left_btn == 0)
-    //         { //Mouse Down
-    //             left_btn = 1;
-    //             click_count = 1;
-
-    //             int16_t start;
-    //             int16_t end;
-
-    //             if (start_select > previous_position)
-    //             {
-    //                 start = (start_select - abs(start_select - previous_position)) + 1;
-    //                 end = start_select;
-    //             }
-    //             else
-    //             {
-    //                 start = start_select;
-    //                 end = previous_position;
-    //             }
-
-    //             //Unselect
-    //             for (int i = start; i < end; i++)
-    //                 *(VGA_MEMORY + (i * 2) + 1) = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
-
-    //             start_select = position;
-    //             TTY_set_cursor_position((VGA_WIDTH * mouse_s.y) + mouse_s.x);
-    //         }
-    //         else if (packet.left_button == 1 && left_btn == 1)
-    //         { //Mouse Drag
-    //             click_count++;
-
-    //             if (click_count > 1)
-    //             {
-    //                 TTY_set_cursor_position((VGA_WIDTH * mouse_s.y) + mouse_s.x);
-
-    //                 int16_t start;
-    //                 int16_t end;
-
-    //                 if (start_select > previous_position)
-    //                 {
-    //                     start = (start_select - abs(start_select - previous_position)) + 1;
-    //                     end = start_select;
-    //                 }
-    //                 else
-    //                 {
-    //                     start = start_select;
-    //                     end = previous_position;
-    //                 }
-
-    //                 //Unselect
-    //                 for (int i = start; i < end; i++)
-    //                     *(VGA_MEMORY + (i * 2) + 1) = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
-
-    //                 if (start_select > position)
-    //                 {
-    //                     start = start_select - abs(start_select - position) + 1;
-    //                     end = start_select;
-    //                 }
-    //                 else
-    //                 {
-    //                     start = start_select;
-    //                     end = position;
-    //                 }
-
-    //                 //Select
-    //                 for (int i = start; i < end; i++)
-    //                     *(VGA_MEMORY + (i * 2) + 1) = VGA_COLOR_WHITE | VGA_COLOR_BLUE << 4;
-    //             }
-    //         }
-    //         else if (packet.left_button == 0 && left_btn == 1)
-    //         { //Mouse Up
-    //             left_btn = 0;
-    //             click_count = 0;
-    //         }
-
-    //         //draw mouse
-    //         *(VGA_MEMORY + (previous_position * 2) + 1) = previous_color;
-    //         previous_color = *(VGA_MEMORY + (position * 2) + 1);
-    //         *(VGA_MEMORY + (position * 2) + 1) = VGA_COLOR_BLACK | VGA_COLOR_WHITE << 4;
-    //         previous_position = position;
     //     }
     // }
 

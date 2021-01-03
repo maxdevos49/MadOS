@@ -1,6 +1,7 @@
 BINARIES=libgraphics.a
 
-OBJS=graphics.o
+OBJS=graphics.o\
+	img/tga.o\
 
 all: $(BINARIES)
 
@@ -8,10 +9,10 @@ libgraphics.a: $(OBJS)
 	$(AR) rcs $@ $(OBJS) 
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -O3 $(CPPFLAGS) -c $< -o $@
 
 %.s: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -S -masm=intel -fverbose-asm $< -o $@
+	$(CC) $(CFLAGS) -O3 $(CPPFLAGS) -S -masm=intel -fverbose-asm $< -o $@
 
 .PHONY: install install-headers install-bin clean
 install: install-headers install-bin

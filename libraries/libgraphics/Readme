@@ -1,0 +1,53 @@
+MadOS Graphics
+==============
+
+Lightweight functional graphics library. Designed for use 
+between GOP and VESA graphics modes. Inspired by the 
+Javascript canvas API.
+
+Features:
+1. Multi context support
+2. Single, Double, and Triple Buffering
+3. Fill Command
+4. Stroke Command
+5. Line Drawing
+6. Rectangle Drawing
+
+Requirements:
+1. malloc/free functions
+2. Valid enabled VESA or GOP modes
+3. Pointer to valid BIOS font data
+4. Framebuffer location
+5. Screen pixel width
+7. Screen pixel height
+8. Screen pitch(swidth * sizeof(uint32_t))
+
+
+Library setup(do once before using):
+------------------------------------
+
+GRAPHICS_BUFFER buffer;
+buffer.framebuffer = <your framebuffer pointer>;
+buffer.width = <screen pixel width>;
+buffer.height = <screen pixel height>;
+buffer.pitch = <screen pitch>;
+buffer.bpp = 32;//Only supports 32bpp
+buffer.font = <your font pointer>;
+
+graphics_init(&buffer);
+
+
+Library use:
+------------
+
+//Double buffering full screen context
+GRAPHICS_CONTEXT* ctx = get_graphics_ctx(DOUBLE, 0, 0, get_screen_width(), get_screen_height());
+
+//Set fill green
+set_fill(ctx, 0x0000ff00);
+
+//draw to back buffer green Rectangle at x:100, y:100, w:300, h:300
+fill_rect(ctx, 100,100,300,300);
+
+//Move back buffer forward showing all changes since last buffer swap
+swap_buffer(ctx);

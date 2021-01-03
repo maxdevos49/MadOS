@@ -56,7 +56,8 @@ struct game
     GRAPHICS_CONTEXT *ctx;
 };
 
-int pacman_main(int argc, char *argv[]);
+// int pacman_main(int argc, char *argv[]);
+int pacman_main();
 void pacman_init(struct game *game);
 void pacman_cleanup(struct game *game);
 

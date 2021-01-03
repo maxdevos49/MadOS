@@ -6,33 +6,17 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-    int memcmp(const void *, const void *, size_t);
-    void *memcpy(void *__restrict, const void *__restrict, size_t);
-    void *memmove(void *, const void *, size_t);
-    void *memset(void *, int, size_t);
-    void *memset64(void *, uint64_t, size_t);
-    size_t strlen(const char *);
-    int strcmp(const char *, const char *);
-    char *strcpy(char *__restrict, const char *__restrict);
-
-#ifndef NULL
 #define NULL 0
-#endif
 
-#ifdef __test
-    void test_strcmp(void);
-    void test_strlen(void);
-    void test_memset(void);
-    void test_memmove(void);
-#endif
+int memcmp(const void *, const void *, size_t);
+void *memcpy(void *__restrict, const void *__restrict, size_t);
+void *memmove(void *, const void *, size_t);
+void *memset(void *, int, size_t);
 
-#ifdef __cplusplus
-}
-#endif
+void *memset64(void *, uint64_t, size_t); //Non standard
+
+size_t strlen(const char *);
+int strcmp(const char *s1, const char *s2);
+char *strcpy(char *__restrict dst, const char *__restrict src);
 
 #endif

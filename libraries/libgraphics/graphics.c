@@ -5,63 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 
-enum GRAPHICS_MODE
-{
-    NONE,
-    RECT,
-    ELLIPSE,
-    TEXT,
-    LINE
-};
-enum GRAPHICS_CURRENT_BUFFER
-{
-    FRAMEBUFFER,
-    BUFFER0,
-    BUFFER1
-};
-struct __graphics_context
-{
-    int x_offset;
-    int y_offset;
-    int ctx_width;
-    int ctx_height;
-    uint32_t pitch;
-
-    void *buffer0;
-    void *buffer1;
-    size_t buffer_size;
-
-    enum GRAPHICS_BUFFER_COUNT buffer_count;
-
-    //Always current drawing buffer
-    void *buffer;
-    enum GRAPHICS_CURRENT_BUFFER current_back_buffer;
-
-    //draw origin
-    int origin_x;
-    int origin_y;
-
-    //Draw details
-    int x;
-    int y;
-    int w;
-    int h;
-
-    //Line end
-    int line_x;
-    int line_y;
-    int line_width;
-
-    //Line color in different sizes for when needed
-    uint64_t stroke_64;
-    uint32_t stroke_32;
-
-    //Fill color in different sizes for when needed
-    uint64_t fill_64;
-    uint32_t fill_32;
-
-    enum GRAPHICS_MODE mode;
-};
+#include "opaque/context.h"
 
 static int g_abs(int n)
 {
@@ -147,7 +91,7 @@ GRAPHICS_CONTEXT *get_graphics_ctx(enum GRAPHICS_BUFFER_COUNT buffer_count, int 
     ctx->buffer1 = NULL;
     ctx->current_back_buffer = FRAMEBUFFER;
     ctx->buffer = _buffer.framebuffer;
-    ctx->buffer_size = width * height;
+    ctx->buffer_size = width * height * sizeof(uint32_t);
 
     set_origin(ctx, 0, 0);
     rect(ctx, 0, 0, 0, 0);
@@ -196,8 +140,8 @@ GRAPHICS_CONTEXT *get_graphics_ctx(enum GRAPHICS_BUFFER_COUNT buffer_count, int 
         return NULL;
     }
 
-    clear_rect(ctx, 0, 0, ctx->ctx_width, ctx->ctx_height);
-    swap_buffer(ctx);
+    // clear_rect(ctx, 0, 0, ctx->ctx_width, ctx->ctx_height);
+    // swap_buffer(ctx);
 
     return ctx;
 }
@@ -240,21 +184,19 @@ void swap_buffer(GRAPHICS_CONTEXT *ctx)
     if (ctx->current_back_buffer == FRAMEBUFFER)
         return;
 
-    int x, y, w, h;
-    x = ctx->x_offset;
-    y = ctx->y_offset;
-    w = ctx->ctx_width + x;
-    h = ctx->ctx_height + y;
+    int left = ctx->x_offset;
+    int right = ctx->ctx_width + left;
+    int top = ctx->y_offset;
+    int bottom = ctx->ctx_height + top;
 
-    printf("X:%d Y:%d W:%d H:%d\n", x, y, w, h);
-
-    for (int i = y; i < h; i++)
+    int fi, bi, fj, bj;
+    for (fi = top, bi = 0; fi < bottom; fi++, bi++)
     {
-        uint32_t *f_offset = (uint32_t *)((uint64_t)_buffer.framebuffer + (_buffer.width * i));
-        uint32_t *b_offset = (uint32_t *)((uint64_t)ctx->buffer + (_buffer.width * i));
+        uint32_t *f_offset = (uint32_t *)(_buffer.pitch * fi + (uint64_t)_buffer.framebuffer);
+        uint32_t *b_offset = (uint32_t *)(ctx->pitch * bi + (uint64_t)ctx->buffer);
 
-        for (int j = x; j < w; j++)
-            f_offset[j] = b_offset[j];
+        for (fj = left, bj = 0; fj < right; fj++, bj++)
+            f_offset[fj] = b_offset[bj];
     }
 
     //If double buffering then there is no back buffer swap
@@ -282,7 +224,6 @@ void set_origin(GRAPHICS_CONTEXT *ctx, int x, int y)
 
 void fill(GRAPHICS_CONTEXT *ctx)
 {
-    // printf("Fill(): 0x%x\n", fill);
     if (ctx->mode == RECT)
     {
         int left = ctx->x + ctx->origin_x;
@@ -315,13 +256,11 @@ void fill(GRAPHICS_CONTEXT *ctx)
 
         for (int i = top; i < bottom; i++)
         {
-            uint32_t *offset = (uint32_t *)((uint64_t)i * (uint64_t)_buffer.width + (uint64_t)ctx->buffer);
+            uint32_t *offset = (uint32_t *)(i * ctx->pitch + (uint64_t)ctx->buffer);
 
             for (int j = left; j < right; j++)
                 offset[j] = ctx->fill_32;
         }
-
-        // printf("L:%d R:%d T:%d B:%d W:%d H:%d M:%d\n", left, right, top, bottom, width, height, ctx->mode);
     }
 }
 
@@ -364,13 +303,14 @@ static void render_line(GRAPHICS_CONTEXT *ctx, int x0, int y0, int x1, int y1)
 
 void stroke(GRAPHICS_CONTEXT *ctx)
 {
-    int left = ctx->x;
-    int top = ctx->y;
-    int right = left + ctx->w;
-    int bottom = top + ctx->h;
 
     if (ctx->mode == RECT)
     {
+        int left = ctx->x;
+        int top = ctx->y;
+        int right = left + ctx->w;
+        int bottom = top + ctx->h;
+
         move_to(ctx, left, top);
         line_to(ctx, right, top);
         stroke(ctx);
@@ -491,6 +431,7 @@ void draw_char(GRAPHICS_CONTEXT *ctx, int x, int y, uint8_t c)
     }
 }
 
+// uint16_t cursor = 0;
 void draw_text(GRAPHICS_CONTEXT *ctx, int x, int y, char *txt)
 {
     int sx = x + ctx->origin_x;
@@ -498,7 +439,7 @@ void draw_text(GRAPHICS_CONTEXT *ctx, int x, int y, char *txt)
 
     int i = 0;
     int offset = 0;
-    while (txt[i] != NULL)
+    while (txt[i] != '\0')
     {
         draw_char(ctx, sx + offset, sy, txt[i]);
         i++;

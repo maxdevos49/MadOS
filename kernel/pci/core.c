@@ -40,31 +40,31 @@
 
 static struct pci_bus *root_bus;
 
-static const char *PCI_class_codes[] = {
-    "Unclassified",
-    "Mass Storage Controller",
-    "Network Controller",
-    "Display Controller",
-    "Multimedia Controller",
-    "Memory Controller",
-    "Bridge Device",
-    "Simple Communication Controller",
-    "Base System Peripheral",
-    "Input Device Controller",
-    "Docking Station",
-    "Processor",
-    "Serial Bus Controller",
-    "Wireless Controller",
-    "Intelligent Controller",
-    "Satelite Communication Controller",
-    "Encryption Controller",
-    "Signal Processing Controller",
-    "Processing Accelerator",
-    "Non Essential Instrumentation",
-    "Reserved",
-    "Co-Processor",
-    "Reserved",
-    "Unassigned Class"};
+// static const char *PCI_class_codes[] = {
+//     "Unclassified",
+//     "Mass Storage Controller",
+//     "Network Controller",
+//     "Display Controller",
+//     "Multimedia Controller",
+//     "Memory Controller",
+//     "Bridge Device",
+//     "Simple Communication Controller",
+//     "Base System Peripheral",
+//     "Input Device Controller",
+//     "Docking Station",
+//     "Processor",
+//     "Serial Bus Controller",
+//     "Wireless Controller",
+//     "Intelligent Controller",
+//     "Satelite Communication Controller",
+//     "Encryption Controller",
+//     "Signal Processing Controller",
+//     "Processing Accelerator",
+//     "Non Essential Instrumentation",
+//     "Reserved",
+//     "Co-Processor",
+//     "Reserved",
+//     "Unassigned Class"};
 
 static void PCI_enumerate_bus(struct pci_bus *bus);
 
@@ -80,89 +80,89 @@ static inline int PCI_check_vendor(struct pci_bus *bus, int slot, int function)
     return (*val == 0xffff);
 }
 
-static uint32_t PCI_check_bar_size(struct pci_dev *dev, int bar_num)
-{
-    uint32_t bar;
-    uint32_t size;
+// static uint32_t PCI_check_bar_size(struct pci_dev *dev, int bar_num)
+// {
+//     uint32_t bar;
+//     uint32_t size;
 
-    //Get old value
-    PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (bar_num * 4)), &bar), (BAR0 + (bar_num * 4)));
-    //write ones
-    PCI_PROBE_ASSERT(PCI_write_config_dword(dev, (BAR0 + (bar_num * 4)), 0xfffffff0 | bar), (BAR0 + (bar_num * 4)));
-    //get size
-    PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (bar_num * 4)), &size), (BAR0 + (bar_num * 4)));
-    //restore value
-    PCI_PROBE_ASSERT(PCI_write_config_dword(dev, (BAR0 + (bar_num * 4)), bar), (BAR0 + (bar_num * 4)));
+//     //Get old value
+//     PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (bar_num * 4)), &bar), (BAR0 + (bar_num * 4)));
+//     //write ones
+//     PCI_PROBE_ASSERT(PCI_write_config_dword(dev, (BAR0 + (bar_num * 4)), 0xfffffff0 | bar), (BAR0 + (bar_num * 4)));
+//     //get size
+//     PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (bar_num * 4)), &size), (BAR0 + (bar_num * 4)));
+//     //restore value
+//     PCI_PROBE_ASSERT(PCI_write_config_dword(dev, (BAR0 + (bar_num * 4)), bar), (BAR0 + (bar_num * 4)));
 
-    return (~(size & 0xfffffff0)) + 1; //TODO enum mask
-    // return size;
-}
+//     return (~(size & 0xfffffff0)) + 1; //TODO enum mask
+//     // return size;
+// }
 
-static void PCI_describe_bar(struct pci_dev *dev)
-{
-    TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_WHITE);
-    if (dev->header_type == 0)
-    { //5 bars
+// static void PCI_describe_bar(struct pci_dev *dev)
+// {
+//     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_WHITE);
+//     if (dev->header_type == 0)
+//     { //5 bars
 
-        uint32_t bar;
-        for (int i = 0; i < 6; i++)
-        {
-            PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (i * 4)), &bar), (BAR0 * (i * 4)));
+//         uint32_t bar;
+//         for (int i = 0; i < 6; i++)
+//         {
+//             PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (i * 4)), &bar), (BAR0 * (i * 4)));
 
-            if ((bar & 0x00000001) == 0) //TODO mask enum
-            {
-                //Memory
-                if (((bar & 0xfffffff0)) == 0)
-                    continue;
+//             if ((bar & 0x00000001) == 0) //TODO mask enum
+//             {
+//                 //Memory
+//                 if (((bar & 0xfffffff0)) == 0)
+//                     continue;
 
-                printf("\tBar %d: Memory Base: %x, Prefetchable: %x, Type: %x, Size: %x\n", i, (bar & 0xFFFFFFF0), (bar & 0x00000008) != 0, (bar & 0x00000006), PCI_check_bar_size(dev, i));
-            }
-            else
-            {
-                if (((bar & 0xfffffffc)) == 0)
-                    continue;
+//                 printf("\tBar %d: Memory Base: %x, Prefetchable: %x, Type: %x, Size: %x\n", i, (bar & 0xFFFFFFF0), (bar & 0x00000008) != 0, (bar & 0x00000006), PCI_check_bar_size(dev, i));
+//             }
+//             else
+//             {
+//                 if (((bar & 0xfffffffc)) == 0)
+//                     continue;
 
-                //I/O Space
-                printf("\tBar %d: I/O Base: %x\n", i, (bar & 0xfffffffc) >> 2);
-            }
-        }
-    }
-    else if (dev->header_type == 1)
-    {
-        uint32_t bar;
+//                 //I/O Space
+//                 printf("\tBar %d: I/O Base: %x\n", i, (bar & 0xfffffffc) >> 2);
+//             }
+//         }
+//     }
+//     else if (dev->header_type == 1)
+//     {
+//         uint32_t bar;
 
-        //2 bars
-        for (int i = 0; i < 3; i++)
-        {
-            PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (i * 4)), &bar), (BAR0 * (i * 4)));
+//         //2 bars
+//         for (int i = 0; i < 3; i++)
+//         {
+//             PCI_PROBE_ASSERT(PCI_read_config_dword(dev, (BAR0 + (i * 4)), &bar), (BAR0 * (i * 4)));
 
-            if ((bar & 0x00000001) == 0)
-            {
-                //Memory
-                if (((bar & 0xfffffff0)) == 0)
-                    continue;
+//             if ((bar & 0x00000001) == 0)
+//             {
+//                 //Memory
+//                 if (((bar & 0xfffffff0)) == 0)
+//                     continue;
 
-                printf("\tBar %d: Memory Base: %x, Prefetchable: %x, Type: %x, Size: %x\n", i, (bar & 0xfffffff0), (bar & 0x00000008) != 0, (bar & 0x00000006), PCI_check_bar_size(dev, i));
-            }
-            else
-            {
-                if (((bar & 0xfffffffc)) == 0)
-                    continue;
+//                 printf("\tBar %d: Memory Base: %x, Prefetchable: %x, Type: %x, Size: %x\n", i, (bar & 0xfffffff0), (bar & 0x00000008) != 0, (bar & 0x00000006), PCI_check_bar_size(dev, i));
+//             }
+//             else
+//             {
+//                 if (((bar & 0xfffffffc)) == 0)
+//                     continue;
 
-                //I/O Space
-                printf("\tBar %d: I/O Base: %x\n", i, (bar & 0xfffffffc) >> 2);
-            }
-        }
-    }
-    TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
-}
+//                 //I/O Space
+//                 printf("\tBar %d: I/O Base: %x\n", i, (bar & 0xfffffffc) >> 2);
+//             }
+//         }
+//     }
+//     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
+// }
 
-static void PCI_describe_device(struct pci_dev *dev)
-{
-    TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_LIGHT_BLUE);
-    printf("B: %d, S: %d, F: %d, V: %x, D: %x, HT: %x, C: %s, SC: %x\n", dev->bus->number, dev->slot, dev->func, dev->vendor_id, dev->device_id, dev->header_type, PCI_class_codes[dev->class_code], dev->subclass_code);
-    TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_WHITE);
-}
+// static void PCI_describe_device(struct pci_dev *dev)
+// {
+//     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_LIGHT_BLUE);
+//     printf("B: %d, S: %d, F: %d, V: %x, D: %x, HT: %x, C: %s, SC: %x\n", dev->bus->number, dev->slot, dev->func, dev->vendor_id, dev->device_id, dev->header_type, PCI_class_codes[dev->class_code], dev->subclass_code);
+//     TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_WHITE);
+// }
 
 static struct pci_bus *PCI_probe_bus(struct pci_dev *bus_dev)
 {

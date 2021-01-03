@@ -2,6 +2,8 @@
 #define __GRAPHICS_TGA_H 1
 
 #include <stdint.h>
+#include "graphics.h"
+
 
 //From https://github.com/nothotscott/VisualOS/commit/dd92f3bb6612f54d620768d2f990ec9159c93d49
 struct TGA_HEADER
@@ -16,7 +18,7 @@ struct TGA_HEADER
     uint16_t y_org; // y origin
     uint16_t width;
     uint16_t height;
-    uint8_t bbp; // bits per pixel
+    uint8_t bpp; // bits per pixel
     uint8_t descriptor;
 } __attribute__((__packed__));
 
@@ -26,6 +28,6 @@ struct TGA_IMAGE
     void *buffer;
 };
 
-void draw_tga(void *frame_buffer, struct TGA_IMAGE *img, int xoff, int yoff);
+void draw_tga(GRAPHICS_CONTEXT *ctx, struct TGA_IMAGE *img, int xoff, int yoff);
 
 #endif

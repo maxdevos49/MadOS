@@ -4,7 +4,8 @@
 
 void *memset64(void *buff_ptr, uint64_t value, size_t size)
 {
-    printf("Warning memset64 is broken\n");
+    printf("Warning memset64 may be broken\n");
+
     size_t i = 0;
 
     if (size < 8)

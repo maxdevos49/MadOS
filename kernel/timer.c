@@ -69,7 +69,7 @@ int64_t TIMER_get_time()
 
 void TIMER_sleep_milliseconds(uint64_t milliseconds)
 {
-    uint64_t end_tick = pit_ticks + milliseconds;
+    volatile uint64_t end_tick = pit_ticks + milliseconds;
     PIT_enable_periodic_irq0();
     PIT_set_periodic_frequency(TIMER_PIT_FREQUENCY);
     while (end_tick > pit_ticks)

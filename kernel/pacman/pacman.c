@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <graphics.h>
+#include <stdio.h>
 
 //Need to abstract these to std library calls some time
 #include <kernel/interrupts/irq.h>
@@ -46,7 +47,8 @@ static uint8_t map[MAP_HEIGHT * MAP_WIDTH] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-int pacman_main(int argc, char *argv[])
+// int pacman_main(int argc, char *argv[])
+int pacman_main()
 {
 
     // if (argv[argc] != NULL)
@@ -68,7 +70,7 @@ int pacman_main(int argc, char *argv[])
 
         render(&game);
 
-        TIMER_sleep_milliseconds(20);
+        // TIMER_sleep_milliseconds(20);
     }
 
     pacman_cleanup(&game);
@@ -82,17 +84,21 @@ void pacman_init(struct game *game)
     game->score = 0;
     game->map = &map;
 
-    game->ctx = get_graphics_ctx(DOUBLE, 0, 0, get_screen_width(), get_screen_height());
+    game->screen_width = get_screen_width(game->ctx) / 2;
+    game->screen_height = get_screen_height(game->ctx);
+    game->ctx = get_graphics_ctx(DOUBLE, 0, 0, game->screen_width, game->screen_height);
 
     printf("CTX: %d\n", game->ctx);
 
     game->pacman = malloc(sizeof(struct entity));
+    //TODO init pacman
 
     for (int i = 0; i < 4; i++)
+    {
         game->ghost[i] = malloc(sizeof(struct entity));
+        //TODO init ghost
+    }
 
-    game->screen_width = get_screen_width(game->ctx);
-    game->screen_height = get_screen_height(game->ctx);
     game->scale = game->screen_height / (MAP_HEIGHT + 4);
 }
 

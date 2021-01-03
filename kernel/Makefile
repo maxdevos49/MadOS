@@ -6,7 +6,7 @@
 NASM?=nasm
 CC?=x86_64-elf-gcc
 OBJCOPY?=x86_64-elf-objcopy
-CFLAGS?=-O0 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=../sysroot -isystem=../sysroot/usr/include
+CFLAGS?=-O1 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=../sysroot -isystem=../sysroot/usr/include
 CPPFLAGS?=
 LIBS?=
 
@@ -40,12 +40,13 @@ KERNEL_OBJS=\
 	time/pit.o\
 	pci/core.o\
 	filesystems/fs.o\
-	filesystems/initrd.o\
 	stack_smash.o\
 	pacman/pacman.o\
 	pacman/ai.o\
 	pacman/render.o\
-	pacman/input.o
+	pacman/input.o\
+	
+	# filesystems/initrd.o\
 
 
 

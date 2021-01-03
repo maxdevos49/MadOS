@@ -2,84 +2,12 @@
 #include "render.h"
 
 #include <graphics.h>
+#include <img/tga.h>
+
 #include <stdlib.h>
 #include <string.h>
 
-static char integer_string_output[60];
-static char *int_to_str(int64_t value)
-{
-    uint8_t is_negative = 0;
-
-    if (value < 0)
-    {
-        is_negative = 1;
-        value *= -1;
-        integer_string_output[0] = '-';
-    }
-
-    uint8_t size = 0;
-    uint64_t size_tester = (uint64_t)value;
-
-    while (size_tester / 10 > 0)
-    {
-        size_tester /= 10;
-        size++;
-    }
-
-    uint8_t index = 0;
-    uint64_t new_value = (uint64_t)value;
-    while (new_value / 10 > 0)
-    {
-        uint8_t remainder = new_value % 10;
-        new_value /= 10;
-        integer_string_output[is_negative + size - index] = remainder + 48;
-        index++;
-    }
-
-    uint8_t remainder = new_value % 10;
-    integer_string_output[is_negative + size - index] = remainder + 48;
-    integer_string_output[is_negative + size + 1] = 0;
-
-    return integer_string_output;
-}
-
-static char hex_string_output[17];                 // 8bytes == 16 characters  + null byte = 17 total characters
-static const char *HEX_TABLE = "0123456789abcdef"; //This is for simplicity but not really required
-static char *hex_to_str(uint64_t value)
-{
-
-    if (value == 0)
-    {
-        hex_string_output[0] = '0';
-        hex_string_output[1] = '\0';
-        return hex_string_output;
-    }
-
-    uint8_t hex_index = 0;
-    uint8_t *ptr;
-
-    for (int8_t i = 7; i > -1; i--)
-    {
-        ptr = ((uint8_t *)&value + i);
-
-        if (*ptr == 0 && hex_index == 0)
-        {
-            continue;
-        }
-        else
-        {
-            hex_string_output[hex_index] = HEX_TABLE[((*ptr & 0xf0) >> 4)];
-            hex_index++;
-
-            hex_string_output[hex_index] = HEX_TABLE[(*ptr & 0x0f)];
-            hex_index++;
-        }
-    }
-
-    hex_string_output[hex_index] = 0;
-
-    return hex_string_output;
-}
+// extern struct TGA_IMAGE map;
 
 void render(struct game *game)
 {
@@ -99,22 +27,17 @@ void render(struct game *game)
 
     render_hud(game);
 
+    // draw_tga(game->ctx, &map, 50,50);
+
     swap_buffer(game->ctx);
 }
 
 void render_hud(struct game *game)
 {
+    draw_text(game->ctx, 10, 0, "Context 3: Pacman Demo");
     draw_text(game->ctx, 10, CHAR_HEIGHT, "HIGH SCORE");
     game->score++;
-    draw_text(game->ctx, game->screen_width / 2 - (strlen(int_to_str(game->score)) * CHAR_WIDTH) / 2, CHAR_HEIGHT, int_to_str(game->score));
-
-    set_origin(game->ctx, 0, 0);
-    int y = 0;
-    draw_text(game->ctx, 0, y, "Screen Width:");
-    draw_text(game->ctx, 0, y += CHAR_HEIGHT + 1, int_to_str(game->screen_width));
-    // game->screen_width++;
-    draw_text(game->ctx, 0, y += CHAR_HEIGHT + 1, "Screen Height:");
-    draw_text(game->ctx, 0, y += CHAR_HEIGHT + 1, int_to_str(game->screen_height));
+    // draw_text(game->ctx, game->screen_width / 2 - (strlen(int_to_str(game->score)) * CHAR_WIDTH) / 2, CHAR_HEIGHT, int_to_str(game->score));
 }
 
 void render_map(struct game *game)

@@ -5,14 +5,14 @@
 # Defaults
 CC?=x86_64-elf-gcc
 AR?=x86_64-elf-ar
-CFLAGS?=-O0 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=$(SYSROOT) -isystem=$(USR_INCLUDE_DIR) # likely will not work stand alone unless explicit sysroot exist and is defined
+CFLAGS?=-O1 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=$(SYSROOT) -isystem=$(USR_INCLUDE_DIR) # likely will not work stand alone unless explicit sysroot exist and is defined
 CPPFLAGS?=
 
 # Flags
-LIBC_CFLAGS:= $(CFLAGS) 
+LIBC_CFLAGS:= $(CFLAGS) -O1
 LIBC_CPPFLAGS:= $(CPPFLAGS)  -D__is_libc -Iinclude
 
-LIBK_CFLAGS:= $(LIBC_CFLAGS)
+LIBK_CFLAGS:= $(LIBC_CFLAGS) -O1
 LIBK_CPPFLAGS:= $(LIBC_CPPFLAGS) -D__is_libk
 
 # Output Binaries
@@ -23,6 +23,7 @@ OBJS=\
 	stdio/printf.o \
 	stdio/putchar.o \
 	stdio/puts.o \
+	stdio/sprintf.o \
 	string/strlen.o\
 	string/strcmp.o\
 	string/strcpy.o\

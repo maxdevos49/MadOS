@@ -22,6 +22,16 @@ char *ctime(const time_t *timer)
 
     struct tm t; //testing something
 
+    t.tm_hour = 0;
+    t.tm_isdst = 0;
+    t.tm_mday = 0;
+    t.tm_min = 0;
+    t.tm_mon = 0;
+    t.tm_sec = 0;
+    t.tm_wday = 0;
+    t.tm_yday = 0;
+    t.tm_year = 0;
+
     //Most of this is a miracle that it works but it does I guess.(I think it does atleast)
 
     //Get Year
@@ -53,14 +63,14 @@ char *ctime(const time_t *timer)
     t.tm_sec = (((tm % SECS_PER_YEAR) % SECS_PER_DAY) % SECS_PER_HOUR) % SECS_PER_MIN;
 
     //Get day of the week
-    t.tm_wday = (t.tm_mday + (t.tm_mon+1) + (t.tm_year-2000) + (CURRENT_CENTURY))%7 ;
+    t.tm_wday = (t.tm_mday + (t.tm_mon + 1) + (t.tm_year - 2000) + (CURRENT_CENTURY)) % 7;
 
     //Build string
     uint8_t str_index = 0;
     time_str[str_index] = '\0';
 
     //TODO use sprintf() later
-    printf("%s %s %d %d:%d:%d %d\n", days_of_the_week[0][t.tm_wday], months_of_the_year[0][t.tm_mon-1], t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_year);
+    printf("%s %s %d %d:%d:%d %d\n", days_of_the_week[0][t.tm_wday], months_of_the_year[0][t.tm_mon - 1], t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_year);
 
     return time_str;
 }

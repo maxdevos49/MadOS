@@ -97,7 +97,6 @@ isr13:
     ; 14: Page Fault Exception
 GLOBAL isr14
 isr14:
-    ; push qword 0
     push qword 14
     jmp isr_common_stub
 

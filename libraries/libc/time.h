@@ -4,11 +4,7 @@
 #include <stdint.h>
 
 
-#ifndef NULL
 #define NULL 0
-#endif
-
-
 //#define CLOCKS_PER_SEC
 
 typedef long long int clock_t;

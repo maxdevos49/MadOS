@@ -4,10 +4,10 @@
 int puts(const char *str)
 {
 
-	int len = strlen(str);
+	// int len = strlen(str);
 	int i;
-	for (i = 0; i < len; i++)
+	for (i = 0; str[i] != '\0'; i++)
 		putchar(str[i]);
 
-	return len;
+	return i+1;
 }

@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <graphics.h>
 
 extern void isr0();
 extern void isr1();
@@ -181,6 +182,25 @@ void fault_handler(struct registers *regs)
         strace(10);
 
         TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
+
+        //If in graphics mode
+        GRAPHICS_CONTEXT *ctx = get_graphics_ctx(SINGLE, 0, 0, get_screen_width(), get_screen_height());
+
+        set_fill(ctx, 0x00f0f000);
+        set_stroke(ctx, 0x0);
+
+        int width = 400;
+        int height = 200;
+        int x = get_screen_width()/2 - width/2;
+        int y = get_screen_height()/2 - height/2;
+        fill_rect(ctx, x,y,width,height);
+        set_origin(ctx, x,y);
+        
+        draw_text(ctx, CHAR_WIDTH, 0, "Kernel Panic: ");
+        draw_text(ctx, CHAR_WIDTH, CHAR_HEIGHT, (char*)exception_messages[regs->int_num]);
+        draw_text(ctx, CHAR_WIDTH, CHAR_HEIGHT * 2, "System will now halt");
+        swap_buffer(ctx);
+        destroy_graphics_ctx(ctx);
 
         while (1)
             ;
