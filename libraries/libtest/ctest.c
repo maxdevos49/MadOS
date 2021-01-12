@@ -1,7 +1,6 @@
 #include <ctest.h>
 #include <stdio.h>
 
-#include <kernel/tty.h>
 
 struct ctest_data
 {

@@ -19,7 +19,6 @@ KERNEL_OBJS=\
 	boot/extended_boot.o\
 	boot/binaries.o\
 	kernel.o \
-	tty.o\
 	timer.o\
 	debug.o\
 	interrupts/idt.o\
@@ -28,7 +27,9 @@ KERNEL_OBJS=\
 	interrupts/pic.o\
 	devices/keyboard.o\
 	devices/mouse.o\
+	devices/tty.o\
 	devices/vesa.o\
+	devices/vga.o\
 	memory/init_heap.o\
 	memory/k_malloc.o\
 	memory/k_calloc.o\
@@ -55,11 +56,12 @@ KERNEL_OBJS=\
 # libraries.
 KERNEL_LIB_PATHS=\
 	 ../libraries/libc/libk.a\
+	 ../libraries/libm/libm.a\
 	 ../libraries/libgraphics/libgraphics.a
 
 KERNEL_CFLAGS:=-Ttext 0x8000 $(CFLAGS)  
 KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude  
-KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc -ltest -lgraphics
+KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc -lgraphics -lm
 
 # Do not edit below
 ###################################################################################

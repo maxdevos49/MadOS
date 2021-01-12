@@ -21,5 +21,5 @@ export CFLAGS="-ggdb -MD -Wall -Wextra -ffreestanding  -fstack-protector-all -mn
 export CPPFLAGS="-D__test"
 export LIBS=
 
-export SYSTEM_LIBRARY_PROJECTS="libraries/libtest libraries/libc libraries/libgraphics"
+export SYSTEM_LIBRARY_PROJECTS="libraries/libc libraries/libgraphics libraries/libm"
 export SYSTEM_PROJECTS="$SYSTEM_LIBRARY_PROJECTS Boot Kernel"

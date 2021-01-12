@@ -7,13 +7,22 @@
 #define MAP_WIDTH (int)28
 #define MAP_HEIGHT (int)36
 
-enum entity_type
+enum ENTITY_TYPE
 {
     PACMAN,
     GHOST
 };
 
-enum entity_mode
+enum ENTITY_NAME
+{
+    BLINKY,
+    PINKY,
+    INKY,
+    CLYDE,
+    OTHER
+};
+
+enum ENTITY_MODE
 {
     PACMAN_CONTROL,
     PACMAN_AI,
@@ -21,9 +30,10 @@ enum entity_mode
     GHOST_SCATTER
 };
 
-enum entity_direction
+static const int DIRECTION_OFFSET[] = {-1, 1, 1, -1};
+enum DIRECTION
 {
-    UP,
+    TOP = 0,
     RIGHT,
     BOTTOM,
     LEFT
@@ -31,12 +41,24 @@ enum entity_direction
 
 struct entity
 {
+    enum ENTITY_NAME name;
+    //Actual location
     uint32_t x;
     uint32_t y;
+
+    //Target location
+    uint32_t x_target;
+    uint32_t y_target;
+
+    //Map location
+    uint32_t cell_x;
+    uint32_t cell_y;
+
     uint32_t color;
-    enum entity_direction direction;
-    enum entity_type type;
-    enum entity_mode mode;
+    enum DIRECTION des_dir;
+    enum DIRECTION dir;
+    enum ENTITY_TYPE type;
+    enum ENTITY_MODE mode;
 };
 
 struct game
@@ -47,16 +69,14 @@ struct game
     struct entity *pacman;
     struct entity *ghost[4];
 
+    //Rendering Details
+    GRAPHICS_CONTEXT *ctx;
+    uint8_t *map;
     uint32_t scale;
     int32_t screen_width;
     int32_t screen_height;
-
-    uint8_t *map;
-
-    GRAPHICS_CONTEXT *ctx;
 };
 
-// int pacman_main(int argc, char *argv[]);
 int pacman_main();
 void pacman_init(struct game *game);
 void pacman_cleanup(struct game *game);

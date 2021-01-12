@@ -39,6 +39,8 @@ struct __graphics_context
     void *buffer;
     enum GRAPHICS_CURRENT_BUFFER current_back_buffer;
 
+    int batch_id;
+
     //draw origin
     int origin_x;
     int origin_y;

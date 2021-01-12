@@ -1,8 +1,8 @@
 /**
- * Graphics Library for madOS
+ * Graphics Library for MadOS
  * Compatible with *VGA, VESA, and *GOP.
  * Designed for graphics modes with 32 bpp.
- * Supports both Double and Triple Buffering.
+ * Supports both Double and Triple(Useless without hardware acceleration) Buffering.
  * */
 #ifndef __LIB_GRAPHICS_H
 #define __LIB_GRAPHICS_H 1
@@ -56,6 +56,12 @@ void rect(GRAPHICS_CONTEXT *ctx, int x, int y, int w, int h);
 void stroke_rect(GRAPHICS_CONTEXT *ctx, int x, int y, int w, int h);
 void fill_rect(GRAPHICS_CONTEXT *ctx, int x, int y, int w, int h);
 void clear_rect(GRAPHICS_CONTEXT *ctx, int x, int y, int w, int h);
+
+int start_batch(GRAPHICS_CONTEXT*ctx, int id);
+int end_batch(GRAPHICS_CONTEXT*ctx, int id);
+
+uint32_t *get_backbuffer0(GRAPHICS_CONTEXT *ctx);
+uint32_t *get_backbuffer1(GRAPHICS_CONTEXT *ctx);
 
 uint32_t get_screen_width();
 uint32_t get_screen_height();

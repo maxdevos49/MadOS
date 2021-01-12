@@ -63,7 +63,6 @@ int graphics_uninit()
 
 GRAPHICS_CONTEXT *get_graphics_ctx(enum GRAPHICS_BUFFER_COUNT buffer_count, int x, int y, int width, int height)
 {
-    printf("Gettings Graphics context\n");
     GRAPHICS_CONTEXT *ctx = (struct __graphics_context *)malloc(sizeof(struct __graphics_context));
 
     if (ctx == NULL)
@@ -180,6 +179,10 @@ int print_error(GRAPHICS_CONTEXT *ctx, char *str, int error_code)
 
 void swap_buffer(GRAPHICS_CONTEXT *ctx)
 {
+    if (ctx->batch_id != NULL)
+        return;
+
+    
     //If single buffering there is no need to swap anything
     if (ctx->current_back_buffer == FRAMEBUFFER)
         return;
@@ -330,7 +333,11 @@ void stroke(GRAPHICS_CONTEXT *ctx)
 
         int x1 = ctx->line_x;
         int y1 = ctx->line_y;
-        for (int i = -ctx->line_width / 2; i < ctx->line_width / 2; i++)
+
+        int left_offset = 0 - ctx->line_width / 2;                //TODO needs work
+        int right_offset = ctx->line_width - ctx->line_width / 2; //ctx->line_width / 2;
+
+        for (int i = left_offset; i < right_offset; i++)
         {
             render_line(ctx, x0 + i, y0 + i, x1 + i, y1 + i);
         }
@@ -431,7 +438,6 @@ void draw_char(GRAPHICS_CONTEXT *ctx, int x, int y, uint8_t c)
     }
 }
 
-// uint16_t cursor = 0;
 void draw_text(GRAPHICS_CONTEXT *ctx, int x, int y, char *txt)
 {
     int sx = x + ctx->origin_x;
@@ -459,6 +465,38 @@ void pixel(GRAPHICS_CONTEXT *ctx, int x, int y, uint32_t color)
         return;
 
     *((uint32_t *)(sy * ctx->pitch + (sx * 4) + (uint64_t)ctx->buffer)) = color;
+}
+
+int start_batch(GRAPHICS_CONTEXT *ctx, int id)
+{
+    if (ctx->batch_id != NULL)
+        return 1; //batch id already set
+
+    ctx->batch_id = id;
+
+    return 0; //Success
+}
+
+int end_batch(GRAPHICS_CONTEXT *ctx, int id)
+{
+    if (ctx->batch_id != id)
+        return 1; //Batch id is invalid
+
+    ctx->batch_id = NULL;
+
+    swap_buffer(ctx);
+
+    return 0; //Success
+}
+
+uint32_t *get_backbuffer0(GRAPHICS_CONTEXT *ctx)
+{
+    return ctx->buffer0;
+}
+
+uint32_t *get_backbuffer1(GRAPHICS_CONTEXT *ctx)
+{
+    return ctx->buffer1;
 }
 
 uint32_t get_screen_width()

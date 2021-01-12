@@ -1,11 +1,8 @@
 #include <stdlib.h>
 
-int abs(int n)
+int abs(int x)
 {
-    if (n >= 0)
-        return n;
-
-    return n * -1;
+   return __builtin_abs(x);
 }
 
 // #ifdef __test

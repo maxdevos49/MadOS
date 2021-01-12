@@ -5,4 +5,6 @@
 
 void KB_install(void);
 
+void register_kb_handler(void (*handler)(uint8_t scan_code, char chr));
+
 #endif

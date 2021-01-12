@@ -42,7 +42,6 @@ static int float_to_str(char *buffer, double value, enum FLAGS flag, int width, 
  *      %d, %i --> decimal integer
  *      %f --> float
  * 
- *  TODO not supported yet
  *  Special extra formatters:
  *      %(3)d  --> minimum width is 3 columns
  *      %(-)3d  --> right pad formatted value minimum width of 3
@@ -291,6 +290,7 @@ static int int_to_str(char *buffer, int64_t value, enum FLAGS flag, int width, i
     uint8_t remainder = new_value % 10;
     int_buffer[is_negative + size - index] = remainder + 48;
     int_buffer[is_negative + size + 1] = 0;
+    index++;
 
     return position_text(buffer, int_buffer, index, flag, width, length, 0);
 }

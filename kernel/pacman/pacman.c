@@ -1,5 +1,7 @@
 #include "pacman.h"
 #include "render.h"
+#include "input.h"
+#include "ai.h"
 
 #include <stdlib.h>
 #include <graphics.h>
@@ -62,15 +64,16 @@ int pacman_main()
     {
         game.ticks++;
 
-        //get input
-
-        //This seems to be a pain in the ass
+        if (update_input(&game))
+            break;
 
         //calculate next state
+        entity_ai(&game, game.pacman);
+        entity_ai(&game, (&game)->ghost[BLINKY]);
 
         render(&game);
 
-        // TIMER_sleep_milliseconds(20);
+        TIMER_sleep_milliseconds(20);
     }
 
     pacman_cleanup(&game);
@@ -86,25 +89,49 @@ void pacman_init(struct game *game)
 
     game->screen_width = get_screen_width(game->ctx) / 2;
     game->screen_height = get_screen_height(game->ctx);
+    game->scale = 18;
     game->ctx = get_graphics_ctx(DOUBLE, 0, 0, game->screen_width, game->screen_height);
 
-    printf("CTX: %d\n", game->ctx);
-
+    //pacman
     game->pacman = malloc(sizeof(struct entity));
-    //TODO init pacman
+    game->pacman->name = OTHER;
+    game->pacman->x = 13 * game->scale + game->scale / 2;
+    game->pacman->y = 26 * game->scale;
+    game->pacman->cell_x = 13;
+    game->pacman->cell_y = 26;
+    game->pacman->x_target = game->pacman->x;
+    game->pacman->y_target = game->pacman->y;
+    game->pacman->type = PACMAN;
+    game->pacman->mode = PACMAN_CONTROL;
+    game->pacman->des_dir = LEFT;
+    game->pacman->dir = LEFT;
 
-    for (int i = 0; i < 4; i++)
-    {
-        game->ghost[i] = malloc(sizeof(struct entity));
-        //TODO init ghost
-    }
+    //Pinky
+    game->ghost[BLINKY] = malloc(sizeof(struct entity));
+    game->ghost[BLINKY]->name = BLINKY;
+    game->ghost[BLINKY]->color = 0x00ff0000;
+    game->ghost[BLINKY]->x = 13 * game->scale + game->scale / 2;
+    game->ghost[BLINKY]->y = 14 * game->scale;
+    game->ghost[BLINKY]->cell_x = 13;
+    game->ghost[BLINKY]->cell_y = 14;
+    game->ghost[BLINKY]->x_target = game->ghost[BLINKY]->x;
+    game->ghost[BLINKY]->y_target = game->ghost[BLINKY]->y;
+    game->ghost[BLINKY]->type = GHOST;
+    game->ghost[BLINKY]->mode = GHOST_CHASE;
+    game->ghost[BLINKY]->des_dir = LEFT;
+    game->ghost[BLINKY]->dir = LEFT;
 
-    game->scale = game->screen_height / (MAP_HEIGHT + 4);
+    init_input(game);
 }
 
 void pacman_cleanup(struct game *game)
 {
+
+    destroy_graphics_ctx(game->ctx);
+
     free(game->pacman);
     for (int i = 0; i < 4; i++)
         free(game->ghost[i]);
+
+    uninit_input();
 }

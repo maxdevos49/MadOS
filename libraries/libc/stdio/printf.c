@@ -27,7 +27,7 @@ int printf(const char *restrict format, ...)
     va_list args;
     va_start(args, format);
 
-    char buffer[300];
+    char buffer[1000];
 
     size_t written = vsprintf(buffer, format, args);
 

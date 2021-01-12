@@ -24,8 +24,7 @@
 #include <kernel/io.h>
 #include <kernel/list.h>
 
-#include <kernel/tty.h>
-#include <kernel/vga.h>
+#include <kernel/devices/tty.h>
 
 #include <stdint.h>
 #include <stdlib.h>

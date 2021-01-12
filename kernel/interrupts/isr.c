@@ -1,8 +1,7 @@
 #include <kernel/interrupts/idt.h>
 #include <kernel/interrupts/isr.h>
 
-#include <kernel/tty.h>
-#include <kernel/vga.h>
+#include <kernel/devices/tty.h>
 #include <kernel/debug.h>
 
 #include <stdio.h>
@@ -122,40 +121,40 @@ static void page_fault(struct registers *regs)
     switch (regs->err_code)
     {
     case 0x0:
-        printf("[Error Code: %x] Supervisory process tried to read a non-present page entry.\n", regs->err_code);
+        printf("[Error Code: %02x] Supervisory process tried to read a non-present page entry.\n", regs->err_code);
         break;
     case 0x1:
-        printf("[Error Code: %x] Supervisory process tried to read a page and caused a protection fault.\n", regs->err_code);
+        printf("[Error Code: %02x] Supervisory process tried to read a page and caused a protection fault.\n", regs->err_code);
         break;
     case 0x2:
-        printf("[Error Code: %x] Supervisory process tried to write to a non-present page entry.\n", regs->err_code);
+        printf("[Error Code: %02x] Supervisory process tried to write to a non-present page entry.\n", regs->err_code);
         break;
     case 0x3:
-        printf("[Error Code: %x] Supervisory process tried to write a page and caused a protection fault.\n", regs->err_code);
+        printf("[Error Code: %02x] Supervisory process tried to write a page and caused a protection fault.\n", regs->err_code);
         break;
     case 0x4:
-        printf("[Error Code: %x] User process tried to read a non-present page entry.\n", regs->err_code);
+        printf("[Error Code: %02x] User process tried to read a non-present page entry.\n", regs->err_code);
         break;
     case 0x5:
-        printf("[Error Code: %x] User process tried to read a page and caused a protection fault.\n", regs->err_code);
+        printf("[Error Code: %02x] User process tried to read a page and caused a protection fault.\n", regs->err_code);
         break;
     case 0x6:
-        printf("[Error Code: %x] User process tried to write to a non-present page entry.\n", regs->err_code);
+        printf("[Error Code: %02x] User process tried to write to a non-present page entry.\n", regs->err_code);
         break;
     case 0x7:
-        printf("[Error Code: %x] User process tried to write a page and caused a protection fault.\n", regs->err_code);
+        printf("[Error Code: %02x] User process tried to write a page and caused a protection fault.\n", regs->err_code);
         break;
     default:
-        printf("Unknown Page fault error. Error Code: %x\n", regs->err_code);
+        printf("Unknown Page fault error. Error Code: %02x\n", regs->err_code);
         break;
     }
-    printf("[Instruction Pointer: 0x%x]\n\n", regs->rip);
+    printf("[Instruction Pointer: 0x%08x]\n\n", regs->rip);
 }
 
 static void general_protection_fault(struct registers *regs)
 {
-    printf("[Error code: 0x%x]\n", regs->err_code);
-    printf("[Instruction Pointer: 0x%x]\n\n", regs->rip);
+    printf("[Error code: 0x%02x]\n", regs->err_code);
+    printf("[Instruction Pointer: 0x%08x]\n\n", regs->rip);
 }
 
 void fault_handler(struct registers *regs)
@@ -163,7 +162,7 @@ void fault_handler(struct registers *regs)
 
     if (regs->int_num < 32)
     {
-        TTY_set_theme(VGA_COLOR_RED, VGA_COLOR_WHITE);
+        TTY_set_theme(0x00ff0000, 0x00ffffff);
         printf("\nKernel Panic: %s\n\n System will now Halt\n\nDetails:\n\n", exception_messages[regs->int_num]);
 
         switch (regs->int_num)
@@ -175,34 +174,34 @@ void fault_handler(struct registers *regs)
             page_fault(regs);
             break;
         default:
-            printf("[Error code: %x]\n", regs->err_code);
+            printf("[Error code: %02x]\n", regs->err_code);
             break;
         }
 
         strace(10);
 
-        TTY_set_theme(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
+        // //If in graphics mode
+        // GRAPHICS_CONTEXT *ctx = get_graphics_ctx(SINGLE, 0, 0, get_screen_width(), get_screen_height());
 
-        //If in graphics mode
-        GRAPHICS_CONTEXT *ctx = get_graphics_ctx(SINGLE, 0, 0, get_screen_width(), get_screen_height());
+        // set_fill(ctx, 0x00f0f000);
+        // set_stroke(ctx, 0x0);
 
-        set_fill(ctx, 0x00f0f000);
-        set_stroke(ctx, 0x0);
-
-        int width = 400;
-        int height = 200;
-        int x = get_screen_width()/2 - width/2;
-        int y = get_screen_height()/2 - height/2;
-        fill_rect(ctx, x,y,width,height);
-        set_origin(ctx, x,y);
+        // int width = 400;
+        // int height = 200;
+        // int x = get_screen_width()/2 - width/2;
+        // int y = get_screen_height()/2 - height/2;
+        // fill_rect(ctx, x,y,width,height);
+        // set_origin(ctx, x,y);
         
-        draw_text(ctx, CHAR_WIDTH, 0, "Kernel Panic: ");
-        draw_text(ctx, CHAR_WIDTH, CHAR_HEIGHT, (char*)exception_messages[regs->int_num]);
-        draw_text(ctx, CHAR_WIDTH, CHAR_HEIGHT * 2, "System will now halt");
-        swap_buffer(ctx);
-        destroy_graphics_ctx(ctx);
+        // draw_text(ctx, CHAR_WIDTH, 0, "Kernel Panic: ");
+        // draw_text(ctx, CHAR_WIDTH, CHAR_HEIGHT, (char*)exception_messages[regs->int_num]);
+        // draw_text(ctx, CHAR_WIDTH, CHAR_HEIGHT * 2, "System will now halt");
+        // swap_buffer(ctx);
+        // destroy_graphics_ctx(ctx);
 
         while (1)
             ;
+
+            __builtin_unreachable();
     }
 }
