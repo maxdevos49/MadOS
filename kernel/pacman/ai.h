@@ -5,8 +5,9 @@
 
 #include <stdint.h>
 
-void ghost_ai(struct game *state, uint8_t ghost);
-void pacman_ai(struct game *state);
-void pacman_keyboard(struct game *state);
+void general_ai(struct game * game);
+
+void entity_ai(struct game *game, struct entity *entity);
+void entity_reverse(struct game *game, struct entity *entity);
 
 #endif

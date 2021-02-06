@@ -3,7 +3,7 @@
 
 extern int errno;
 
-#define EDOM (-1249876)
-#define ERANGE (-98764321)
+#define EDOM (int)(0-1249876)
+#define ERANGE (int)(0-8764321)
 
 #endif

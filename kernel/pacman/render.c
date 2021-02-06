@@ -7,27 +7,35 @@
 #include <stdio.h>
 #include <string.h>
 
-void render_pacman(struct game *game, struct entity *pacman);
-void render_map(struct game *game);
-void render_hud(struct game *game);
-static int once = 0;
+const char *DIRECTIONS[] = {
+    "TOP",
+    "RIGHT",
+    "BOTTOM",
+    "LEFT"};
+
+const char *MODES[] = {
+    "SCATTER",
+    "CHASE",
+    "FRIGHTENED"};
+
+static void render_map(struct game *game);
+static void render_hud(struct game *game);
+static void render_pacman(struct game *game, struct entity *pacman);
+static void render_ghost(struct game *game, struct entity *ghost);
+
 void render(struct game *game)
 {
     start_batch(game->ctx, 0xdead);
 
-    // if (once == 0)
-    // {
     set_fill(game->ctx, 0x00081f3a);
     fill_rect(game->ctx, 0, 0, game->screen_width, game->screen_height);
 
     render_map(game);
-    //     once = 1;
-    // }
 
     render_ghost(game, game->ghost[BLINKY]);
-    // render_ghost(game->ghost[1]);
-    // render_ghost(game->ghost[2]);
-    // render_ghost(game->ghost[3]);
+    render_ghost(game, game->ghost[PINKY]);
+    render_ghost(game, game->ghost[INKY]);
+    render_ghost(game, game->ghost[CLYDE]);
 
     render_pacman(game, game->pacman);
 
@@ -36,29 +44,16 @@ void render(struct game *game)
     end_batch(game->ctx, 0xdead);
 }
 
-const char *DIRECTIONS[] = {
-    "TOP",
-    "RIGHT",
-    "BOTTOM",
-    "LEFT"};
-
-void render_hud(struct game *game)
+static void render_hud(struct game *game)
 {
-    //Top bar
-    // set_fill(game->ctx, 0x000000);
-    // fill_rect(game->ctx, 0, 0, MAP_WIDTH * game->scale, game->scale * 3);
-    // //bottom bar
-    // set_fill(game->ctx, 0x000000);
-    // fill_rect(game->ctx, 0, 0, MAP_WIDTH * game->scale, game->scale * 3);
-
     char buffer[50];
-    sprintf(buffer, "Frame Count:   %05d", game->ticks++);
+    sprintf(buffer, "Frame Count:   %05d", game->ticks);
     draw_text(game->ctx, 10, 0, buffer);
 
     sprintf(buffer, "Current Direction: %s", DIRECTIONS[game->pacman->dir]);
     draw_text(game->ctx, 10, CHAR_HEIGHT, buffer);
 
-    sprintf(buffer, "Desired Direction: %s", DIRECTIONS[game->pacman->des_dir]);
+    sprintf(buffer, "Mode: %s", MODES[game->mode]);
     draw_text(game->ctx, 10, CHAR_HEIGHT + CHAR_HEIGHT, buffer);
 
     sprintf(buffer, "Scale: %dpx, Step: %dpx", game->scale, game->scale / 6);
@@ -74,7 +69,7 @@ void render_hud(struct game *game)
     draw_text(game->ctx, 10, CHAR_HEIGHT * 39, buffer);
 }
 
-void render_map(struct game *game)
+static void render_map(struct game *game)
 {
     int i, j;
 
@@ -95,6 +90,11 @@ void render_map(struct game *game)
             {
             case 1: //blue
                 set_fill(game->ctx, 0x0000ff);
+                fill_rect(game->ctx, x, y, scale, scale);
+                break;
+            case 4:
+            case 5:
+                set_fill(game->ctx, 0xff00ff);
                 fill_rect(game->ctx, x, y, scale, scale);
                 break;
             case 2: //black with dots
@@ -123,13 +123,24 @@ void render_map(struct game *game)
         }
     }
 }
-void render_ghost(struct game *game, struct entity *ghost)
+
+static void render_ghost(struct game *game, struct entity *ghost)
 {
-    set_fill(game->ctx, ghost->color);
+    int color = ghost->color;
+
+    if(game->mode == FRIGHTENED)
+    {
+        if((game->ticks % 20) > 10)
+            color = 0x000000aa;
+        else
+            color = 0x00C0C0C0;
+    }
+
+    set_fill(game->ctx, color);
     fill_rect(game->ctx, ghost->x, ghost->y, game->scale, game->scale);
 }
 
-void render_pacman(struct game *game, struct entity *pacman)
+static void render_pacman(struct game *game, struct entity *pacman)
 {
     set_fill(game->ctx, 0x00ffff00);
     fill_rect(game->ctx, pacman->x, pacman->y, game->scale, game->scale);

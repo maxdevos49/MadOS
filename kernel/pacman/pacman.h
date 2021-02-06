@@ -22,14 +22,6 @@ enum ENTITY_NAME
     OTHER
 };
 
-enum ENTITY_MODE
-{
-    PACMAN_CONTROL,
-    PACMAN_AI,
-    GHOST_CHASE,
-    GHOST_SCATTER
-};
-
 static const int DIRECTION_OFFSET[] = {-1, 1, 1, -1};
 enum DIRECTION
 {
@@ -37,6 +29,13 @@ enum DIRECTION
     RIGHT,
     BOTTOM,
     LEFT
+};
+
+enum GAME_MODE
+{
+    SCATTER,
+    CHASE,
+    FRIGHTENED
 };
 
 struct entity
@@ -58,13 +57,14 @@ struct entity
     enum DIRECTION des_dir;
     enum DIRECTION dir;
     enum ENTITY_TYPE type;
-    enum ENTITY_MODE mode;
 };
 
 struct game
 {
     uint32_t ticks;
+    uint32_t switcher;
     uint16_t score;
+    enum GAME_MODE mode;
 
     struct entity *pacman;
     struct entity *ghost[4];

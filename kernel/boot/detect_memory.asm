@@ -10,8 +10,8 @@ detect_memory:
     mov es, ax
     mov di, 0x6000   ; Map table to 0x6000 in memory
 
-    mov edx, 0x534d4150
-    xor ebx, ebx
+    mov edx, 0x534d4150 ; Weird number, Function maybe?
+    xor ebx, ebx ; Zero ebx
 
     .repeat:
         mov eax, 0xe820

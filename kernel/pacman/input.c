@@ -7,6 +7,7 @@
 static char last;
 static void handle_input(uint8_t scan_code, char c)
 {
+    scan_code = 10;
     last = c;
 }
 
@@ -34,9 +35,8 @@ int update_input(struct game *game)
     return 0;
 }
 
-int init_input(struct game *game)
+void init_input()
 {
- 
     register_kb_handler(handle_input);
 }
 

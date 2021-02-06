@@ -2,21 +2,19 @@
 
 double pow(double x, double y)
 {
-    if (y == 0)
-    {
+    int ay = fabs(y);
+
+    if (x == 0)
+        return 0;
+
+    if (ay == 0)
         return 1;
-    }
-    else if (y == 1)
-    {
-        return x;
-    }
-  
 
     double result = x;
-    for (int i = 0; i < y-1; i++)
+    for (int i = 0; i < ay - 1; i++)
         result *= x;
 
-    return result;
+    return y < 0 ? 1 / result : result;
 }
 
 double sqrt(double x)

@@ -12,17 +12,7 @@ all: $(BINARIES)
 %.o: %.asm
 	$(NASM) -f elf64 $< -o $@
 
-.PHONY: install install-bin clean
-install: install-bin
-
-install-bin: $(BINARIES)
-	cp -L boot.bin $(SYSROOT)/boot
-
-install-headers:
-	@echo No Boot Headers
-
-debug:
-
+.PHONY: clean
 clean:
 	@find . -type f -name "*.o" -delete -print
 	@find . -type f -name "*.bin" -delete -print
