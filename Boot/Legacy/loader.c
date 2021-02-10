@@ -16,6 +16,8 @@ void bios_loader()
 
     //TODO Load elf kernel
 
+    //TODO Start elf kenrel
+
     //Should never reach here
     while(1);
     __builtin_unreachable();

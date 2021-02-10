@@ -25,12 +25,12 @@ VBE_MODE_INFO:
     .segment_b:         dw 0
     .win_func_ptr:      dd 0
     .pitch:             dw 0
-    .width:             dw 0
+    .width:             dw 0; 15
     .height:            dw 0
     .w_char:            db 0
     .y_char:            db 0
     .planes:            db 0
-    .bpp:               db 0
+    .bpp:               db 0;25
     .banks:             db 0
     .memory_model:      db 0
     .bank_size:         db 0
@@ -60,11 +60,11 @@ load_font:
     ; ask BIOS to return VGA bitmap fonts
     push ds
     push es
-    ;ask BIOS to return VGA bitmap fonts
+    ; ask BIOS to return VGA bitmap fonts
     mov ax, 1130h
     mov bh, 6
     int 10h
-    ;copy charmap   
+    ; copy charmap
     push es
     pop ds
     pop es
@@ -75,15 +75,15 @@ load_font:
     ret
 
 detect_vesa_mode:
-    mov [.width], ax
+    mov [.width], ax    ; Store arguments
     mov [.height], bx
     mov [.bpp], cl
 
-    sti
+    sti                 ; Enable interupts
 
     push es                  ; some VESA BIOSes destroy ES, or so I read
     mov ax, 0x4F00           ; get VBE BIOS info
-    mov di, VBE_INFO
+    mov di, VBE_INFO    
     int 0x10
     pop es
 
@@ -132,7 +132,7 @@ detect_vesa_mode:
     cmp al, [VBE_MODE_INFO.bpp]
     jne .next_mode
 
-    ;Set the mode
+    ; Set the mode
     push es
     mov ax, 0x4F02
     mov bx, [.mode]
@@ -144,7 +144,7 @@ detect_vesa_mode:
     cmp ax, 0x4F
     jne vesa_error
 
-    clc                      ; ???
+    clc                      ; Clear carry
 
     ret
 
