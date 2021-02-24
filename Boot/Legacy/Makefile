@@ -2,9 +2,14 @@
 
 NASM?=nasm
 
-BINARIES=boot.bin
+BINARIES=boot.bin extended.bin
 
-all: $(BINARIES)
+TARGET=loader.bin
+
+all: $(TARGET)
+
+$(TARGET): $(BINARIES)
+	cat $(BINARIES) > $(TARGET)
 
 %.bin: %.asm
 	$(NASM) -f bin $< -o $@
@@ -12,7 +17,11 @@ all: $(BINARIES)
 %.o: %.asm
 	$(NASM) -f elf64 $< -o $@
 
-.PHONY: clean
+.PHONY: clean run
+
+run: $(TARGET)
+	qemu-system-x86_64 -no-reboot -no-shutdown -drive format=raw,media=disk,file=loader.bin
+
 clean:
 	@find . -type f -name "*.o" -delete -print
 	@find . -type f -name "*.bin" -delete -print

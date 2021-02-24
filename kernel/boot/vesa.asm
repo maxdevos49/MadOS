@@ -92,6 +92,7 @@ detect_vesa_mode:
 
     mov ax, word[VBE_INFO.video_modes]
     mov [.offset], ax
+    
     mov ax, word[VBE_INFO.video_modes+2]
     mov [.segment], ax
 

@@ -1,7 +1,16 @@
-; Prints a string refrenced by bx
-print_string:
+[bits 16]
+; ==================     Print     ====================
+; Prints a string pointed by address in bx
+; Input:
+;   bx = string pointer
+; Output: void
+; =====================================================
+
+SECTION .text
+print:
     push ax
     push bx
+
     mov ah, 0x0e      ; BIOS teletype function
     .loop:
     cmp [bx], byte 0  ; if ([bx] === 0)
