@@ -1,6 +1,7 @@
 [bits 16]
 ; ==================   Detect Vesa Mode   ====================
-; Loads the desired VESA Mode
+; Loads the desired VESA Mode from the given contstants. Halts if VESA 
+; is not suported or the desired VESA mode is not found
 ; Input: void
 ; Output: void
 ; ============================================================

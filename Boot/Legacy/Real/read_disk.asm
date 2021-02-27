@@ -1,12 +1,12 @@
 
 ; ==================     Read Disc    =======================
-; Reads and loads memory from a disc drive to a given destination
-; Input: 
-;   dl = boot drive number
+; Reads and loads memory from a disc drive to a given destination. Halts 
+; if the read fails or the desired amount of sectors is not read
+; Input: void
 ; Output: void
 ; ===========================================================
 ; Contants
-SECTOR_COUNT equ 4  ; 60 or 64 Maximum
+SECTOR_COUNT equ 6  ; 60 or 64 Maximum
 DESTINATION_POINTER equ 0x8000
 ;============================================================
 

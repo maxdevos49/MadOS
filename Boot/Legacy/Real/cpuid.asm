@@ -1,6 +1,7 @@
 [bits 16]
 ; ==================     Check CPUID    =======================
-; Check the cpu for feature support
+; Checks the cpu for feature support of cpuid itself and
+; long mode. Halts if either feature is not present.
 ; Input: void
 ; Output: void
 ; ===========================================================

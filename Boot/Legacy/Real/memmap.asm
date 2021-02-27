@@ -1,7 +1,8 @@
 [bits 16]
 ; ==================     Memory Map   ======================
 ; https://wiki.osdev.org/Detecting_Memory_(x86)#Detecting_Upper_Memory
-; Retrieves the memory map and stores it at 0000:MEMORY_MAP_BASE. Also sets the Total memory region count at 0000:MEMORY_REGION_COUNT.
+; Retrieves the memory map and stores it at 0000:MEMORY_MAP_BASE. Also 
+; sets the Total memory region count at 0000:MEMORY_REGION_COUNT.
 ; Input: void
 ; Output: void
 ; ==========================================================
