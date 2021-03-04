@@ -9,6 +9,7 @@ export NASM=nasm
 export MAKE="make -j4"
 
 export SYSROOT="$(pwd)/sysroot"
+export BOOT_SYSROOT="$(pwd)/boot_sysroot"
 
 export BOOT_DIR="/boot"
 export KERNEL_DIR="/kernel"

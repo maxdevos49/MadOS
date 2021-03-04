@@ -1,5 +1,4 @@
 [bits 16]
-[org 0x8000] ; TODO remove
 ; =====================   Extended Half   =======================
 ; Begins with the assumption that long mode is supported 
 ; for the current machine. Sets up gdt, paging, and long
@@ -41,16 +40,18 @@ extended:
     mov cr0, ebx                        ; Write changes back to CR0
 
     lgdt [GDT.DESCRIPTOR]
-    
+
     jmp CODE_SEG:long_mode
 
 SECTION .rodata
 extended_MSG: db "Extended half loaded", 0xA, 0xD, 0
-    
-[bits 64]
-SECTION .text
-long_mode:
 
+[bits 64]
+%include "./Real/sse.asm"
+    
+SECTION .text
+[extern bios_loader]
+long_mode:
     mov ax, DATA_SEG
     mov ds, ax
     mov es, ax
@@ -58,34 +59,20 @@ long_mode:
     mov gs, ax
     mov ss, ax
 
-    ; STACK
-    ; ACTIVATE SSE
-    ; LOADER TRANSFER
+    mov rbp, 0x1E8480                   ; Set Stack at the top of the 2MB of Identity Mapped Ram
+    mov rsp, rbp                        ; Set Stack pointer at the Stack Base 
+    xor rbp, rbp                        ; Nullify the pointer to mark the beginning of the stack
 
-        ; Blank out the screen to a blue color.
-    mov edi, 0xB8000
-    mov rcx, 500                      ; Since we are clearing uint64_t over here, we put the count as Count/4.
-    mov rax, 0x1F201F201F201F20       ; Set the value to set the screen to: Blue background, white foreground, blank spaces.
-    rep stosq                         ; Clear the entire screen. 
- 
-    ; Display "Hello World!"
-    mov edi, 0x00b8000              
- 
-    mov rax, 0x1F6C1F6C1F651F48    
-    mov [edi],rax
- 
-    mov rax, 0x1F6F1F571F201F6F
-    mov [edi + 8], rax
- 
-    mov rax, 0x1F211F641F6C1F72
-    mov [edi + 16], rax
-
-    jmp $
+    call setup_sse
+        
+    mov edi, 0xB8000                    ; Blank out the screen to a blue color.
+    mov rcx, 500                        ; Since we are clearing uint64_t over here, we put the count as Count/4.
+    mov rax, 0x1F201F201F201F20         ; Set the value to set the screen to: Blue background, white foreground, blank spaces.
+    rep stosq                           ; Clear the entire screen. 
 
 
-SECTION .rodata
+    jmp bios_loader
+
+
+SECTION .data
 times 2048-($-$$) db 0                                  ; Pad for a minimum of 4 sectors for the extended half
-
-; Is the following the best way to find the program length??
-; SECTION .bss
-; PROGRAM_END: resb 1

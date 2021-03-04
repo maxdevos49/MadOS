@@ -23,7 +23,7 @@ typedef struct __tty_config
 	void (*write)(TTY_CONFIG* config, const char *data, size_t size);
 	void (*scroll)(TTY_CONFIG* config);
 	void (*apply_theme)( uint32_t background, uint32_t foreground);
-} TTY_CONFIG;
+};
 
 void TTY_init(TTY_CONFIG *config);
 // void TTY_uninit();

@@ -6,7 +6,7 @@
 ; Output: void
 ; ===========================================================
 ; Contants
-SECTOR_COUNT equ 6  ; 60 or 64 Maximum
+; SECTOR_COUNT equ 20  ; 60 or 64 Maximum
 DESTINATION_POINTER equ 0x8000
 ;============================================================
 

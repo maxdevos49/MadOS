@@ -1,7 +1,19 @@
-#include "loader.h"
 
-void bios_loader()
+void legacy_loader()
 {
+
+    //Serial Debugging is outputted to stdio on host machine
+    init_serial();
+
+    //Initialize the tty interface for the screen character output
+    if(init_tty(VESA))
+    {
+        serial_printf("[ERROR] TTY initialization failed. Halting Progress.");
+
+        while(1);
+        __builtin_unreachable();
+    }
+
     BOOT_HEADER boot_header;
 
     //TODO Populate cpu information

@@ -4,7 +4,7 @@ _x86 16-bit Real Mode_
 
 ---
 
-Memory Segmentation exist to allow for access over 64kb with 16-bit registers. This allows up to 1Mb of memory to be addressed. 
+Memory Segmentation exist to allow for access over 64kb with 16-bit registers. This allows up to 1Mb of memory to be addressed in Real mode.
 
 #### Segment Registers
 
@@ -15,7 +15,7 @@ Memory Segmentation exist to allow for access over 64kb with 16-bit registers. T
 | SS | Stack Segment | Any push or pop or data referencing the stack uses this segment
 | ES | Extra Segment | Default destination for string operations
 | FS | F Segment| No hardware defined use / Software Defined
-| GS | G Segment | No hardware defined use/ Software Defined
+| GS | G Segment | No hardware defined use / Software Defined
 
 #### Segment Address Translation
 Say you have the following code:
