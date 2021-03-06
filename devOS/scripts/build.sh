@@ -13,10 +13,6 @@ mkdir -p $SYSROOT$USR_LIB_DIR
 mkdir -p $SYSROOT$BIN_DIR
 mkdir -p $SYSROOT$DEV_DIR
 
-mkdir -p $BOOT_SYSROOT
-mkdir -p $BOOT_SYSROOT$USR_INCLUDE_DIR
-mkdir -p $BOOT_SYSROOT$USR_LIB_DIR
-
 # Install Headers
 for PROJECT in $SYSTEM_PROJECTS; do
     (cd $PROJECT && $MAKE install-headers)
