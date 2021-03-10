@@ -1,5 +1,6 @@
-
-#include "../loader.h"
+#include "../stdio.h"
+#include "../string.h"
+#include "../stdarg.h"
 
 enum FLAGS
 {
@@ -11,8 +12,8 @@ enum FLAGS
     ZERO
 };
 
-static int hex_to_str(char *buffer, unsigned long long int value, enum FLAGS flag, int width);
-static int int_to_str(char *buffer, long long int, enum FLAGS flag, int width);
+static int hex_to_str(char *buffer, uint64_t value, enum FLAGS flag, int width);
+static int int_to_str(char *buffer, int64_t, enum FLAGS flag, int width);
 static int float_to_str(char *buffer, double value, enum FLAGS flag, int width, int precision);
 
 #define __PUTC(c, buffer, position) \
@@ -26,38 +27,6 @@ static int float_to_str(char *buffer, double value, enum FLAGS flag, int width, 
         strcpy(buffer + position, src); \
         position += strlen(src);        \
     }
-
-int vsprintf(char *buffer, const char *format, va_list args);
-/**
- * sprintf(buffer_string ,"format string", formatter_values...) 
- * 
- * %[flags][width][.precision][length]specifier 
- * 
- * Format characters:
- *      %c --> character
- *      %s --> string
- *      %u --> unsigned integer
- *      %x --> hexadecimal
- *      %d, %i --> decimal integer
- *      %f --> float
- * 
- *  Special extra formatters:
- *      %(3)d  --> minimum width is 3 columns
- *      %(-)3d  --> right pad formatted value minimum width of 3
- *      %(0)3d  --> left pad zeros to reach minimum width
- *      %(+)3d  --> explicitly indicate the value is positive
- *      %(2.4)f  --> atleast 2 characters wide and display minimum of 4 decimal places
- * */
-int sprintf(char *buffer, const char *restrict format, ...)
-{
-    va_list args;
-    va_start(args, format);
-
-    unsigned long long int written = vsprintf(buffer, format, args);
-
-    va_end(args);
-    return written;
-}
 
 static enum FLAGS is_flag(char c)
 {
@@ -89,7 +58,7 @@ static int num_defined(char c)
 
 int vsprintf(char *buffer, const char *format, va_list args)
 {
-    unsigned long long int written = 0;
+    uint64_t written = 0;
     const char *src = NULL;
 
     enum FLAGS flag;
@@ -140,12 +109,12 @@ int vsprintf(char *buffer, const char *format, va_list args)
             case 'd': //%d --> decimal integer
             case 'i': //%i --> decimal integer
 
-                written += int_to_str(buffer + written, (long long int)va_arg(args, long long int), flag, width);
+                written += int_to_str(buffer + written, (int64_t)va_arg(args, int64_t), flag, width);
 
                 format++;
                 break;
             case 'u': //%u --> unsigned integer
-                written += int_to_str(buffer + written, (unsigned long long int)va_arg(args, unsigned long long int), flag, width);
+                written += int_to_str(buffer + written, (uint64_t)va_arg(args, uint64_t), flag, width);
 
                 format++;
                 break;
@@ -155,7 +124,7 @@ int vsprintf(char *buffer, const char *format, va_list args)
                 format++;
                 break;
             case 'x': //%x --> unsigned hex
-                written += hex_to_str(buffer + written, (unsigned long long int)va_arg(args, unsigned long long int), flag, width);
+                written += hex_to_str(buffer + written, (uint64_t)va_arg(args, uint64_t), flag, width);
 
                 format++;
                 break;
@@ -222,16 +191,16 @@ static int position_text(char *dst, const char *src, int src_len, enum FLAGS fla
 }
 
 static const char *HEX_TABLE = "0123456789abcdef"; //This is for simplicity but not really required
-static int hex_to_str(char *buffer, unsigned long long int value, enum FLAGS flag, int width)
+static int hex_to_str(char *buffer, uint64_t value, enum FLAGS flag, int width)
 {
     char hex_buffer[25];
 
-    unsigned char hex_index = 0;
-    unsigned char *ptr;
+    uint8_t hex_index = 0;
+    uint8_t *ptr;
 
     for (char i = 7; i > -1; i--)
     {
-        ptr = ((unsigned char *)&value + i);
+        ptr = ((uint8_t *)&value + i);
 
         if (*ptr == 0 && hex_index == 0)
         {
@@ -252,11 +221,11 @@ static int hex_to_str(char *buffer, unsigned long long int value, enum FLAGS fla
     return position_text(buffer, hex_buffer, hex_index, flag, width, 0);
 }
 
-static int int_to_str(char *buffer, long long int value, enum FLAGS flag, int width)
+static int int_to_str(char *buffer, int64_t value, enum FLAGS flag, int width)
 {
     char int_buffer[25];
 
-    unsigned char is_negative = 0;
+    uint8_t is_negative = 0;
 
     if (value < 0)
     {
@@ -265,8 +234,8 @@ static int int_to_str(char *buffer, long long int value, enum FLAGS flag, int wi
         int_buffer[0] = '-';
     }
 
-    unsigned char size = 0;
-    unsigned long long int size_tester = (unsigned long long int)value;
+    uint8_t size = 0;
+    uint64_t size_tester = (uint64_t)value;
 
     while (size_tester / 10 > 0)
     {
@@ -274,17 +243,17 @@ static int int_to_str(char *buffer, long long int value, enum FLAGS flag, int wi
         size++;
     }
 
-    unsigned char index = 0;
-    unsigned long long int new_value = (unsigned long long int)value;
+    uint8_t index = 0;
+    uint64_t new_value = (uint64_t)value;
     while (new_value / 10 > 0)
     {
-        unsigned char remainder = new_value % 10;
+        uint8_t remainder = new_value % 10;
         new_value /= 10;
         int_buffer[is_negative + size - index] = remainder + 48;
         index++;
     }
 
-    unsigned char remainder = new_value % 10;
+    uint8_t remainder = new_value % 10;
     int_buffer[is_negative + size - index] = remainder + 48;
     int_buffer[is_negative + size + 1] = 0;
     index++;
@@ -315,7 +284,7 @@ static int float_to_str(char *buffer, double value, enum FLAGS flag, int width, 
 
     float new_value = value - (int)value;
 
-    for (unsigned char i = 0; i < precision; i++)
+    for (uint8_t i = 0; i < precision; i++)
     {
         new_value *= 10;
         *float_ptr = (int)new_value + 48;
@@ -327,4 +296,3 @@ static int float_to_str(char *buffer, double value, enum FLAGS flag, int width, 
 
     return position_text(buffer, float_buffer, precision + size, flag, width, precision);
 }
-

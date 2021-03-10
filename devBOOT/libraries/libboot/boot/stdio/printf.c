@@ -1,10 +1,14 @@
-#include <stdarg.h>
-#include <stdio.h>
+
+#include "../stdio.h"
+#include "../stdint.h"
+
+#include "../drivers/tty.h"
+#include "../drivers/serial.h"
 
 /**
- * printf("format string", formatter_values...) 
+ * printf(buffer_string ,"format string", formatter_values...) 
  * 
- * %[flags][width][.precision]specifier 
+ * %[flags][width][.precision][length]specifier 
  * 
  * Format characters:
  *      %c --> character
@@ -26,11 +30,14 @@ int printf(const char *restrict format, ...)
     va_list args;
     va_start(args, format);
 
-    char buffer[1000];
+    char buffer[400];
 
-    size_t written = vsprintf(buffer, format, args);
+    uint64_t written = vsprintf(buffer, format, args);
 
-    puts(buffer);
+    TTY_write(buffer, written);
+
+    for (uint64_t i = 0; i < written; i++)
+        SERIAL_write(buffer[i]);
 
     va_end(args);
     return written;

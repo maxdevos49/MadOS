@@ -1,13 +1,22 @@
 #include "tty.h"
+#include "../string.h"
 
 static TTY_CONFIG *tty;
 
-void TTY_init(TTY_CONFIG *config)
+int TTY_init(TTY_CONFIG *config)
 {
+    if (config == NULL)
+        return 1; // NULL
+
+    if (config->char_width == 0 || config->char_height == 0)
+        return 2;
+
+    if (config->set_cursor == NULL || config->put_char == NULL || config->clear == NULL || config->write == NULL || config->scroll == NULL)
+        return 3;
+
     tty = config;
 
-    TTY_clear();
-    TTY_set_cursor_position(0);
+    return 0;
 }
 
 void TTY_clear(void)
@@ -42,7 +51,7 @@ void TTY_putchar(char c)
 
         index += tty->char_width;         //\n
         index -= index % tty->char_width; //implied \r
-        TTY_set_cursor_position(index);
+        TTY_set_cursor_position(index-1);
 
         break;
     case '\r':
@@ -55,18 +64,16 @@ void TTY_putchar(char c)
         TTY_set_cursor_position(index);
 
         break;
-    case 0x08://Backspace
+    case 0x08: //Backspace
         index--;
         tty->put_char(tty, ' ', index);
         TTY_set_cursor_position(index);
 
         break;
     default:
-        index++;
-        uint32_t position = index - 1;
-        TTY_set_cursor_position(index);
+        tty->put_char(tty, c, index);
+        TTY_set_cursor_position(index+1);
 
-        tty->put_char(tty, c, position);
         break;
     }
 }

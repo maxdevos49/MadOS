@@ -9,5 +9,4 @@
 
 void VGA_tty_init(TTY_CONFIG* config);
 
-
 #endif

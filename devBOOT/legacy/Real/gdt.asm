@@ -19,7 +19,8 @@ GDT:
 ALIGN 4
     dw 0                              ; Padding to make the "address of the GDT" field aligned on a 4-byte boundary
  
-.DESCRIPTOR:
+GLOBAL GDT_DESCRIPTOR
+GDT_DESCRIPTOR:
     dw $ - GDT - 1                    ; 16-bit Size (Limit) of GDT.
     dd GDT                            ; 32-bit Base Address of GDT. (CPU will zero extend to 64-bit)
 

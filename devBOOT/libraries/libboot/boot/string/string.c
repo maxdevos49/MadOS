@@ -1,4 +1,4 @@
-#include "string.h"
+#include "../string.h"
 
 void *memset(void *buff_ptr, int value, size_t size)
 {

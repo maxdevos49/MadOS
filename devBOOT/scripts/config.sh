@@ -14,10 +14,10 @@ export BOOT_DIR="/boot"
 export USR_INCLUDE_DIR="/usr/include"
 export USR_LIB_DIR="/usr/lib"
 
-export CFLAGS="-ggdb -MD -Wall -Wextra -m64"
+export CFLAGS="-MD -Wall -Wextra -m64"
 export CPPFLAGS=""
-export LIBS=
+export LIBS="-nostdlib -lgcc"
 
-export SYSTEM_LIBRARY_PROJECTS="libraries/libBoot"
+export SYSTEM_LIBRARY_PROJECTS="libraries/libboot"
 export SYSTEM_PROJECTS="$SYSTEM_LIBRARY_PROJECTS legacy"
-# export SYSTEM_PROJECTS="$SYSTEM_LIBRARY_PROJECTS legacy efi"
+# export SYSTEM_PROJECTS="$SYSTEM_LIBRARY_PROJECTS legacy efi" # Future

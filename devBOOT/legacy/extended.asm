@@ -39,7 +39,7 @@ extended:
     or ebx, 0x80000001                  ; Enable Paging and Protected mode simultaneously
     mov cr0, ebx                        ; Write changes back to CR0
 
-    lgdt [GDT.DESCRIPTOR]
+    lgdt [GDT_DESCRIPTOR]
 
     jmp CODE_SEG:long_mode
 
@@ -50,7 +50,7 @@ extended_MSG: db "Extended half loaded", 0xA, 0xD, 0
 %include "./Real/sse.asm"
     
 SECTION .text
-[extern bios_loader]
+[extern legacy_loader]
 long_mode:
     mov ax, DATA_SEG
     mov ds, ax
@@ -65,13 +65,12 @@ long_mode:
 
     call setup_sse
         
-    mov edi, 0xB8000                    ; Blank out the screen to a blue color.
-    mov rcx, 500                        ; Since we are clearing uint64_t over here, we put the count as Count/4.
-    mov rax, 0x1F201F201F201F20         ; Set the value to set the screen to: Blue background, white foreground, blank spaces.
-    rep stosq                           ; Clear the entire screen. 
+    ; mov edi, 0xB8000                    ; Blank out the screen to a blue color.
+    ; mov rcx, 500                        ; Since we are clearing uint64_t over here, we put the count as Count/4.
+    ; mov rax, 0x1F201F201F201F20         ; Set the value to set the screen to: Blue background, white foreground, blank spaces.
+    ; rep stosq                           ; Clear the entire screen. 
 
-
-    jmp bios_loader
+    jmp legacy_loader
 
 
 SECTION .data

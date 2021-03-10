@@ -5,34 +5,42 @@
 # Defaults
 CC?=x86_64-elf-gcc
 AR?=x86_64-elf-ar
-CFLAGS?=-O1 -MD -Wall -Wextra -m64 # -ffreestanding -mno-red-zone --sysroot=$(SYSROOT) -isystem=$(USR_INCLUDE_DIR)
-CPPFLAGS?=
+CFLAGS?=-MD -Wall -Wextra -m64
+CPPFLAGS?=-nostdlib
 
 # Target Lib
 LIB_TARGET=libboot.a
-LIBBOOT_CFLAGS=-ffreestanding -mno-red-zone --sysroot=$(SYSROOT) -isystem=$(USR_INCLUDE_DIR)
+LIBBOOT_CFLAGS=-O1 -ffreestanding -mno-red-zone --sysroot=$(SYSROOT) -isystem=$(USR_INCLUDE_DIR)
 LIBBOOT_CPPFLAGS=
 
 # Object Files
-OBJS=boot/print.c\
-	boot/string.c\
-	boot/drivers/serial.c\
-	boot/drivers/tty.c\
-	boot/drivers/vga.c\
+LIBBOOT_OBJS=\
+	boot/cpu.o\
+	boot/drivers/serial.o\
+	boot/drivers/tty.o\
+	boot/drivers/vga.o\
+	boot/stdio/printf.o\
+	boot/stdio/serial_printf.o\
+	boot/stdio/sprintf.o\
+	boot/stdio/vsprintf.o\
+	boot/string/string.o\
 
 
 # Do not edit below
 ###################################################################################
 LIBBOOT_CFLAGS:=$(CFLAGS) $(LIBBOOT_CFLAGS)
 LIBBOOT_CPPFLAGS:=$(CPPFLAGS) $(LIBBOOT_CPPFLAGS)
+LIBBOOT_DEPS:=$(LIBBOOT_OBJS:.o=.d)
 
 all: $(LIB_TARGET)
 
-$(LIB_TARGET): $(OBJS)
-	$(AR) rcs $@ $(OBJS) 
+$(LIB_TARGET): $(LIBBOOT_OBJS)
+	$(AR) rcs $@ $(LIBBOOT_OBJS) 
 
 %.o: %.c
-	$(CC) $(LIBBOOT_CFLAGS) -O3 $(LIBBOOT_CPPFLAGS) -c $< -o $@
+	$(CC) $(LIBBOOT_CFLAGS) $(LIBBOOT_CPPFLAGS) -c $< -o $@
+
+-include $(LIBBOOT_DEPS)
 
 .PHONY: install install-headers install-bin clean
 install: install-headers install-bin

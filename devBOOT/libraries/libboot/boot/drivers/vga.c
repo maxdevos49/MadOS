@@ -1,5 +1,7 @@
 #include "vga.h"
 #include "tty.h"
+#include "../io.h"
+#include "../string.h"
 
 static uint8_t theme;
 static void set_cursor(TTY_CONFIG *config);
@@ -9,11 +11,13 @@ static void write(TTY_CONFIG *config, const char *data, size_t size);
 static void scroll(TTY_CONFIG *config);
 static uint8_t color32_to_color8(uint32_t color);
 
+static uint16_t get_cursor();
+
 void VGA_tty_init(TTY_CONFIG *config)
 {
     config->char_width = VGA_WIDTH;
     config->char_height = VGA_HEIGHT;
-    config->cursor_position = 0;
+    config->cursor_position = get_cursor();
 
     config->set_cursor = set_cursor;
     config->put_char = put_char;
@@ -21,9 +25,19 @@ void VGA_tty_init(TTY_CONFIG *config)
     config->write = write;
     config->scroll = scroll;
 
-    theme = color32_to_color8(0x00ffffff) | color32_to_color8(0x00000000) << 4;
+    theme = color32_to_color8(0x00555555) | color32_to_color8(0x00000000) << 4;
 
     return;
+}
+
+static uint16_t get_cursor()
+{
+    uint16_t pos = 0;
+    outb(0x3D4, 0x0F);
+    pos |= inb(0x3D5);
+    outb(0x3D4, 0x0E);
+    pos |= ((uint16_t)inb(0x3D5)) << 8;
+    return pos;
 }
 
 static void set_cursor(TTY_CONFIG *config)
@@ -58,11 +72,11 @@ static void clear(TTY_CONFIG *config)
     }
 }
 
-static void write(TTY_CONFIG *config, const char *data, size_t size)
+static void write(TTY_CONFIG *_, const char *data, size_t size)
 {
     uint64_t i;
     for (i = 0; i < size; i++)
-        TTY_putchar(*(data + i));
+        TTY_putchar(data[i]);
 }
 
 static void scroll(TTY_CONFIG *config)
@@ -73,7 +87,7 @@ static void scroll(TTY_CONFIG *config)
 
     memmove(dst_ptr, src_ptr, length);
 
-    for (int i = 0; i < config->char_width; i++)
+    for (uint32_t i = 0; i < config->char_width; i++)
     {
         int offset = length - config->char_width * 2;
 
@@ -88,7 +102,7 @@ static uint8_t color32_to_color8(uint32_t color)
     uint8_t green = (color & 0x0000ff00) >> 8;
     uint8_t blue = (color & 0x000000ff);
 
-    uint8_t index = (red > 128 | green > 128 | blue > 128) ? 8 : 0; // Bright bit
+    uint8_t index = ((red > 128) | (green > 128) | (blue > 128)) ? 8 : 0; // Bright bit
 
     index |= (red > 64) ? 4 : 0;   // Red bit
     index |= (green > 64) ? 2 : 0; // Green bit

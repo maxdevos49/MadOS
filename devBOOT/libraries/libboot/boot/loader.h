@@ -1,29 +1,27 @@
 #ifndef __LOADER_H
 #define __LOADER_H 1
 
-#include "types.h"
+#include "stdint.h"
+
+#define STRINGIFY(s) #s              //Stringify symbol name
+#define STRINGIFY_MV(s) STRINGIFY(s) //Stringify macro value
+
+#define VERSION_MAJOR 0  //Breaking API changes
+#define VERSION_MINOR 1  //New features but no breaking changes
+#define VERSION_BUGFIX 0 //Bug fixes
+
+#define VERSION_STRING "v" STRINGIFY_MV(VERSION_MAJOR) "." STRINGIFY_MV(VERSION_MINOR) "." STRINGIFY_MV(VERSION_BUGFIX)
 
 enum BOOT_MODE
 {
-    BIOS,
+    LEGACY,
     UEFI
 };
 
 struct CPU
 {
-    uint32_t maximum_standard_level;
-    char *vendor_string; //12 bytes
-
-    //Standard Level 1
-    //EAX
-    uint8_t extended_family; // Bits 27-20
-    uint8_t extended_model;  //Bits 19-16
-    uint8_t type;            //Bits 13-12
-    uint8_t family;          //Bits 11-8
-    uint8_t model;           //bits 7-4
-    uint8_t stepping;        //bits 3-0
-
-    uint8_t data[12]; //Above pointers point within here
+    char brand_string[13]; //12 bytes + null terminator
+    char model_string[49]; //16 bytes + null terminator
 };
 
 struct FRAMEBUFFER
@@ -46,8 +44,8 @@ struct FRAMEBUFFER
 struct DESCRIPTOR
 {
     uint16_t size;
-    void *base;
-};
+    uint32_t base;
+} __attribute__((packed));
 
 typedef struct
 {

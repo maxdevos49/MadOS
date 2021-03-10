@@ -1,10 +1,12 @@
-#include <stdarg.h>
-#include <stdio.h>
+
+#include "../stdio.h"
+#include "../stdint.h"
+
 
 /**
- * printf("format string", formatter_values...) 
+ * sprintf(buffer_string ,"format string", formatter_values...) 
  * 
- * %[flags][width][.precision]specifier 
+ * %[flags][width][.precision][length]specifier 
  * 
  * Format characters:
  *      %c --> character
@@ -21,17 +23,15 @@
  *      %(+)3d  --> explicitly indicate the value is positive
  *      %(2.4)f  --> atleast 2 characters wide and display minimum of 4 decimal places
  * */
-int printf(const char *restrict format, ...)
+int sprintf(char *buffer, const char *restrict format, ...)
 {
     va_list args;
     va_start(args, format);
 
-    char buffer[1000];
-
-    size_t written = vsprintf(buffer, format, args);
-
-    puts(buffer);
+    uint64_t written = vsprintf(buffer, format, args);
 
     va_end(args);
     return written;
 }
+
+

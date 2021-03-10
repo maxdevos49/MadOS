@@ -13,13 +13,14 @@ setup_interrupts:
     nop
     nop
 
-    lidt [IDT]          ; Load a zero length IDT so any NMI causes a triple fault
+    lidt [IDT_DESCRIPTOR]          ; Load a zero length IDT so any NMI causes a triple fault
 
     ret
 
 SECTION .data
 
 ALIGN 4
-IDT:
+GLOBAL IDT_DESCRIPTOR
+IDT_DESCRIPTOR:
     .length: dw 0
     .base: dd 0

@@ -1,7 +1,8 @@
 #ifndef __BOOT_DRIVERS_TTY
 #define __BOOT_DRIVERS_TTY 1
 
-#include "../types.h"
+#include "../stdint.h"
+#include "../stddef.h"
 
 typedef struct __tty_config TTY_CONFIG;
 
@@ -16,10 +17,9 @@ struct __tty_config
     void (*clear)(TTY_CONFIG *config);
     void (*write)(TTY_CONFIG *config, const char *data, size_t size);
     void (*scroll)(TTY_CONFIG *config);
-    void (*apply_theme)(uint32_t background, uint32_t foreground);
 };
 
-void TTY_init(TTY_CONFIG *config);
+int TTY_init(TTY_CONFIG *config);
 
 uint16_t TTY_get_cursor_position();
 void TTY_set_cursor_position(uint32_t position);
