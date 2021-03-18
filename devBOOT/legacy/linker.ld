@@ -12,12 +12,6 @@ SECTIONS
         _e_text = .;
 	}
 
-	/* .idt BLOCK(0x1000) : ALIGN(0x1000)
-	{
-		_idt = .;
-		. = . + 0x1000;
-	} */
-
 	.rodata : ALIGN(0x1000)
 	{
         _s_rodata = .;

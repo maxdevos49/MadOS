@@ -51,7 +51,7 @@ void TTY_putchar(char c)
 
         index += tty->char_width;         //\n
         index -= index % tty->char_width; //implied \r
-        TTY_set_cursor_position(index-1);
+        TTY_set_cursor_position(index);
 
         break;
     case '\r':

@@ -24,7 +24,7 @@ extended:
     mov bx, extended_MSG
     call print
 
-    ; call detect_vesa_mode
+    call detect_vesa_mode
     call memmap
     call load_font
     call setup_paging

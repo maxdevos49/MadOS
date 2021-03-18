@@ -297,7 +297,12 @@ int PCI_read(uint16_t bus, uint8_t slot, uint8_t func, uint8_t offset, size_t si
     uint32_t l_bus = ((uint32_t)bus) << 16;
     uint32_t l_slot = ((uint32_t)slot) << 11;
     uint32_t l_func = ((uint32_t)func) << 8;
-    uint32_t address = (uint32_t)(l_bus | l_slot | l_func | ((uint32_t)(offset & 0xfc)) | ((uint32_t)0x80000000));
+    uint32_t address = (uint32_t)(
+        l_bus 
+    | l_slot 
+    | l_func 
+    | ((uint32_t)(offset & 0xfc)) 
+    | ((uint32_t)0x80000000));
 
     outl(CONFIG_ADDRESS_PORT, address);
 

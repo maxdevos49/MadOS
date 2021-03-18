@@ -17,6 +17,8 @@ memmap:
     mov es, ax                  ; "    "
     mov di, MEMORY_MAP_BASE     ; Map table to MEMORY_MAP_BASE
 
+    mov DWORD [MEMORYMAP_DESCRIPTOR.base], MEMORY_MAP_BASE ; Save Memort Map Base
+
     mov edx, 0x534d4150         ; Magic number
     xor ebx, ebx                ; Zero ebx
 
@@ -29,7 +31,7 @@ memmap:
         je .finished     ; end loop
 
         add di, 24                      ; Increment Destination Index
-        inc byte [MEMORY_REGION_COUNT]  ; Increment Region count
+        inc byte [MEMORYMAP_DESCRIPTOR.size]  ; Increment Region count
         jmp .repeat              ; Wash, Rinse, and Repeat!
 
     .finished:
@@ -37,4 +39,7 @@ memmap:
     ret
 
 SECTION .bss
-MEMORY_REGION_COUNT: resb 1
+GLOBAL MEMORYMAP_DESCRIPTOR
+MEMORYMAP_DESCRIPTOR:
+    .size: resw 1
+    .base: resd 1

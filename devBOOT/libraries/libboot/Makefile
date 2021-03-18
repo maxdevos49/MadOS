@@ -19,11 +19,13 @@ LIBBOOT_OBJS=\
 	boot/drivers/serial.o\
 	boot/drivers/tty.o\
 	boot/drivers/vga.o\
+	boot/drivers/pci.o\
 	boot/stdio/printf.o\
 	boot/stdio/serial_printf.o\
 	boot/stdio/sprintf.o\
 	boot/stdio/vsprintf.o\
 	boot/string/string.o\
+	boot/stdlib/malloc.o\
 
 
 # Do not edit below

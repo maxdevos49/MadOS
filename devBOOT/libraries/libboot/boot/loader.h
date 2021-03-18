@@ -7,7 +7,7 @@
 #define STRINGIFY_MV(s) STRINGIFY(s) //Stringify macro value
 
 #define VERSION_MAJOR 0  //Breaking API changes
-#define VERSION_MINOR 1  //New features but no breaking changes
+#define VERSION_MINOR 0  //New features but no breaking changes
 #define VERSION_BUGFIX 0 //Bug fixes
 
 #define VERSION_STRING "v" STRINGIFY_MV(VERSION_MAJOR) "." STRINGIFY_MV(VERSION_MINOR) "." STRINGIFY_MV(VERSION_BUGFIX)
@@ -38,7 +38,7 @@ struct FRAMEBUFFER
     uint16_t pitch;
 
     void *font; //Bitmap font
-    void *framebuffer;
+    void *buffer;
 };
 
 struct DESCRIPTOR

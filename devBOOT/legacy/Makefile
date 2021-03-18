@@ -11,7 +11,7 @@ CPPFLAGS?=
 LIBS?=-nostdlib
 
 # Target Options
-LEGACY_TARGET=loader
+LEGACY_TARGET=legacy
 LEGACY_CFLAGS=-Ttext 0x8000 -ffreestanding -mno-red-zone --sysroot=$(SYSROOT) -isystem=$(USR_INCLUDE_DIR)
 LEGACY_CPPFLAGS=
 LEGACY_LIBS=-lboot
@@ -43,8 +43,8 @@ $(LEGACY_TARGET): $(LEGACY_OBJS) $(LEGACY_LIB_PATHS)
 	SECTORCOUNT=$$(expr $$(wc -c $(LEGACY_TARGET).bin | awk '{print $$1}') / 512);\
 	nasm -f bin -d SECTOR_COUNT=$$SECTORCOUNT boot.asm -o boot.bin;\
 	echo "SECTOR_COUNT=$$SECTORCOUNT"
-
-	cat boot.bin $(LEGACY_TARGET).bin > $(LEGACY_TARGET)
+	dd if=/dev/zero of=$(LEGACY_TARGET)  bs=512 count=200
+	cat boot.bin $(LEGACY_TARGET).bin | dd of=$(LEGACY_TARGET).img conv=notrunc
 
 %.bin: %.asm
 	$(NASM) -f bin $< -o $@
@@ -70,4 +70,5 @@ clean:
 	@find . -type f -name "*.o" -delete -print
 	@find . -type f -name "*.bin" -delete -print
 	@find . -type f -name "*.elf" -delete -print
+	@find . -type f -name "*.img" -delete -print
 	@find . -type f -name "$(LEGACY_TARGET)" -delete -print

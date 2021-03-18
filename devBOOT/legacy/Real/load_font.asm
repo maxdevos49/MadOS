@@ -33,4 +33,5 @@ load_font:
     ret
 
 SECTION .bss
+GLOBAL FONT
 FONT: resb 4096

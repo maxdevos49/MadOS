@@ -1,9 +1,11 @@
 #include "cpu.h"
 #include "cpuid.h"
 
+#include "stdio.h"
+
 void CPU_info(struct CPU *info)
 {
-    printf("CPU information -> ");
+    printf("CPU information:\n");
 
     //Brand String
     int eax, ebx, ecx, edx;
@@ -16,7 +18,7 @@ void CPU_info(struct CPU *info)
     ((int *)str)[2] = ecx;
     str[12] = '\0';
 
-    printf("Brand: %s, ", info->brand_string);
+    printf("\tBrand: %s\n", info->brand_string);
 
     //Model String
     str = info->model_string;
@@ -43,5 +45,5 @@ void CPU_info(struct CPU *info)
     ((int *)str)[11] = edx;
     str[49] = '\0';
 
-    printf("Model: %s\n", info->model_string);
+    printf("\tModel: %s\n", info->model_string);
 }

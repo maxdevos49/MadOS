@@ -3,6 +3,10 @@
 
 #include "stdarg.h"
 
+#include "stdio/_file.h"
+
+typedef struct __file_stream FILE;
+
 int sprintf(char *buffer, const char *format, ...);
 int vsprintf(char *buffer, const char *format, va_list args);
 

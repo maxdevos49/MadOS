@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export NC='\033[0m' # No Color
+
 export CC=x86_64-elf-gcc
 export AR=x86_64-elf-ar
 export LD=x86_64-elf-ld

@@ -13,9 +13,9 @@ BPP equ 32
 
 SECTION .text
 detect_vesa_mode:
-    mov word [.width], WIDTH    ; Store arguments
-    mov word [.height], HEIGHT
-    mov byte [.bpp], BPP
+    mov word [FRAMEBUFFER_INFO.width], WIDTH    ; Store arguments
+    mov word [FRAMEBUFFER_INFO.height], HEIGHT
+    mov byte [FRAMEBUFFER_INFO.bpp], BPP
 
     sti                 ; Enable interupts
 
@@ -29,29 +29,29 @@ detect_vesa_mode:
     jne .vesa_error
 
     mov ax, word[VBE.video_modes]
-    mov [.offset], ax
+    mov [FRAMEBUFFER_INFO.offset], ax
     
     mov ax, word[VBE.video_modes+2]
-    mov [.segment], ax
+    mov [FRAMEBUFFER_INFO.segment], ax
 
-    mov ax, [.segment]
+    mov ax, [FRAMEBUFFER_INFO.segment]
     mov fs, ax
-    mov si, [.offset]
+    mov si, [FRAMEBUFFER_INFO.offset]
 
 .find_mode:
     mov dx, [fs:si]
     add si, 2
-    mov [.offset], si
-    mov [.mode], dx
+    mov [FRAMEBUFFER_INFO.offset], si
+    mov [FRAMEBUFFER_INFO.mode], dx
     mov ax, 0
     mov fs, ax
 
-    cmp word [.mode], 0xFFFF ; end of list?
+    cmp word [FRAMEBUFFER_INFO.mode], 0xFFFF ; end of list?
     je .vesa_mode_not_found
 
     push es
     mov ax, 0x4F01           ; get VBE mode info
-    mov cx, [.mode]
+    mov cx, [FRAMEBUFFER_INFO.mode]
     mov di, VBE_MODE_INFO
     int 0x10
     pop es
@@ -59,38 +59,44 @@ detect_vesa_mode:
     cmp ax, 0x4F
     jne .vesa_error
 
-    mov ax, [.width]
+    mov ax, [FRAMEBUFFER_INFO.width]
     cmp ax, [VBE_MODE_INFO.width]
     jne .next_mode
 
-    mov ax, [.height]
+    mov ax, [FRAMEBUFFER_INFO.height]
     cmp ax, [VBE_MODE_INFO.height]
     jne .next_mode
 
-    mov al, [.bpp]
+    mov al, [FRAMEBUFFER_INFO.bpp]
     cmp al, [VBE_MODE_INFO.bpp]
     jne .next_mode
 
+    mov ax, [VBE_MODE_INFO.pitch]
+    mov word [FRAMEBUFFER_INFO.pitch], ax
+
+    mov eax, [VBE_MODE_INFO.framebuffer]
+    mov DWORD [FRAMEBUFFER_INFO.buffer], eax
+
     ; Set the mode
-    push es
-    mov ax, 0x4F02
-    mov bx, [.mode]
-    or bx, 0x4000            ; enable LFB
-    mov di, 0                ; not sure if some BIOSes need this... anyway it doesn't hurt
-    int 0x10
-    pop es
+    ; push es
+    ; mov ax, 0x4F02
+    ; mov bx, [FRAMEBUFFER_INFO.mode]
+    ; or bx, 0x4000            ; enable LFB
+    ; mov di, 0                ; not sure if some BIOSes need this... anyway it doesn't hurt
+    ; int 0x10
+    ; pop es
 
-    cmp ax, 0x4F
-    jne .vesa_error
+    ; cmp ax, 0x4F
+    ; jne .vesa_error
 
-    clc                      ; Clear carry
+    ; clc                      ; Clear carry
 
     ret
 
 .next_mode:
-    mov ax, [.segment]
+    mov ax, [FRAMEBUFFER_INFO.segment]
     mov fs, ax
-    mov si, [.offset]
+    mov si, [FRAMEBUFFER_INFO.offset]
     jmp .find_mode
 
 .vesa_error:
@@ -108,12 +114,16 @@ SECTION .rodata
     .VESA_NOT_FOUND_MSG: db "[ERROR] Failed to find a desired VESA Mode", 0xA, 0xD, 0
 
 SECTION .bss
+GLOBAL FRAMEBUFFER_INFO
+FRAMEBUFFER_INFO:
     .width:         resw 1
     .height:        resw 1
     .bpp:           resb 1
+    .mode:          resw 1
+    .pitch:         resw 1
+    .buffer:        resd 1
     .segment:       resw 1
     .offset:        resw 1
-    .mode:          resw 1
 
 VBE:
     .signature:		resd 1        ; indicate support for VBE 2.0+
