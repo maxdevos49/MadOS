@@ -16,6 +16,7 @@ detect_memory:
     .repeat:
         mov eax, 0xe820
         mov ecx, 24
+        mov [es:di + 20], dword 1
         int 0x15
 
         cmp ebx, 0
