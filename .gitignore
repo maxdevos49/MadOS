@@ -12,6 +12,8 @@
 *.iso
 *.flp
 *.tmp
+*.obj
+*.mem
 
 # macOS Related
 .DS_Store
