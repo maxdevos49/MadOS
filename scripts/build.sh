@@ -16,8 +16,8 @@ mformat -i $IMG_PATH -v $OS_NAME -R 50 -F ::
 mmd -i $IMG_PATH ::/EFI
 mmd -i $IMG_PATH ::/EFI/BOOT
 
-mmd -i $IMG_PATH ::LEGACY
-mmd -i $IMG_PATH ::LEGACY/BOOT
+mmd -i $IMG_PATH ::/LEGACY
+mmd -i $IMG_PATH ::/LEGACY/BOOT
 
 for SUB_PROJECT in $SUB_PROJECTS; do
     echo "${RED_COLOR}Building Sub Project: ${SUB_PROJECT}${RESET_COLOR}"

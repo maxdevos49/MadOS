@@ -1,6 +1,12 @@
 [bits 16]
 [org 0x8000]
 SECTION .text
+jmp extended
+
+%include "./Real/print_ext.asm"
+%include "./Real/read_fat32.asm"
+
+SECTION .text
 extended:
 
     mov bx, extended_MSG
@@ -9,15 +15,14 @@ extended:
     call init_fat32                     ; Initilizes details for reading from a fat32 filesystem
 
     ; Proceed to load the BOOTX64.leg
+    call read_fat32
 
     jmp $
     
     ; jmp BOOT64.leg ; TODO
-
+SECTION .data
 extended_MSG: db "Extended half loaded", 0xA, 0xD, 0
 
-%include "./Real/print.asm"
-%include "./Real/read_fat32.asm"
 
 ; Move all below into a new file
 
