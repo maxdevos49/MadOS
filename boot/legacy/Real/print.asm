@@ -21,6 +21,6 @@ print:
         jmp .loop
     .exit:
 
-    pop ax
     pop bx
+    pop ax
     ret

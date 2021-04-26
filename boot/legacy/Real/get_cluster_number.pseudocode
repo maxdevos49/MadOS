@@ -1,0 +1,97 @@
+
+typedef unsigned int uint32_t;
+
+uint32_t get_cluster_number(uint32_t root_cluster, const char* path, int* error)
+{
+
+    // char c = path[i];
+    int i = 0;
+    char file_name[13]; // 12 + '\0'
+
+    if(path[i] != '/')
+    {
+        *error = 1;// Invalid Path
+        return 0;
+    }
+
+    i++;
+
+    while(path[i] != '/' && path[i] != '\0')
+    {
+        file_name[i-1] = path[i];
+        i++;
+    }
+
+    file_name[i] = '\0';
+
+    uint32_t *destination = 0x9000;
+    read_sectors(destination, (root_cluster * FAT.SECTORS_PER_CLUSTER) + DATA.BASE);
+
+    // struct entry entry* = destination;
+    int present = *destination;
+    char* name[13];
+    
+    while(present)
+    {
+        if(!strcmp(name, file_name))
+        {
+            int cluster_num = *(destination+offset_cluster));
+            int attr = *(destination+offset_attr)
+            if(attr == dir)
+                return get_cluster_num(cluster_num, path + i, error);
+            else
+                return cluster_num;
+        }
+
+        destination+=32;
+        name = 
+        present = 
+    }
+
+    *error = 2; // Directory or File does not exist
+    return 0;
+
+
+}
+
+// Slow but easy to use read_cluster
+function read_cluster(destination, cluster_num) do
+
+    //Load Required fat sector to destination
+    read_sector(destination, ((cluster_num*4)/512 + 1) + FAT.BASE_SECTOR, 1)
+
+    //Use FAT to get next cluster number
+    set next_cluster_num = ((uint32_t*)destination)[200%128];
+
+    //Load cluster
+    read_sector(destination, (cluster_num * FAT.SECTORS_PER_CLUSTER) + DATA.BASE), FAT.SECTORS_PER_CLUSTER)
+
+    //Return
+    return next_cluster_num
+end
+
+
+
+// int cluster_num;
+
+// cluster_num = get_cluster_num("/my/path/to/my/file.txt", error_ptr); // Recursively checks directorys for the file
+// if([ptr_error] != 0)
+//   return 1;
+
+// do
+// {
+   
+//   error = read_cluster(cluster_num, fs:di); //uses fat32 info to read correct sectors. increments fs:di correctly
+
+//   if(error)
+//       return 2
+
+//   cluster_num = next_cluster(cluster_num);
+
+// }
+// while(cluster_num < FINAL_CLUSTER && cluster_num != CORRUPT)
+
+// if(cluster == CORUPT)
+//   return 3
+
+// return 0 // success

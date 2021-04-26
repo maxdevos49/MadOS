@@ -30,7 +30,7 @@ setup_paging:
 
     mov edi, PT                     ; Move to the PT table
     mov ebx, 0x00000003             ; Set the Page Table Entry template value
-    mov ecx, 512                    ; Set how many entry to loop through and add
+    mov ecx, 512                    ; Set how many entries to loop through and add
 
     .set_table_entry:               ; Fills the Page Table for identity mapping the first 2 MB
         mov DWORD [edi], ebx        ; Set the entry to the current entry represented in ebx
