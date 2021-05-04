@@ -5,7 +5,30 @@
 ;   bx = string pointer
 ; Output: void
 ; =====================================================
+; MACROs:
+%macro puts 1
+    push bx
+    mov bx, %1
+    call print
+    pop bx
+%endmacro
 
+%macro println 1
+    push bx
+    mov bx, %1
+    call print
+    mov bx, NEW_LINE
+    call print
+    pop bx
+%endmacro
+;======================================================
+; Constants
+NULL equ 0
+;======================================================
+; GLOBALS
+SECTION .rodata
+NEW_LINE: db 0xA, 0xD, 0
+;======================================================
 SECTION .text
 print:
     push ax

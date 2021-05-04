@@ -7,6 +7,7 @@ uint32_t get_cluster_number(uint32_t root_cluster, const char* path, int* error)
     // char c = path[i];
     int i = 0;
     char file_name[13]; // 12 + '\0'
+    char test_file_name[13]; // 12 + '\0'
 
     if(path[i] != '/')
     {
@@ -33,6 +34,8 @@ uint32_t get_cluster_number(uint32_t root_cluster, const char* path, int* error)
     
     while(present)
     {
+        
+
         if(!strcmp(name, file_name))
         {
             int cluster_num = *(destination+offset_cluster));

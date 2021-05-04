@@ -3,25 +3,42 @@
 SECTION .text
 jmp extended
 
+%include "./Real/string.asm"
 %include "./Real/print_ext.asm"
+%include "./Real/read_disk_ext.asm"
 %include "./Real/read_fat32.asm"
 
 SECTION .text
 extended:
 
-    mov bx, extended_MSG
-    call print
+    println EXTENDED_MSG
 
     call init_fat32                     ; Initilizes details for reading from a fat32 filesystem
 
-    ; Proceed to load the BOOTX64.leg
-    call read_fat32
+    xor ax, ax
+    mov fs, ax
+    mov es, ax
+    mov ds, ax
+
+    read_fat32 PATH, 0x9000
+
+    cmp bx, 0
+    jne .read_error
+
+    mov si, 0x9000
+    call print_c
 
     jmp $
+
+    .read_error
+        puts INVALID_PATH
+        puth bx
+        jmp $
     
-    ; jmp BOOT64.leg ; TODO
-SECTION .data
-extended_MSG: db "Extended half loaded", 0xA, 0xD, 0
+SECTION .rodata
+PATH: db "/USR/INCLUDE/BOOT/CPU.H",0
+EXTENDED_MSG: db "Extended half loaded", 0
+INVALID_PATH: db "Fat32 read failed: ", 0
 
 
 ; Move all below into a new file

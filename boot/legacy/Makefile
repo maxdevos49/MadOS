@@ -59,7 +59,7 @@ install-bin: $(LEGACY_TARGETS)
 	dd if=$(LEGACY_BOOTLOADER) of=$(IMG_PATH) conv=notrunc bs=1 count=3
 	dd if=$(LEGACY_BOOTLOADER) of=$(IMG_PATH) conv=notrunc bs=1 count=350 skip=90 seek=90
 	dd if=$(LEGACY_EXT_BOOTLOADER) of=$(IMG_PATH) conv=notrunc bs=512 count=$(SECTOR_COUNT) seek=7
-	mcopy -s -i $(IMG_PATH) $(SYSROOT)/usr ::
+	mcopy -s -i $(IMG_PATH) $(SYSROOT)/* ::
 
 clean:
 	@find . -type f -name "*.o" -delete -print

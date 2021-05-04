@@ -8,7 +8,7 @@ times 0x5a-($-$$) db 0          ; Extended BIOS Parameter Block Padding
 
 %include "./Real/print.asm"
 %include "./Real/cpuid.asm"
-%include "./Real/read_extended.asm"
+%include "./Real/read_disk.asm"
 
 SECTION .text
 _start:
