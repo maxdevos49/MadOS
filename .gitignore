@@ -16,6 +16,10 @@
 *.elf
 *.mem
 
+~iso
+~bin
+~obj
+
 # macOS Related
 .DS_Store
 
