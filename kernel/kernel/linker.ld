@@ -1,12 +1,14 @@
 OUTPUT_FORMAT(elf64-x86-64)
-/* OUTPUT_FORMAT(binary) */
-/* https://stackoverflow.com/questions/34129461/should-i-make-my-own-os-kernel-elf-or-raw-binary */
 
-ENTRY(kernel_main)
+ENTRY(_start)
 
 SECTIONS
 {
-	. = 0x8000;
+	. = 0xffffffff80200000;
+
+	.stivale2hdr : {
+        KEEP(*(.stivale2hdr))
+    }
 
 	.text : ALIGN(0x1000)
 	{

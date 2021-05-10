@@ -2,90 +2,90 @@
 #-----------------------------Kernel Makefile options-----------------------------#
 ###################################################################################
 
-#Defaults
-NASM?=nasm
-CC?=x86_64-elf-gcc
-OBJCOPY?=x86_64-elf-objcopy
-CFLAGS?=-O1 -MD -Wall -Wextra -ffreestanding -m64 --sysroot=../sysroot -isystem=../sysroot/usr/include
-CPPFLAGS?=
-LIBS?=
-
 #Target
-KERNEL=MadOS.kernel
-
+KERNEL=$(BIN)/$(OS_NAME).elf
 
 # Objects
 KERNEL_OBJS=\
-	boot/extended_boot.o\
-	boot/binaries.o\
-	kernel.o \
-	timer.o\
-	debug.o\
-	interrupts/idt.o\
-	interrupts/isr.o\
-	interrupts/irq.o\
-	interrupts/pic.o\
-	devices/keyboard.o\
-	devices/mouse.o\
-	devices/tty.o\
-	devices/vesa.o\
-	devices/vga.o\
-	memory/init_heap.o\
-	memory/k_malloc.o\
-	memory/k_calloc.o\
-	memory/k_realloc.o\
-	memory/k_free.o\
-	memory/memory.o\
-	time/cmos.o\
-	time/rtc.o\
-	time/pit.o\
-	pci/core.o\
-	filesystems/fs.o\
-	stack_smash.o\
-	pacman/pacman.o\
-	pacman/ai.o\
-	pacman/render.o\
-	pacman/input.o\
-	
-	# filesystems/initrd.o\
+	kernel.o
+
+# timer.o\
+# debug.o\
+# interrupts/idt.o\
+# interrupts/isr.o\
+# interrupts/irq.o\
+# interrupts/pic.o\
+# devices/keyboard.o\
+# devices/mouse.o\
+# devices/tty.o\
+# devices/vesa.o\
+# devices/vga.o\
+# memory/init_heap.o\
+# memory/k_malloc.o\
+# memory/k_calloc.o\
+# memory/k_realloc.o\
+# memory/k_free.o\
+# memory/memory.o\
+# time/cmos.o\
+# time/rtc.o\
+# time/pit.o\
+# pci/core.o\
+# filesystems/fs.o\
+# stack_smash.o\
+# pacman/pacman.o\
+# pacman/ai.o\
+# pacman/render.o\
+# pacman/input.o\
+
+# filesystems/initrd.o\
 
 
 
 # Ensures if we make a change to the library it gets relinked to the kernel 
 # without making a random change to the kernel. Only needed for statically linked 
 # libraries.
-KERNEL_LIB_PATHS=\
-	 ../libraries/libc/libk.a\
-	 ../libraries/libm/libm.a\
-	 ../libraries/libgraphics/libgraphics.a
+KERNEL_LIB_PATHS=
+#  ../libraries/libc/libk.a\
+#  ../libraries/libm/libm.a\
+#  ../libraries/libgraphics/libgraphics.a
 
-KERNEL_CFLAGS:=-Ttext 0x8000 $(CFLAGS)  
-KERNEL_CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude  
-KERNEL_LIBS:=$(LIBS) -nostdlib -lk -lgcc -lgraphics -lm
+KERNEL_CFLAGS:=\
+	-MD -Wall -Wextra -m64\
+	-ffreestanding\
+	--sysroot=$(SYSROOT)\
+	-isystem=$(SYSROOT)$(USR_INCLUDE_DIR)\
+	-fno-stack-protector \
+	-fno-pic -fpie       \
+	-mgeneral-regs-only  \
+	-mno-red-zone\
+	-D__is_kernel\
+	-Iinclude
+
+KERNEL_LDFLAGS:=\
+	-Wl,-static,-pie,--no-dynamic-linker,-ztext\
+	-static-pie\
+	-z max-page-size=0x1000
+
+KERNEL_LIBS:=\
+	$(LIBS)\
+	-nostdlib\
+	-lgcc
+# -lk\
+# -lgraphics\
+# -lm
 
 # Do not edit below
 ###################################################################################
 
-KERNEL_LINKER_LIST+=$(KERNEL_OBJS)
-KERNEL_DEPS:=$(KERNEL_LINKER_LIST:.o=.d)
-
-TMP:=$(filter-out 	boot/extended_boot.o boot/binaries.o, $(KERNEL_OBJS))
-KERNEL_DEBUG:=$(TMP:.o=.s)
+KERNEL_OBJS:=$(addprefix $(PROJECT_OBJ)/, $(KERNEL_OBJS))
+KERNEL_DEPS:=$(KERNEL_OBJS:.o=.d)
 
 # Links MadOS.kernel
-$(KERNEL): $(KERNEL_LINKER_LIST) $(KERNEL_LIB_PATHS)
-	$(CC) $(KERNEL_CFLAGS)  $(KERNEL_CPPFLAGS) -T"linker.ld" $(KERNEL_LINKER_LIST) $(KERNEL_LIBS) -o $(KERNEL).elf
-	$(OBJCOPY) -O binary $(KERNEL).elf $(KERNEL)
+$(KERNEL): $(KERNEL_OBJS) $(KERNEL_LIB_PATHS)
+	$(CC) $(KERNEL_CFLAGS) $(KERNEL_LDFLAGS) -T"linker.ld" $(KERNEL_OBJS) $(KERNEL_LIBS) -o $(KERNEL)
 
-
-%.o: %.c
-	$(CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) $(KERNEL_LIBS) -c $< -o $@ 
-
-%.o: %.asm
-	$(NASM) -f elf64 $^ -o $@ -MD $@.d
-
-%.s: %.c
-	$(CC) $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS) $(KERNEL_LIBS) -S -masm=intel -fverbose-asm $< -o $@
+$(PROJECT_OBJ)/%.o: $(PROJECT_PATH)/%.c
+	$(CC) $(KERNEL_CFLAGS) $(KERNEL_LIBS) -c $< -o $@ 
 
 -include $(KERNEL_DEPS)
 
@@ -97,8 +97,6 @@ install-headers:
 
 install-bin: $(KERNEL)
 	cp -RL $(KERNEL) $(SYSROOT)$(KERNEL_DIR)
-
-debug: $(KERNEL_DEBUG)
 
 clean:
 	@find . -type f -name "*.o" -delete -print

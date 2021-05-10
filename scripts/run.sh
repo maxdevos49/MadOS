@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 
-. ./scripts/config.sh
+# . ./scripts/config.sh
 
-. ./scripts/clean.sh
+# . ./scripts/clean.sh
 
 . ./scripts/build.sh
 
@@ -13,10 +13,10 @@ echo "${GREEN}Running devOS:${NC}"
 qemu-system-x86_64                                                                 \
     -machine q35                                                                   \
     -serial stdio                                                                  \
+    -boot menu=on,splash-time=6000                                                 \
     -drive media=disk,format=raw,file=$IMG_PATH                                    
     # -no-shutdown                                                                   \
     # -no-reboot                                                                     \
-    # -boot menu=on,splash-time=6000                                \
     # -device nec-usb-xhci,id=xhci                                                   \
     # -s -S                                                                          \
 

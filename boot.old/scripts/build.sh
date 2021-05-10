@@ -4,23 +4,26 @@ set -e
 # Configure Build
 . ./scripts/config.sh
 
-# # Create Sysroot
-mkdir -p $SYSROOT/kernel
-mkdir -p $SYSROOT/usr/include
-mkdir -p $SYSROOT/usr/lib
+# Create sub project intermediate Folder
+mkdir -p $OBJ/$SUB_PROJECT
+
+# Create Sub Project System Root
+mkdir -p $SYSROOT
+mkdir -p $SYSROOT/$USR_INCLUDE_DIR
+mkdir -p $SYSROOT/$USR_LIB_DIR
 
 # Install Headers to System Root
 echo "${GREEN_COLOR}Installing Project Headers: ${RESET_COLOR}"
 
-# Install Headers
 for PROJECT in $SYSTEM_PROJECTS; do
-    (cd $PROJECT && $MAKE install-headers)
+    echo "${RED_COLOR}Project: $PROJECT${RESET_COLOR}"
+
+    (cd $PROJECT && rsync -avm --include='*.h' -f 'hide,! */' .  $SYSROOT/$USR_INCLUDE_DIR)
 done
 
 # Compile Projects
-echo "${GREEN_COLOR}Building and Installing Project Binaries: ${RESET_COLOR}"
+echo "${GREEN_COLOR}Building and Installing Project Bins: ${RESET_COLOR}"
 
-# Compile Projects
 for PROJECT in $SYSTEM_PROJECTS; do
     echo "${RED_COLOR}Project: $PROJECT${RESET_COLOR}"
 
@@ -33,5 +36,6 @@ for PROJECT in $SYSTEM_PROJECTS; do
     mkdir -p $PROJECT_OBJ
     rsync -a $PROJECT_PATH/ $PROJECT_OBJ/ --include \*/ --exclude \*
 
+    # Install binaries
     (cd $PROJECT && $MAKE install-bin)
 done

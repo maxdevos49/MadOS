@@ -15,8 +15,9 @@ export NASM=nasm
 export MAKE=make
 
 # Output Directories
-export BIN="$(pwd)/.bin"
-export OBJ="$(pwd)/.obj"
+export BIN="$(pwd)/~bin"
+export OBJ="$(pwd)/~obj"
+export ISO="$(pwd)/~iso"
 
 # Dynamic Project Paths
 export SUB_PROJECT
@@ -25,8 +26,9 @@ export PROJECT_BIN
 export PROJECT_PATH
 
 # Universal Flags
-export CFLAGS="-MD -Wall -Wextra -m64"
+export CFLAGS=""
 export CPPFLAGS=""
+export LDFLAGS=""
 export LIBS=""
 
 # Control Switch Defaults
@@ -39,10 +41,17 @@ export MINOR_VER="1"
 export BUGFIX_VER="0"
 
 export OS_NAME="dev_OS"
-export IMG_NAME="${OS_NAME}-${MAJOR_VER}_${MINOR_VER}_${BUGFIX_VER}.img"
-export IMG_PATH=$BIN/$IMG_NAME
+export IMG_NAME="${OS_NAME}-${MAJOR_VER}_${MINOR_VER}_${BUGFIX_VER}.iso"
+export IMG_PATH=$ISO/$IMG_NAME
+
+export ISO_ROOT=$ISO/iso_root
+export SYSROOT=$ISO_ROOT
+export KERNEL_DIR="/kernel"
+export USR_LIB_DIR="/usr/lib"
+export USR_INCLUDE_DIR="/usr/include"
+
 
 # Sub Project Names
 export SUB_PROJECTS="\
+    kernel\
     boot"
-    # kernel"

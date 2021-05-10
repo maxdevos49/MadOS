@@ -1,41 +1,37 @@
 #!/bin/sh
 set -e
 
-# Configure Build
-. ./scripts/config.sh
+DIR=$(pwd)/limine
 
-# Create sub project intermediate Folder
-mkdir -p $OBJ/$SUB_PROJECT
+if [[ ! -d $DIR ]]
+then
+    # Download the latest Limine binary release.
+    git clone https://github.com/limine-bootloader/limine.git --branch=v2.0-branch-binary --depth=1
 
-# Create Sub Project System Root
-mkdir -p $SYSROOT
-mkdir -p $SYSROOT/$USR_INCLUDE_DIR
-mkdir -p $SYSROOT/$USR_LIB_DIR
+    # Build limine-install.
+    make -C limine
+fi
 
-# Install Headers to System Root
-echo "${GREEN_COLOR}Installing Project Headers: ${RESET_COLOR}"
+# Create a directory which will be our ISO root.
+if [[ ! -d $ISO_ROOT ]]
+then
+    mkdir -p $ISO_ROOT
+fi
 
-for PROJECT in $SYSTEM_PROJECTS; do
-    echo "${RED_COLOR}Project: $PROJECT${RESET_COLOR}"
+# Copy the relevant files over.
+cp -v \
+    limine.cfg\
+    limine/limine.sys\
+    limine/limine-cd.bin\
+    limine/limine-eltorito-efi.bin\
+    $ISO_ROOT/
 
-    (cd $PROJECT && rsync -avm --include='*.h' -f 'hide,! */' .  $SYSROOT/$USR_INCLUDE_DIR)
-done
-
-# Compile Projects
-echo "${GREEN_COLOR}Building and Installing Project Bins: ${RESET_COLOR}"
-
-for PROJECT in $SYSTEM_PROJECTS; do
-    echo "${RED_COLOR}Project: $PROJECT${RESET_COLOR}"
-
-    # Set Dynamic Paths
-    PROJECT_OBJ=$OBJ/$SUB_PROJECT/$PROJECT
-    PROJECT_BIN=$BIN/$SUB_PROJECT/$PROJECT
-    PROJECT_PATH=$(pwd)/$PROJECT
-
-    # gcc does not seem to be able to generate supporting directories
-    mkdir -p $PROJECT_OBJ
-    rsync -a $PROJECT_PATH/ $PROJECT_OBJ/ --include \*/ --exclude \*
-
-    # Install binaries
-    (cd $PROJECT && $MAKE install-bin)
-done
+# Create the bootable ISO.
+xorriso -as mkisofs\
+    -b limine-cd.bin\
+    -no-emul-boot\
+    -boot-load-size 4\
+    -boot-info-table \
+    -eltorito-alt-boot\
+    -e limine-eltorito-efi.bin\
+    -no-emul-boot $ISO_ROOT -o $IMG_PATH

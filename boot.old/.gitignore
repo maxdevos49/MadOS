@@ -12,12 +12,12 @@
 *.iso
 *.flp
 *.tmp
-*.obj
-*.elf
-*.mem
 
 # macOS Related
 .DS_Store
 
 # VSCode Related
 .vscode
+
+# Other 
+sysroot
